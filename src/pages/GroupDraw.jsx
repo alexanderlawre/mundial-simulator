@@ -14,7 +14,9 @@ export default function GroupDraw() {
 
   const groupCount = teamCount === 48 ? 12 : 8
   const initialGroups = useMemo(
-    () => (teams ? seedGroupDraw(teams, groupCount, 'custom-draw-' + teamCount) : null),
+    // Random seed per mount -- every new tournament gets a fresh draw instead
+    // of the same groups every time for a given team count.
+    () => (teams ? seedGroupDraw(teams, groupCount, 'custom-draw-' + teamCount + '-' + Date.now() + '-' + Math.random()) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )

@@ -10,8 +10,8 @@ const NATIONS_BY_NAME = Object.fromEntries(NATIONS.map((n) => [n.name, n]))
 
 export const ADMIN_CACHE_KEY = 'mundial.adminDataCache'
 
-const TOP_N = 6
-const SIGNUPS_PREVIEW_N = 3
+const TOP_N = 9
+const SIGNUPS_PREVIEW_N = 9
 
 function BreakdownTable({ title, rows, viewAllHref }) {
   const visibleRows = rows.slice(0, TOP_N)

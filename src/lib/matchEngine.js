@@ -16,27 +16,43 @@ function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v))
 }
 
-// Rating-gap threshold (roughly "2+ tiers" on this app's 0-99 scale, where a
-// tier is ~8-10 points) above which a team is a clear underdog for the
-// purposes of late-knockout upset dampening below.
-const BIG_UNDERDOG_GAP = 12
+// Rating-gap threshold (roughly "1.5+ tiers" on this app's 0-99 scale, where
+// a tier is ~8-10 points) above which a team is a clear underdog for the
+// purposes of late-knockout upset dampening below. Lowered from 12 -> 9 so
+// upper-mid-tier sides (e.g. Iran/Canada/Scotland/Cote d'Ivoire, rated
+// 73-75) are correctly treated as big underdogs against elite/near-elite
+// opponents (rated 84+), not just against the very top of the scale.
+const BIG_UNDERDOG_GAP = 9
 
 // Expected goals for `team` given the rating gap vs the opponent.
 // Chaos is intentionally modest: a small random wobble plus a low flat
 // chance of an upset-flavored swing, so ratings/form drive results while
-// still allowing occasional surprises. In quarterfinal-and-later rounds,
-// a clear underdog (2+ tiers below its opponent) has that upset-flavored
-// spike dampened -- both less likely to trigger and smaller when it does --
-// so deep Cinderella runs by weaker sides become rarer without being
-// impossible, matching real-world late-tournament form (favorites are
-// tested less by pure randomness the deeper a tournament goes).
-function expectedGoals(ratingFor, ratingAgainst, rng, { lateKnockout = false } = {}) {
+// still allowing occasional surprises. From the round of 16 onward, a clear
+// underdog (see BIG_UNDERDOG_GAP) has that upset-flavored spike dampened --
+// both less likely to trigger and smaller when it does -- and from the
+// semifinals onward the dampening is tightened further still, so a mid-tier
+// side that got hot early can still reach a quarterfinal on occasion but
+// making a semifinal or final is extremely rare, matching real-world
+// late-tournament form (favorites are tested less by pure randomness the
+// deeper a tournament goes).
+function expectedGoals(ratingFor, ratingAgainst, rng, { knockoutStage = null } = {}) {
   const gap = ratingFor - ratingAgainst
-  let xg = 1.25 + gap * 0.038
+  // Slightly steeper than before (0.038 -> 0.045) so large rating gaps pull
+  // the underdog's baseline scoring rate down more, reducing upset odds that
+  // come from plain Poisson variance -- not just the explicit spike below.
+  let xg = 1.25 + gap * 0.045
   xg += (rng() - 0.5) * 0.35 // normal match-to-match variance
-  const isBigUnderdog = lateKnockout && gap <= -BIG_UNDERDOG_GAP
-  const upsetChance = isBigUnderdog ? 0.012 : 0.03
-  const upsetMagnitude = isBigUnderdog ? 0.3 : 0.5
+
+  const isBigUnderdog = gap <= -BIG_UNDERDOG_GAP
+  let upsetChance = 0.03
+  let upsetMagnitude = 0.5
+  if (isBigUnderdog && knockoutStage === 'r16plus') {
+    upsetChance = 0.01
+    upsetMagnitude = 0.25
+  } else if (isBigUnderdog && knockoutStage === 'semisplus') {
+    upsetChance = 0.004
+    upsetMagnitude = 0.15
+  }
   if (rng() < upsetChance) xg += rng() * upsetMagnitude // rare, upset-flavored spike
   return clamp(xg, 0.15, 4.2)
 }
@@ -98,15 +114,19 @@ function simulatePenaltyShootout(teamA, teamB, rng) {
 }
 
 // teamA/teamB shape: { name, rating, confederation, colors, iso2 }
-// `roundSize`: number of teams entering the current knockout round (8 =
-// quarterfinals, 4 = semifinals, 2 = final). Optional -- omitted for group
-// matches and non-bracket play, where the upset dampening below doesn't
-// apply.
+// `roundSize`: number of teams entering the current knockout round (16 =
+// round of 16, 8 = quarterfinals, 4 = semifinals, 2 = final). Optional --
+// omitted for group matches and non-bracket play, where the upset dampening
+// below doesn't apply.
 export function simulateMatch(teamA, teamB, { knockout = false, seedKey = '', roundSize = null } = {}) {
   const rng = seededRng(`${teamA.name}-${teamB.name}-${seedKey}-${Math.random()}`)
-  const lateKnockout = knockout && roundSize != null && roundSize <= 8
-  const xgA = expectedGoals(teamA.rating, teamB.rating, rng, { lateKnockout })
-  const xgB = expectedGoals(teamB.rating, teamA.rating, rng, { lateKnockout })
+  let knockoutStage = null
+  if (knockout && roundSize != null) {
+    if (roundSize <= 4) knockoutStage = 'semisplus' // semifinal, 3rd place, final
+    else if (roundSize <= 16) knockoutStage = 'r16plus' // round of 16, quarterfinal
+  }
+  const xgA = expectedGoals(teamA.rating, teamB.rating, rng, { knockoutStage })
+  const xgB = expectedGoals(teamB.rating, teamA.rating, rng, { knockoutStage })
   const scoreA = poissonRandom(xgA, rng)
   const scoreB = poissonRandom(xgB, rng)
 

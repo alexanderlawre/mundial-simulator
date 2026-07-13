@@ -82,7 +82,10 @@ export default function SimulatorSetup() {
 
   function simulateQualifyingAll() {
     const already = pickedFlat.map((t) => buildTeam(t.name))
-    const result = simulateFullQualifying(quotas, already)
+    // Explicit random seed per click -- simulateFullQualifying() defaults to a
+    // fixed seed, which without this would deterministically pick the exact
+    // same qualifiers every single time "Simulate Qualifying" is pressed.
+    const result = simulateFullQualifying(quotas, already, 'qual-' + Date.now() + '-' + Math.random())
     const next = {}
     Object.entries(result).forEach(([conf, teams]) => {
       next[conf] = teams.map((t) => t.name)
@@ -92,7 +95,7 @@ export default function SimulatorSetup() {
 
   function simulateQualifyingForConf(conf) {
     const already = (picked[conf] || []).map((n) => buildTeam(n))
-    const result = simulateFullQualifying({ [conf]: quotas[conf] }, already)
+    const result = simulateFullQualifying({ [conf]: quotas[conf] }, already, 'qual-' + conf + '-' + Date.now() + '-' + Math.random())
     setPicked((prev) => ({ ...prev, [conf]: result[conf].map((t) => t.name) }))
   }
 

@@ -88,12 +88,32 @@ export function seedGroupDraw(teams, groupCount, seedKey = 'draw') {
     pots.push(sorted.slice(i, i + groupCount))
   }
 
-  pots.forEach((pot) => {
+  pots.forEach((pot, potIndex) => {
     // Shuffle within the pot for variety.
     const shuffled = [...pot]
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(rng() * (i + 1))
       ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+
+    // The top pot -- the best `groupCount` teams overall (top 12 for a
+    // 48-team/12-group draw, top 8 for 32-team/8-group) -- is placed with a
+    // strict one-per-group permutation rather than the random-with-fallback
+    // placement below. That placement loop only guarantees against a
+    // confederation-cap collision, not against two top-rated teams landing
+    // in the same group, so without this the strongest sides could still be
+    // drawn together. A permutation guarantees each of them lands in a
+    // distinct group, matching real World Cup top-seed placement.
+    if (potIndex === 0 && shuffled.length === groupCount) {
+      const order = Array.from({ length: groupCount }, (_, i) => i)
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1))
+        ;[order[i], order[j]] = [order[j], order[i]]
+      }
+      shuffled.forEach((team, i) => {
+        groups[order[i]].push(team)
+      })
+      return
     }
 
     shuffled.forEach((team) => {
