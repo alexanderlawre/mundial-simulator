@@ -65,27 +65,32 @@ export default function LeaguePredict() {
     setEditing(true)
   }
 
+  // The drag board needs a wider stage on desktop so the unplaced-clubs
+  // pool can sit as a side column next to the table instead of forcing a
+  // long scroll down to the bottom every time; the locked/confirmed view
+  // and header stay narrow and centered like the rest of the app.
   return (
     <AppBackground>
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <div
-          className="rounded-2xl p-5 mb-6 text-white shadow-depth-lg"
-          style={{ background: `linear-gradient(135deg, ${league.colors.from}, ${league.colors.to})` }}
-        >
-          <div className="flex items-center gap-3">
-            <CountryFlag nation={nation} size="lg" />
-            <div>
-              <p className="font-display text-2xl font-extrabold">{league.name}</p>
-              <p className="text-white/80 text-xs">{t('leagues.clubCount', { count: league.clubs.length })}</p>
+      <div className={`mx-auto px-4 py-8 ${editing ? 'max-w-5xl' : 'max-w-2xl'}`}>
+        <div className={editing ? 'max-w-2xl' : ''}>
+          <div
+            className="rounded-2xl p-5 mb-6 text-white shadow-depth-lg"
+            style={{ background: `linear-gradient(135deg, ${league.colors.from}, ${league.colors.to})` }}
+          >
+            <div className="flex items-center gap-3">
+              <CountryFlag nation={nation} size="lg" />
+              <div>
+                <p className="font-display text-2xl font-extrabold">{league.name}</p>
+                <p className="text-white/80 text-xs">{t('leagues.clubCount', { count: league.clubs.length })}</p>
+              </div>
             </div>
           </div>
+
+          {editing && <p className="text-sm text-charcoal-600 dark:text-charcoal-300 mb-4">{t('leagues.dragHint')}</p>}
         </div>
 
         {editing ? (
-          <>
-            <p className="text-sm text-charcoal-600 dark:text-charcoal-300 mb-4">{t('leagues.dragHint')}</p>
-            <LeagueDragBoard league={league} initialOrder={prediction?.order || null} onConfirm={handleConfirm} />
-          </>
+          <LeagueDragBoard league={league} initialOrder={prediction?.order || null} onConfirm={handleConfirm} />
         ) : (
           <div className="space-y-5">
             <div className="space-y-1.5">

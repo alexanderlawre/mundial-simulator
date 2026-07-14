@@ -8,8 +8,10 @@ import { useTranslation } from '../../lib/i18n'
 // -circle "TBD" visual language already established by BracketTree.jsx.
 // A slot is simultaneously a drop target (useDroppable, always, so a pool
 // club or another slot's club can land here) and, only once filled, also a
-// drag source (useDraggable) -- both hooks share the same DOM node.
-export default function LeagueTableSlot({ index, club, accent, interactive, relegation, europe }) {
+// drag source (useDraggable) -- both hooks share the same DOM node. It's
+// also always a click target (onClick, when interactive) so the parent can
+// offer click-to-select/click-to-place as an alternative to dragging.
+export default function LeagueTableSlot({ index, club, accent, interactive, relegation, europe, selected, onClick }) {
   const { t } = useTranslation()
   const slotId = `slot-${index}`
   const { setNodeRef: setDropRef, isOver } = useDroppable({ id: slotId, disabled: !interactive })
@@ -31,10 +33,11 @@ export default function LeagueTableSlot({ index, club, accent, interactive, rele
     <div
       ref={setRefs}
       {...dragProps}
+      onClick={interactive ? onClick : undefined}
       className={`flex items-center gap-3 px-3 py-2 rounded-xl border transition-all touch-none
-        ${isOver ? 'ring-2 ring-gold bg-gold/10' : 'bg-white/90 dark:bg-night-card/90 border-charcoal-900/10 dark:border-white/10'}
+        ${isOver ? 'ring-2 ring-gold bg-gold/10' : selected ? 'ring-2 ring-blue-500 bg-blue-500/10 border-blue-500' : 'bg-white/90 dark:bg-night-card/90 border-charcoal-900/10 dark:border-white/10'}
         ${isDragging ? 'opacity-30' : ''}
-        ${interactive && club ? 'cursor-grab active:cursor-grabbing' : ''}
+        ${interactive && club ? 'cursor-grab active:cursor-grabbing' : interactive ? 'cursor-pointer' : ''}
         ${relegation ? 'border-l-4 border-l-red-500/70' : ''}
         ${europe ? 'border-l-4 border-l-emerald' : ''}
       `}
