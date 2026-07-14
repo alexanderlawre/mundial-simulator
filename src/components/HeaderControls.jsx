@@ -2,14 +2,16 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from '../lib/i18n'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
+import ResetProfileButton from './ResetProfileButton'
 
 // Persistent top-right icon row, rendered once by AppBackground so it's in
 // the same place on every page (including ones like Onboarding/Dashboard
 // that don't render NavBar). Order, closest-to-center first: Home -> dark/
-// light mode toggle -> language selector. Keeping all three grouped in a
-// single row (instead of Home living separately inside each page's inline
-// NavBar, and Theme/Language floating in opposite corners) is what keeps
-// them visually "in line" with each other.
+// light mode toggle -> language selector -> reset profile. Keeping all four
+// grouped in a single row (instead of Home living separately inside each
+// page's inline NavBar, Theme/Language floating in opposite corners, and
+// Reset Profile living inline in Dashboard's own header) is what keeps them
+// visually "in line" with each other and available from anywhere.
 export default function HeaderControls() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -32,6 +34,7 @@ export default function HeaderControls() {
       )}
       <ThemeToggle />
       <LanguageSelector />
+      <ResetProfileButton />
     </div>
   )
 }

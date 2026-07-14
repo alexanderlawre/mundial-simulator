@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { getProfile, clearProfile, clearActiveTournament } from '../lib/storage'
+import { getProfile } from '../lib/storage'
 import { getNation } from '../data/nations'
 import CountryFlag from '../components/CountryFlag'
-import SambaButton from '../components/SambaButton'
 import AppBackground from '../components/AppBackground'
 import { useTranslation } from '../lib/i18n'
 
@@ -32,31 +31,22 @@ const MODES = [
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, tn } = useTranslation()
   const profile = getProfile()
   const supported = profile ? getNation(profile.supportedCountry) : null
-
-  function handleReset() {
-    clearProfile()
-    clearActiveTournament()
-    navigate('/')
-  }
 
   return (
     <AppBackground>
       <div className="max-w-4xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            {supported && <CountryFlag nation={supported} size="lg" />}
-            <div>
-              <h1 className="font-display font-bold text-3xl tracking-wide text-forest dark:text-mint">MUNDIAL</h1>
-              <p className="text-charcoal-600 dark:text-charcoal-300 text-sm font-medium">
-                {profile ? t('dashboard.welcomeName', { name: profile.name }) : t('dashboard.welcomeGeneric')}
-              </p>
-              {supported && <p className="text-charcoal-600 dark:text-charcoal-300 text-sm">{t('dashboard.supporting', { name: supported.name })}</p>}
-            </div>
+        <div className="flex items-center gap-3 mb-8">
+          {supported && <CountryFlag nation={supported} size="lg" />}
+          <div>
+            <h1 className="font-display font-bold text-3xl tracking-wide text-forest dark:text-mint">MUNDIAL</h1>
+            <p className="text-charcoal-600 dark:text-charcoal-300 text-sm font-medium">
+              {profile ? t('dashboard.welcomeName', { name: profile.name }) : t('dashboard.welcomeGeneric')}
+            </p>
+            {supported && <p className="text-charcoal-600 dark:text-charcoal-300 text-sm">{t('dashboard.supporting', { name: tn(supported.name) })}</p>}
           </div>
-          <SambaButton variant="outline" size="sm" onClick={handleReset}>{t('dashboard.resetProfile')}</SambaButton>
         </div>
 
         <div className="grid gap-5">
