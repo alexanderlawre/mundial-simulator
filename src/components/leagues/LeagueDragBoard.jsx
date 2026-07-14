@@ -146,9 +146,12 @@ export default function LeagueDragBoard({ league, initialOrder, onConfirm }) {
             sticks in place while the long 20-row table scrolls past --
             avoids the "scroll all the way down to grab a club" hassle on
             desktop. Below lg there isn't room for a side column, so it
-            falls back to stacking underneath, same as before. */}
-        <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-6 lg:items-start">
-          <div className="space-y-1.5">
+            falls back to stacking -- but ABOVE the table there (order-1),
+            not below: on a phone you land on the pool first and can start
+            tapping/dragging clubs immediately, instead of scrolling past
+            a full 20-row empty table to find them. */}
+        <div className="flex flex-col lg:grid lg:grid-cols-[1fr_300px] lg:gap-6 lg:items-start">
+          <div className="order-2 mt-5 lg:order-1 lg:mt-0 space-y-1.5">
             {table.map((clubKey, i) => (
               <LeagueTableSlot
                 key={i}
@@ -164,7 +167,7 @@ export default function LeagueDragBoard({ league, initialOrder, onConfirm }) {
             ))}
           </div>
 
-          <div className="mt-5 lg:mt-0 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pb-2">
+          <div className="order-1 lg:order-2 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pb-2">
             <p className="text-[11px] uppercase tracking-wide text-charcoal-600/70 dark:text-charcoal-300/70 font-semibold mb-2">
               {t('leagues.poolTitle', { count: pool.length })}
             </p>

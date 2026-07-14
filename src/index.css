@@ -6,10 +6,39 @@ html, body, #root {
   height: 100%;
 }
 
+html {
+  /* Stops iOS Safari auto-bumping the font size on rotation, and removes
+     the gray flash Safari/Android paint on tap for every button/link so
+     custom active: styles are the only tap feedback the user sees --
+     both make the app feel more like a native app and less like a web
+     page on touch devices. */
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  /* Keeps a vertical swipe at the very top/bottom of the page from
+     chaining into the browser's native pull-to-refresh / overscroll-glow
+     gesture, which otherwise fights with in-app drag gestures (the league
+     board's touch drag in particular) on iOS Safari and Android Chrome. */
+  overscroll-behavior-y: none;
+}
+
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background-color: #F4EFE6;
   color: #1E2422;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Every interactive control gets the same tap-friendly touch-action by
+   default: removes the ~300ms tap delay some mobile browsers still apply
+   while they wait to see if a tap is the start of a double-tap-to-zoom,
+   and blocks that double-tap-zoom on controls entirely, so buttons feel
+   instantly responsive. Drag-and-drop pieces already set their own more
+   restrictive `touch-none` utility class where needed, which wins because
+   it's more specific / applied directly on those elements.
+*/
+button, a {
+  touch-action: manipulation;
 }
 
 /* Safety-net fallback: any text left without an explicit dark: text-color
@@ -27,6 +56,14 @@ body {
 /* Tabular numerals for scores/ratings so they never jitter */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Momentum ("flick") scrolling for every internally-scrolling panel
+   (sticky league pool, modals, admin tables, etc.) on older iOS Safari,
+   which doesn't apply it by default the way modern Safari does. */
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
 }
 
 ::-webkit-scrollbar {

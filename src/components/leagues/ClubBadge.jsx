@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 const SIZES = {
-  xs: 'w-4 h-4 text-[7px]',
-  sm: 'w-6 h-6 text-[9px]',
-  md: 'w-9 h-9 text-xs',
-  lg: 'w-14 h-14 text-lg',
-  xl: 'w-20 h-20 text-2xl',
+  xs: 'w-6 h-6 text-[8px]',
+  sm: 'w-9 h-9 text-[11px]',
+  md: 'w-12 h-12 text-sm',
+  lg: 'w-16 h-16 text-lg',
+  xl: 'w-24 h-24 text-2xl',
 }
 
 function initials(name) {
@@ -18,45 +18,41 @@ function initials(name) {
     .toUpperCase() || name.slice(0, 2).toUpperCase()
 }
 
-// Club crest, rounded-square (not circular -- source crests are portrait
-// and object-contain, unlike CountryFlag's circular national flags which
-// are designed to be cropped). crossOrigin="anonymous" is required for a
-// clean html2canvas capture later even though the badge host already sends
-// open CORS headers -- any club whose badgeUrl is null (no CORS-safe
-// hotlink source available) or whose URL fails to load falls back to a
-// monogram (initials) badge in the league's accent color, so one missing
-// crest never breaks a card.
-export default function ClubBadge({ club, size = 'md', accent = '#12805C', className = '', forceLight = false }) {
+// Club crest. Real crests render "bare" -- no filled/bordered frame box
+// around them, just a drop-shadow for legibility against any background --
+// since the source images are already self-contained badge artwork and a
+// white card behind them just adds visual clutter/redundant chrome. Only
+// the monogram (initials) fallback -- used when a club has no badgeUrl or
+// its image fails to load -- keeps a solid colored circle background,
+// since raw initials need *some* backing to stay legible and on-brand.
+// crossOrigin="anonymous" is required for a clean html2canvas capture
+// later even though the badge hosts already send open CORS headers.
+export default function ClubBadge({ club, size = 'md', accent = '#12805C', className = '' }) {
   const [failed, setFailed] = useState(false)
   if (!club) return null
   const sizeClass = SIZES[size] || SIZES.md
   const showImage = club.badgeUrl && !failed
-  const frameTone = forceLight
-    ? 'bg-white border border-charcoal-900/10'
-    : 'bg-white dark:bg-night-card border border-charcoal-900/10 dark:border-white/10'
+
+  if (showImage) {
+    return (
+      <img
+        src={club.badgeUrl}
+        alt={club.name}
+        crossOrigin="anonymous"
+        className={`object-contain shrink-0 drop-shadow-md ${sizeClass} ${className}`}
+        onError={() => setFailed(true)}
+      />
+    )
+  }
 
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-lg shadow-depth overflow-hidden shrink-0 ${frameTone} ${sizeClass} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full shadow-depth shrink-0 font-display font-bold text-white ${sizeClass} ${className}`}
+      style={{ backgroundColor: accent }}
       title={club.name}
       aria-label={club.name}
     >
-      {showImage ? (
-        <img
-          src={club.badgeUrl}
-          alt=""
-          crossOrigin="anonymous"
-          className="w-full h-full object-contain p-0.5"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <span
-          className="w-full h-full flex items-center justify-center font-display font-bold text-white"
-          style={{ backgroundColor: accent }}
-        >
-          {initials(club.name)}
-        </span>
-      )}
+      {initials(club.name)}
     </span>
   )
 }

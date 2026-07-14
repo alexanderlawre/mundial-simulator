@@ -4,16 +4,16 @@
 // English display string). Club-name translation is explicitly out of
 // scope -- names render as-is everywhere, no `tn()`.
 //
-// Badge images are hotlinked (never downloaded into the repo) from the
-// `luukhopman/football-logos` GitHub repo, which serves PNGs with an open
-// `access-control-allow-origin: *` header (verified via curl), making them
-// safe for html2canvas capture later. 5 clubs (promoted from a division
-// outside that repo's coverage, or otherwise absent from its current +
-// history folders) have no CORS-safe hotlink source available anywhere
-// (their official crests are non-free trademarked files on Wikipedia,
-// served without CORS headers) -- `badgeUrl: null` for those, and
-// `ClubBadge` renders a monogram (initials) fallback for any club whose
-// badge is missing or fails to load.
+// Badge images are hotlinked (never downloaded into the repo). Most clubs
+// use the `luukhopman/football-logos` GitHub repo, which serves PNGs with
+// an open `access-control-allow-origin: *` header (verified via curl),
+// making them safe for html2canvas capture later. 5 clubs (promoted from a
+// division outside that repo's coverage, or otherwise absent from its
+// current + history folders) instead hotlink their crest directly from
+// Wikipedia (`upload.wikimedia.org`, also verified via curl to serve open
+// CORS headers even for these non-free/fair-use files). `ClubBadge` still
+// renders a monogram (initials) fallback for any club whose badge is
+// missing or fails to load, as a safety net.
 
 const LOGO_BASE = 'https://raw.githubusercontent.com/luukhopman/football-logos/master'
 
@@ -34,11 +34,11 @@ export const LEAGUES = [
       { key: 'brentford', name: 'Brentford', badgeUrl: logo('logos/England - Premier League/Brentford FC.png') },
       { key: 'brighton', name: 'Brighton & Hove Albion', badgeUrl: logo('logos/England - Premier League/Brighton & Hove Albion.png') },
       { key: 'chelsea', name: 'Chelsea', badgeUrl: logo('logos/England - Premier League/Chelsea FC.png') },
-      { key: 'coventry-city', name: 'Coventry City', badgeUrl: null },
+      { key: 'coventry-city', name: 'Coventry City', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/7/7b/Coventry_City_FC_crest.svg' },
       { key: 'crystal-palace', name: 'Crystal Palace', badgeUrl: logo('logos/England - Premier League/Crystal Palace.png') },
       { key: 'everton', name: 'Everton', badgeUrl: logo('logos/England - Premier League/Everton FC.png') },
       { key: 'fulham', name: 'Fulham', badgeUrl: logo('logos/England - Premier League/Fulham FC.png') },
-      { key: 'hull-city', name: 'Hull City', badgeUrl: null },
+      { key: 'hull-city', name: 'Hull City', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg' },
       { key: 'ipswich-town', name: 'Ipswich Town', badgeUrl: logo('history/2024-25/England - Premier League/Ipswich Town.png') },
       { key: 'leeds-united', name: 'Leeds United', badgeUrl: logo('logos/England - Premier League/Leeds United.png') },
       { key: 'liverpool', name: 'Liverpool', badgeUrl: logo('logos/England - Premier League/Liverpool FC.png') },
@@ -61,14 +61,14 @@ export const LEAGUES = [
       { key: 'atletico-madrid', name: 'Atlético Madrid', badgeUrl: logo('logos/Spain - LaLiga/Atlético de Madrid.png') },
       { key: 'barcelona', name: 'Barcelona', badgeUrl: logo('logos/Spain - LaLiga/FC Barcelona.png') },
       { key: 'celta-vigo', name: 'Celta Vigo', badgeUrl: logo('logos/Spain - LaLiga/Celta de Vigo.png') },
-      { key: 'deportivo-la-coruna', name: 'Deportivo La Coruña', badgeUrl: null },
+      { key: 'deportivo-la-coruna', name: 'Deportivo La Coruña', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/56/RC_Deportivo_A_Coru%C3%B1a_logo_2026.svg' },
       { key: 'elche', name: 'Elche', badgeUrl: logo('logos/Spain - LaLiga/Elche CF.png') },
       { key: 'espanyol', name: 'Espanyol', badgeUrl: logo('logos/Spain - LaLiga/RCD Espanyol Barcelona.png') },
       { key: 'getafe', name: 'Getafe', badgeUrl: logo('logos/Spain - LaLiga/Getafe CF.png') },
       { key: 'levante', name: 'Levante', badgeUrl: logo('logos/Spain - LaLiga/Levante UD.png') },
-      { key: 'malaga', name: 'Málaga', badgeUrl: null },
+      { key: 'malaga', name: 'Málaga', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/6/6d/M%C3%A1laga_CF.svg' },
       { key: 'osasuna', name: 'Osasuna', badgeUrl: logo('logos/Spain - LaLiga/CA Osasuna.png') },
-      { key: 'racing-santander', name: 'Racing Santander', badgeUrl: null },
+      { key: 'racing-santander', name: 'Racing Santander', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/f/f5/Racing_de_Santander_logo.svg' },
       { key: 'rayo-vallecano', name: 'Rayo Vallecano', badgeUrl: logo('logos/Spain - LaLiga/Rayo Vallecano.png') },
       { key: 'real-betis', name: 'Real Betis', badgeUrl: logo('logos/Spain - LaLiga/Real Betis Balompié.png') },
       { key: 'real-madrid', name: 'Real Madrid', badgeUrl: logo('logos/Spain - LaLiga/Real Madrid.png') },

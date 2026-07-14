@@ -19,7 +19,10 @@ export default function HeaderControls() {
   const onDashboard = location.pathname === '/dashboard'
 
   return (
-    <div className="fixed top-4 right-4 z-30 flex items-center gap-2">
+    <div
+      className="fixed z-30 flex items-center gap-2"
+      style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1rem)', right: 'calc(env(safe-area-inset-right, 0px) + 1rem)' }}
+    >
       {!onDashboard && (
         <button
           onClick={() => navigate('/dashboard')}

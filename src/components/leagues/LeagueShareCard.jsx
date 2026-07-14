@@ -41,7 +41,7 @@ function Row({ rank, club, accent, tone = 'default' }) {
       <span className="w-7 text-center font-display font-extrabold text-sm text-charcoal-900 tabular-nums shrink-0">
         {rank}
       </span>
-      <ClubBadge club={club} size="sm" accent={accent} forceLight />
+      <ClubBadge club={club} size="sm" accent={accent} />
       <span className="flex-1 min-w-0 truncate font-display font-semibold text-charcoal-900 text-sm">{club.name}</span>
     </div>
   )
