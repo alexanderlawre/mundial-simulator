@@ -123,7 +123,7 @@ export const LEAGUES = [
     colors: { from: '#008C45', to: '#008FD7', accent: '#008C45' },
     zones: [zone('ucl', 1, 4), zone('uel', 5, 5), zone('uecl', 6, 6), zone('relegation', 18, 20)],
     clubs: [
-      { key: 'atalanta', name: 'Atalanta', badgeUrl: logo('logos/Italy - Serie A/Atalanta BC.png') },
+      { key: 'atalanta', name: 'Atalanta', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/f/f2/Atalanta_BC_new_logo.svg' },
       { key: 'bologna', name: 'Bologna', badgeUrl: logo('logos/Italy - Serie A/Bologna FC 1909.png') },
       { key: 'cagliari', name: 'Cagliari', badgeUrl: logo('logos/Italy - Serie A/Cagliari Calcio.png') },
       { key: 'como', name: 'Como', badgeUrl: logo('logos/Italy - Serie A/Como 1907.png') },
@@ -149,7 +149,7 @@ export const LEAGUES = [
     key: 'ligue-1',
     name: 'Ligue 1',
     country: 'France',
-    colors: { from: '#0A1743', to: '#00AEEF', accent: '#00AEEF' },
+    colors: { from: '#0055A4', to: '#EF4135', accent: '#0055A4' },
     // 18 clubs: top 3 go straight to the UCL group stage, 4th enters UCL
     // qualifying, 5th/6th get UEL/UECL. 16th plays a relegation playoff
     // against a second-division side, bottom 2 go straight down.
@@ -163,7 +163,7 @@ export const LEAGUES = [
     ],
     clubs: [
       { key: 'psg', name: 'Paris Saint-Germain', badgeUrl: logo('logos/France - Ligue 1/Paris Saint-Germain.png') },
-      { key: 'marseille', name: 'Olympique Marseille', badgeUrl: logo('logos/France - Ligue 1/Olympique Marseille.png') },
+      { key: 'marseille', name: 'Olympique Marseille', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Olympique_de_Marseille_2026_logo.svg' },
       { key: 'monaco', name: 'AS Monaco', badgeUrl: logo('logos/France - Ligue 1/AS Monaco.png') },
       { key: 'lille', name: 'LOSC Lille', badgeUrl: logo('logos/France - Ligue 1/LOSC Lille.png') },
       { key: 'lyon', name: 'Olympique Lyon', badgeUrl: logo('logos/France - Ligue 1/Olympique Lyon.png') },
@@ -172,21 +172,24 @@ export const LEAGUES = [
       { key: 'rennes', name: 'Stade Rennais FC', badgeUrl: logo('logos/France - Ligue 1/Stade Rennais FC.png') },
       { key: 'strasbourg', name: 'RC Strasbourg Alsace', badgeUrl: logo('logos/France - Ligue 1/RC Strasbourg Alsace.png') },
       { key: 'toulouse', name: 'FC Toulouse', badgeUrl: logo('logos/France - Ligue 1/FC Toulouse.png') },
-      { key: 'nantes', name: 'FC Nantes', badgeUrl: logo('logos/France - Ligue 1/FC Nantes.png') },
       { key: 'brest', name: 'Stade Brestois 29', badgeUrl: logo('logos/France - Ligue 1/Stade Brestois 29.png') },
-      { key: 'reims', name: 'Stade de Reims', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Stade_Reims.svg' },
       { key: 'le-havre', name: 'Le Havre AC', badgeUrl: logo('logos/France - Ligue 1/Le Havre AC.png') },
       { key: 'auxerre', name: 'AJ Auxerre', badgeUrl: logo('logos/France - Ligue 1/AJ Auxerre.png') },
       { key: 'angers', name: 'Angers SCO', badgeUrl: logo('logos/France - Ligue 1/Angers SCO.png') },
       { key: 'lorient', name: 'FC Lorient', badgeUrl: logo('logos/France - Ligue 1/FC Lorient.png') },
       { key: 'paris-fc', name: 'Paris FC', badgeUrl: logo('logos/France - Ligue 1/Paris FC.png') },
+      // Promoted for 2026-27 (replacing relegated Metz & Nantes); not yet in
+      // the football-logos repo's current-season snapshot, so these two
+      // hotlink Wikipedia crests instead, same fallback pattern as above.
+      { key: 'troyes', name: 'ES Troyes AC', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/ESTAC_Troyes_Logo.svg' },
+      { key: 'le-mans', name: 'Le Mans FC', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/57/Le_Mans_FC_logo.svg' },
     ],
   },
   {
     key: 'bundesliga',
     name: 'Bundesliga',
     country: 'Germany',
-    colors: { from: '#D20515', to: '#1C1C1C', accent: '#D20515' },
+    colors: { from: '#D20515', to: '#FFCC00', accent: '#D20515' },
     // 18 clubs: top 4 go to UCL, 5th/6th to UEL/UECL (Germany's UEL berth
     // is currently a straight allocation, no playoff round). 16th plays a
     // two-legged relegation playoff against the 2. Bundesliga's 3rd place,
@@ -209,14 +212,17 @@ export const LEAGUES = [
       { key: 'sc-freiburg', name: 'SC Freiburg', badgeUrl: logo('logos/Germany - Bundesliga/SC Freiburg.png') },
       { key: 'union-berlin', name: 'Union Berlin', badgeUrl: logo('logos/Germany - Bundesliga/1.FC Union Berlin.png') },
       { key: 'werder-bremen', name: 'Werder Bremen', badgeUrl: logo('logos/Germany - Bundesliga/SV Werder Bremen.png') },
-      { key: 'vfl-wolfsburg', name: 'VfL Wolfsburg', badgeUrl: logo('logos/Germany - Bundesliga/VfL Wolfsburg.png') },
       { key: 'mainz-05', name: 'Mainz 05', badgeUrl: logo('logos/Germany - Bundesliga/1.FSV Mainz 05.png') },
       { key: 'fc-augsburg', name: 'FC Augsburg', badgeUrl: logo('logos/Germany - Bundesliga/FC Augsburg.png') },
       { key: 'tsg-hoffenheim', name: 'TSG Hoffenheim', badgeUrl: logo('logos/Germany - Bundesliga/TSG 1899 Hoffenheim.png') },
-      { key: 'fc-heidenheim', name: 'FC Heidenheim', badgeUrl: logo('logos/Germany - Bundesliga/1.FC Heidenheim 1846.png') },
-      { key: 'fc-st-pauli', name: 'FC St. Pauli', badgeUrl: logo('logos/Germany - Bundesliga/FC St. Pauli.png') },
       { key: 'hamburger-sv', name: 'Hamburger SV', badgeUrl: logo('logos/Germany - Bundesliga/Hamburger SV.png') },
       { key: 'fc-koln', name: '1. FC Köln', badgeUrl: logo('logos/Germany - Bundesliga/1.FC Köln.png') },
+      // Promoted for 2026-27 (replacing relegated Wolfsburg, Heidenheim &
+      // St. Pauli); not yet in the football-logos repo's current-season
+      // snapshot, so these hotlink Wikipedia crests instead.
+      { key: 'schalke-04', name: 'Schalke 04', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/FC_Schalke_04_Logo.svg' },
+      { key: 'sv-elversberg', name: 'SV Elversberg', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d4/SV_Elversberg_Logo_2021.svg' },
+      { key: 'sc-paderborn', name: 'SC Paderborn 07', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/67/SC_Paderborn_07_Logo_new.svg' },
     ],
   },
   {
@@ -242,13 +248,15 @@ export const LEAGUES = [
       { key: 'atletico-mineiro', name: 'Atlético Mineiro', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/41/Logo_of_Clube_Atl%C3%A9tico_Mineiro.svg' },
       { key: 'cruzeiro', name: 'Cruzeiro', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo%29.svg' },
       { key: 'bahia', name: 'Bahia', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1e/Logo_of_Esporte_Clube_Bahia_%282004%29.svg' },
-      { key: 'fortaleza', name: 'Fortaleza', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Fortaleza_Esporte_Clube_logo.png' },
-      { key: 'ceara', name: 'Ceará', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Cear%C3%A1_Sporting_Club_logo.svg' },
       { key: 'bragantino', name: 'Bragantino', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/2/2e/Red_Bull_Bragantino_logo.svg' },
       { key: 'vitoria', name: 'Vitória', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Esporte_Clube_Vit%C3%B3ria_%282024%29.svg' },
-      { key: 'juventude', name: 'Juventude', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/bf/Juventude_crest.png' },
       { key: 'mirassol', name: 'Mirassol', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Mirassol_FC_logo.png' },
-      { key: 'sport-recife', name: 'Sport Recife', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/4/45/Sport_Club_Recife.svg' },
+      // Promoted for the 2026 season (replacing relegated Fortaleza, Ceará,
+      // Juventude & Sport Recife).
+      { key: 'coritiba', name: 'Coritiba', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Coritiba_Foot_Ball_Club_logo.svg' },
+      { key: 'athletico-paranaense', name: 'Athletico Paranaense', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Athletico_Paranaense_%28Logo_2019%29.svg' },
+      { key: 'chapecoense', name: 'Chapecoense', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Logo_Associa%C3%A7%C3%A3o_Chapecoense_de_Futebol.svg' },
+      { key: 'remo', name: 'Remo', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/70/Clube_do_Remo.svg' },
     ],
   },
 ]
