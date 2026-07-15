@@ -8,9 +8,11 @@ import CountryFlag from '../components/CountryFlag'
 import AppBackground from '../components/AppBackground'
 import NavBar from '../components/NavBar'
 import SambaButton from '../components/SambaButton'
+import { TopPicksPreview } from './LeaguesHub'
 import { useTranslation } from '../lib/i18n'
 
 const MODE_LABEL_KEYS = { historic: 'account.modeHistoric', custom: 'account.modeCustom', wc2026: 'account.modeWc2026' }
+const SIMULATIONS_PREVIEW_N = 3
 
 function SimRow({ entry }) {
   const { t, tn } = useTranslation()
@@ -38,6 +40,7 @@ export default function Account() {
   const [predictions, setPredictions] = useState({})
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showAllSims, setShowAllSims] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -89,6 +92,7 @@ export default function Account() {
                     <p className="text-[11px] text-white/80 mt-0.5">
                       {prediction?.confirmed ? t('leagues.predictionsLocked') : prediction ? t('leagues.inProgress') : t('account.notStarted')}
                     </p>
+                    <TopPicksPreview league={league} order={prediction?.order} />
                   </div>
                 </button>
               )
@@ -104,7 +108,29 @@ export default function Account() {
             <p className="text-sm text-charcoal-600 dark:text-charcoal-300">{t('account.noSimulations')}</p>
           ) : (
             <div className="space-y-2">
-              {history.map((entry) => <SimRow key={entry.id} entry={entry} />)}
+              {(showAllSims ? history : history.slice(0, SIMULATIONS_PREVIEW_N)).map((entry) => (
+                <SimRow key={entry.id} entry={entry} />
+              ))}
+              {history.length > SIMULATIONS_PREVIEW_N && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllSims((v) => !v)}
+                  className="w-full text-xs font-semibold text-forest dark:text-mint py-2 rounded-xl border border-dashed border-charcoal-900/20 dark:border-white/20 hover:bg-white/50 dark:hover:bg-night-card/50 transition-colors flex items-center justify-center gap-1"
+                >
+                  {showAllSims ? t('account.showRecentOnly') : t('account.showAllSimulations', { count: history.length })}
+                  <svg
+                    viewBox="0 0 24 24"
+                    className={`w-3 h-3 transition-transform ${showAllSims ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+              )}
             </div>
           )}
         </div>

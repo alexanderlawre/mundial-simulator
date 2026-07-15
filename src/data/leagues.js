@@ -21,12 +21,49 @@ function logo(path) {
   return `${LOGO_BASE}/${encodeURI(path)}`
 }
 
+// Shared UEFA-style zone colors, reused across leagues so the legend/UI has
+// one consistent palette. `relegationPlayoff` (Ligue 1 / Bundesliga's 16th
+// place) gets its own color since it's neither safe nor a direct relegation.
+const ZONE_COLORS = {
+  ucl: '#10b981', // emerald
+  uclQualifying: '#6ee7b7', // light emerald
+  uel: '#3b82f6', // blue
+  uecl: '#a855f7', // purple
+  relegationPlayoff: '#f97316', // orange
+  relegation: '#ef4444', // red
+  libertadores: '#10b981', // emerald
+  sudamericana: '#3b82f6', // blue
+}
+
+// `zones` is a declarative list of 1-indexed inclusive rank ranges per
+// league, each tagged with a stable `key` (maps to an i18n label + the
+// shared color above). Replaces the old hardcoded `i < 4` / `i >= length -
+// 3` boolean checks that were duplicated across LeaguePredict/DragBoard/
+// ShareCard and couldn't express anything beyond "top 4 / bottom 3".
+function zone(key, from, to) {
+  return { key, from, to, color: ZONE_COLORS[key] }
+}
+
+export function getZoneForRank(league, rank) {
+  return league?.zones?.find((z) => rank >= z.from && rank <= z.to) || null
+}
+
+// Placeholder cards shown on the Leagues Hub for competitions that aren't
+// predictable yet -- no `clubs`/`zones`, just enough to render a disabled
+// "Coming Soon" card with the same gradient-card visual language.
+export const UPCOMING_COMPETITIONS = [
+  { key: 'champions-league', name: 'Champions League', colors: { from: '#0A1428', to: '#1E3A8A' } },
+  { key: 'europa-league', name: 'Europa League', colors: { from: '#FF6B00', to: '#7A2E00' } },
+  { key: 'conference-league', name: 'Conference League', colors: { from: '#00A651', to: '#0A3D24' } },
+]
+
 export const LEAGUES = [
   {
     key: 'premier-league',
     name: 'Premier League',
     country: 'England',
     colors: { from: '#3D195B', to: '#E90052', accent: '#E90052' },
+    zones: [zone('ucl', 1, 4), zone('uel', 5, 5), zone('uecl', 6, 6), zone('relegation', 18, 20)],
     clubs: [
       { key: 'arsenal', name: 'Arsenal', badgeUrl: logo('logos/England - Premier League/Arsenal FC.png') },
       { key: 'aston-villa', name: 'Aston Villa', badgeUrl: logo('logos/England - Premier League/Aston Villa.png') },
@@ -55,6 +92,7 @@ export const LEAGUES = [
     name: 'La Liga',
     country: 'Spain',
     colors: { from: '#EE2523', to: '#EE8707', accent: '#EE2523' },
+    zones: [zone('ucl', 1, 4), zone('uel', 5, 5), zone('uecl', 6, 6), zone('relegation', 18, 20)],
     clubs: [
       { key: 'alaves', name: 'Alavés', badgeUrl: logo('logos/Spain - LaLiga/Deportivo Alavés.png') },
       { key: 'athletic-bilbao', name: 'Athletic Bilbao', badgeUrl: logo('logos/Spain - LaLiga/Athletic Bilbao.png') },
@@ -83,6 +121,7 @@ export const LEAGUES = [
     name: 'Serie A',
     country: 'Italy',
     colors: { from: '#008C45', to: '#008FD7', accent: '#008C45' },
+    zones: [zone('ucl', 1, 4), zone('uel', 5, 5), zone('uecl', 6, 6), zone('relegation', 18, 20)],
     clubs: [
       { key: 'atalanta', name: 'Atalanta', badgeUrl: logo('logos/Italy - Serie A/Atalanta BC.png') },
       { key: 'bologna', name: 'Bologna', badgeUrl: logo('logos/Italy - Serie A/Bologna FC 1909.png') },
@@ -104,6 +143,112 @@ export const LEAGUES = [
       { key: 'torino', name: 'Torino', badgeUrl: logo('logos/Italy - Serie A/Torino FC.png') },
       { key: 'udinese', name: 'Udinese', badgeUrl: logo('logos/Italy - Serie A/Udinese Calcio.png') },
       { key: 'venezia', name: 'Venezia', badgeUrl: logo('history/2024-25/Italy - Serie A/Venezia FC.png') },
+    ],
+  },
+  {
+    key: 'ligue-1',
+    name: 'Ligue 1',
+    country: 'France',
+    colors: { from: '#0A1743', to: '#00AEEF', accent: '#00AEEF' },
+    // 18 clubs: top 3 go straight to the UCL group stage, 4th enters UCL
+    // qualifying, 5th/6th get UEL/UECL. 16th plays a relegation playoff
+    // against a second-division side, bottom 2 go straight down.
+    zones: [
+      zone('ucl', 1, 3),
+      zone('uclQualifying', 4, 4),
+      zone('uel', 5, 5),
+      zone('uecl', 6, 6),
+      zone('relegationPlayoff', 16, 16),
+      zone('relegation', 17, 18),
+    ],
+    clubs: [
+      { key: 'psg', name: 'Paris Saint-Germain', badgeUrl: logo('logos/France - Ligue 1/Paris Saint-Germain.png') },
+      { key: 'marseille', name: 'Olympique Marseille', badgeUrl: logo('logos/France - Ligue 1/Olympique Marseille.png') },
+      { key: 'monaco', name: 'AS Monaco', badgeUrl: logo('logos/France - Ligue 1/AS Monaco.png') },
+      { key: 'lille', name: 'LOSC Lille', badgeUrl: logo('logos/France - Ligue 1/LOSC Lille.png') },
+      { key: 'lyon', name: 'Olympique Lyon', badgeUrl: logo('logos/France - Ligue 1/Olympique Lyon.png') },
+      { key: 'nice', name: 'OGC Nice', badgeUrl: logo('logos/France - Ligue 1/OGC Nice.png') },
+      { key: 'lens', name: 'RC Lens', badgeUrl: logo('logos/France - Ligue 1/RC Lens.png') },
+      { key: 'rennes', name: 'Stade Rennais FC', badgeUrl: logo('logos/France - Ligue 1/Stade Rennais FC.png') },
+      { key: 'strasbourg', name: 'RC Strasbourg Alsace', badgeUrl: logo('logos/France - Ligue 1/RC Strasbourg Alsace.png') },
+      { key: 'toulouse', name: 'FC Toulouse', badgeUrl: logo('logos/France - Ligue 1/FC Toulouse.png') },
+      { key: 'nantes', name: 'FC Nantes', badgeUrl: logo('logos/France - Ligue 1/FC Nantes.png') },
+      { key: 'brest', name: 'Stade Brestois 29', badgeUrl: logo('logos/France - Ligue 1/Stade Brestois 29.png') },
+      { key: 'reims', name: 'Stade de Reims', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Stade_Reims.svg' },
+      { key: 'le-havre', name: 'Le Havre AC', badgeUrl: logo('logos/France - Ligue 1/Le Havre AC.png') },
+      { key: 'auxerre', name: 'AJ Auxerre', badgeUrl: logo('logos/France - Ligue 1/AJ Auxerre.png') },
+      { key: 'angers', name: 'Angers SCO', badgeUrl: logo('logos/France - Ligue 1/Angers SCO.png') },
+      { key: 'lorient', name: 'FC Lorient', badgeUrl: logo('logos/France - Ligue 1/FC Lorient.png') },
+      { key: 'paris-fc', name: 'Paris FC', badgeUrl: logo('logos/France - Ligue 1/Paris FC.png') },
+    ],
+  },
+  {
+    key: 'bundesliga',
+    name: 'Bundesliga',
+    country: 'Germany',
+    colors: { from: '#D20515', to: '#1C1C1C', accent: '#D20515' },
+    // 18 clubs: top 4 go to UCL, 5th/6th to UEL/UECL (Germany's UEL berth
+    // is currently a straight allocation, no playoff round). 16th plays a
+    // two-legged relegation playoff against the 2. Bundesliga's 3rd place,
+    // bottom 2 go straight down.
+    zones: [
+      zone('ucl', 1, 4),
+      zone('uel', 5, 5),
+      zone('uecl', 6, 6),
+      zone('relegationPlayoff', 16, 16),
+      zone('relegation', 17, 18),
+    ],
+    clubs: [
+      { key: 'bayern-munich', name: 'Bayern Munich', badgeUrl: logo('logos/Germany - Bundesliga/Bayern Munich.png') },
+      { key: 'bayer-leverkusen', name: 'Bayer Leverkusen', badgeUrl: logo('logos/Germany - Bundesliga/Bayer 04 Leverkusen.png') },
+      { key: 'rb-leipzig', name: 'RB Leipzig', badgeUrl: logo('logos/Germany - Bundesliga/RB Leipzig.png') },
+      { key: 'borussia-dortmund', name: 'Borussia Dortmund', badgeUrl: logo('logos/Germany - Bundesliga/Borussia Dortmund.png') },
+      { key: 'eintracht-frankfurt', name: 'Eintracht Frankfurt', badgeUrl: logo('logos/Germany - Bundesliga/Eintracht Frankfurt.png') },
+      { key: 'vfb-stuttgart', name: 'VfB Stuttgart', badgeUrl: logo('logos/Germany - Bundesliga/VfB Stuttgart.png') },
+      { key: 'borussia-monchengladbach', name: 'Borussia Mönchengladbach', badgeUrl: logo('logos/Germany - Bundesliga/Borussia Mönchengladbach.png') },
+      { key: 'sc-freiburg', name: 'SC Freiburg', badgeUrl: logo('logos/Germany - Bundesliga/SC Freiburg.png') },
+      { key: 'union-berlin', name: 'Union Berlin', badgeUrl: logo('logos/Germany - Bundesliga/1.FC Union Berlin.png') },
+      { key: 'werder-bremen', name: 'Werder Bremen', badgeUrl: logo('logos/Germany - Bundesliga/SV Werder Bremen.png') },
+      { key: 'vfl-wolfsburg', name: 'VfL Wolfsburg', badgeUrl: logo('logos/Germany - Bundesliga/VfL Wolfsburg.png') },
+      { key: 'mainz-05', name: 'Mainz 05', badgeUrl: logo('logos/Germany - Bundesliga/1.FSV Mainz 05.png') },
+      { key: 'fc-augsburg', name: 'FC Augsburg', badgeUrl: logo('logos/Germany - Bundesliga/FC Augsburg.png') },
+      { key: 'tsg-hoffenheim', name: 'TSG Hoffenheim', badgeUrl: logo('logos/Germany - Bundesliga/TSG 1899 Hoffenheim.png') },
+      { key: 'fc-heidenheim', name: 'FC Heidenheim', badgeUrl: logo('logos/Germany - Bundesliga/1.FC Heidenheim 1846.png') },
+      { key: 'fc-st-pauli', name: 'FC St. Pauli', badgeUrl: logo('logos/Germany - Bundesliga/FC St. Pauli.png') },
+      { key: 'hamburger-sv', name: 'Hamburger SV', badgeUrl: logo('logos/Germany - Bundesliga/Hamburger SV.png') },
+      { key: 'fc-koln', name: '1. FC Köln', badgeUrl: logo('logos/Germany - Bundesliga/1.FC Köln.png') },
+    ],
+  },
+  {
+    key: 'brasileirao',
+    name: 'Brasileirão Série A',
+    country: 'Brazil',
+    colors: { from: '#009C3B', to: '#FFDF00', accent: '#009C3B' },
+    // 20 clubs, no UEFA-style zones -- top 6 qualify for the Copa
+    // Libertadores group stage, 7th-12th go to the Copa Sudamericana, and
+    // (unlike the European leagues here) 4 teams go down instead of 3.
+    zones: [zone('libertadores', 1, 6), zone('sudamericana', 7, 12), zone('relegation', 17, 20)],
+    clubs: [
+      { key: 'flamengo', name: 'Flamengo', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Clube_de_Regatas_do_Flamengo_logo.svg' },
+      { key: 'palmeiras', name: 'Palmeiras', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/60/SE_Palmeiras_2025_crest.png' },
+      { key: 'sao-paulo', name: 'São Paulo', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f4/S%C3%A3o_Paulo_Futebol_Clube_logo_%282022%29.svg' },
+      { key: 'corinthians', name: 'Corinthians', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/5a/Sport_Club_Corinthians_Paulista_crest.svg' },
+      { key: 'santos', name: 'Santos', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Santos_Futebol_Clube_logo_%28with_stars_and_crown%29.png' },
+      { key: 'fluminense', name: 'Fluminense', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/12/Fluminense_Football_Club.svg' },
+      { key: 'botafogo', name: 'Botafogo', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg' },
+      { key: 'vasco-da-gama', name: 'Vasco da Gama', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/a/a5/Club_de_Regatas_Vasco_da_Gama_logo_%282021%29.svg' },
+      { key: 'gremio', name: 'Grêmio', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Gremio_logo.svg' },
+      { key: 'internacional', name: 'Internacional', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Sport_Club_Internacional_logo.svg' },
+      { key: 'atletico-mineiro', name: 'Atlético Mineiro', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/41/Logo_of_Clube_Atl%C3%A9tico_Mineiro.svg' },
+      { key: 'cruzeiro', name: 'Cruzeiro', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo%29.svg' },
+      { key: 'bahia', name: 'Bahia', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1e/Logo_of_Esporte_Clube_Bahia_%282004%29.svg' },
+      { key: 'fortaleza', name: 'Fortaleza', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Fortaleza_Esporte_Clube_logo.png' },
+      { key: 'ceara', name: 'Ceará', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Cear%C3%A1_Sporting_Club_logo.svg' },
+      { key: 'bragantino', name: 'Bragantino', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/2/2e/Red_Bull_Bragantino_logo.svg' },
+      { key: 'vitoria', name: 'Vitória', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Esporte_Clube_Vit%C3%B3ria_%282024%29.svg' },
+      { key: 'juventude', name: 'Juventude', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/bf/Juventude_crest.png' },
+      { key: 'mirassol', name: 'Mirassol', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Mirassol_FC_logo.png' },
+      { key: 'sport-recife', name: 'Sport Recife', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/4/45/Sport_Club_Recife.svg' },
     ],
   },
 ]

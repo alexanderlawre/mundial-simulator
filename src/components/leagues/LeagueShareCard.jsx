@@ -55,9 +55,17 @@ function Row({ rank, club, accent, tone = 'default' }) {
 export default function LeagueShareCard({ league, nation, clubs, order, variant }) {
   const { t } = useTranslation()
   const accent = league.colors.accent
+  // The bottom "relegation zone" block is sized to whatever this league's
+  // actual relegation-flavored zones cover (`relegation` and, for Ligue 1/
+  // Bundesliga, `relegationPlayoff` too) instead of a hardcoded "last 3" --
+  // that was only ever correct for the original 20-team, top4/bottom3 leagues.
+  const relegationZones = (league.zones || []).filter((z) => z.key.startsWith('relegation'))
+  const relegationStart = relegationZones.length
+    ? Math.min(...relegationZones.map((z) => z.from))
+    : league.clubs.length - 2
   const top3 = order.slice(0, 3).map((k) => clubs[k])
-  const mid = order.slice(3, 8).map((k, i) => ({ rank: i + 4, club: clubs[k] }))
-  const bottom3 = order.slice(17, 20).map((k, i) => ({ rank: i + 18, club: clubs[k] }))
+  const mid = order.slice(3, relegationStart - 1).map((k, i) => ({ rank: i + 4, club: clubs[k] }))
+  const bottomZone = order.slice(relegationStart - 1, league.clubs.length).map((k, i) => ({ rank: relegationStart + i, club: clubs[k] }))
   const full = order.map((k, i) => ({ rank: i + 1, club: clubs[k] }))
 
   return (
@@ -105,13 +113,13 @@ export default function LeagueShareCard({ league, nation, clubs, order, variant 
             </div>
 
             <div className="space-y-1.5">
-              {bottom3.map(({ rank, club }) => club && <Row key={rank} rank={rank} club={club} accent={accent} tone="relegation" />)}
+              {bottomZone.map(({ rank, club }) => club && <Row key={rank} rank={rank} club={club} accent={accent} tone="relegation" />)}
             </div>
           </>
         ) : (
           <div className="space-y-1.5">
             {full.map(({ rank, club }) => club && (
-              <Row key={rank} rank={rank} club={club} accent={accent} tone={rank > 17 ? 'relegation' : 'default'} />
+              <Row key={rank} rank={rank} club={club} accent={accent} tone={rank >= relegationStart ? 'relegation' : 'default'} />
             ))}
           </div>
         )}

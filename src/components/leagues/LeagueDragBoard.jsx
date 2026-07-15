@@ -3,10 +3,8 @@ import { DndContext, PointerSensor, TouchSensor, useDroppable, useSensor, useSen
 import LeagueTableSlot from './LeagueTableSlot'
 import LeagueTeamPoolItem from './LeagueTeamPoolItem'
 import SambaButton from '../SambaButton'
-import { alphabeticalClubKeys, clubsByKey } from '../../data/leagues'
+import { alphabeticalClubKeys, clubsByKey, getZoneForRank } from '../../data/leagues'
 import { useTranslation } from '../../lib/i18n'
-
-const SLOT_COUNT = 20
 
 function PoolArea({ children, onClick, hinting }) {
   const { setNodeRef, isOver } = useDroppable({ id: 'pool' })
@@ -41,7 +39,8 @@ function PoolArea({ children, onClick, hinting }) {
 // all, so there's zero accidental-drag risk once done.
 export default function LeagueDragBoard({ league, initialOrder, onConfirm }) {
   const { t } = useTranslation()
-  const [table, setTable] = useState(() => initialOrder || Array(SLOT_COUNT).fill(null))
+  const slotCount = league.clubs.length
+  const [table, setTable] = useState(() => initialOrder || Array(slotCount).fill(null))
   // { type: 'pool', clubKey } | { type: 'slot', index } | null -- the
   // currently click-selected club, awaiting a target tap. Cleared after
   // every placement, deselect-tap, or re-selection of something else.
@@ -159,8 +158,7 @@ export default function LeagueDragBoard({ league, initialOrder, onConfirm }) {
                 club={clubKey ? clubs[clubKey] : null}
                 accent={league.colors.accent}
                 interactive
-                europe={i < 4}
-                relegation={i >= SLOT_COUNT - 3}
+                zone={getZoneForRank(league, i + 1)}
                 selected={selected?.type === 'slot' && selected.index === i}
                 onClick={() => handleSlotClick(i)}
               />

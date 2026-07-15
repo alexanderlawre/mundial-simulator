@@ -11,7 +11,7 @@ import { useTranslation } from '../../lib/i18n'
 // drag source (useDraggable) -- both hooks share the same DOM node. It's
 // also always a click target (onClick, when interactive) so the parent can
 // offer click-to-select/click-to-place as an alternative to dragging.
-export default function LeagueTableSlot({ index, club, accent, interactive, relegation, europe, selected, onClick }) {
+export default function LeagueTableSlot({ index, club, accent, interactive, zone, selected, onClick }) {
   const { t } = useTranslation()
   const slotId = `slot-${index}`
   const { setNodeRef: setDropRef, isOver } = useDroppable({ id: slotId, disabled: !interactive })
@@ -34,13 +34,12 @@ export default function LeagueTableSlot({ index, club, accent, interactive, rele
       ref={setRefs}
       {...dragProps}
       onClick={interactive ? onClick : undefined}
-      className={`flex items-center gap-3 px-3 py-2 rounded-xl border transition-all touch-none
-        ${isOver ? 'ring-2 ring-gold bg-gold/10' : selected ? 'ring-2 ring-blue-500 bg-blue-500/10 border-blue-500' : 'bg-white/90 dark:bg-night-card/90 border-charcoal-900/10 dark:border-white/10'}
+      className={`flex items-center gap-3 px-3 py-2 rounded-xl border-4 border-y border-r transition-all touch-none
+        ${isOver ? 'ring-2 ring-gold bg-gold/10' : selected ? 'ring-2 ring-blue-500 bg-blue-500/10 border-blue-500' : 'bg-white/90 dark:bg-night-card/90 border-y-charcoal-900/10 dark:border-y-white/10 border-r-charcoal-900/10 dark:border-r-white/10'}
         ${isDragging ? 'opacity-30' : ''}
         ${interactive && club ? 'cursor-grab active:cursor-grabbing' : interactive ? 'cursor-pointer' : ''}
-        ${relegation ? 'border-l-4 border-l-red-500/70' : ''}
-        ${europe ? 'border-l-4 border-l-emerald' : ''}
       `}
+      style={{ borderLeftColor: zone?.color || 'transparent' }}
     >
       <span className="w-6 text-center font-display font-bold text-sm text-charcoal-600 dark:text-charcoal-300 tabular-nums shrink-0">
         {rank}
