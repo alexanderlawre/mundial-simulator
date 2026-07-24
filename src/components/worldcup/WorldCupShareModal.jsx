@@ -1,17 +1,14 @@
 import { useRef, useState } from 'react'
-import LeagueShareCard from './LeagueShareCard'
+import WorldCupShareCard from './WorldCupShareCard'
 import SambaButton from '../common/SambaButton'
 import { captureNode, shareOrDownload } from '../../lib/shareImage'
 import { useTranslation } from '../../lib/i18n'
 
-// The card itself is rendered off-screen (fixed pixel width, positioned
-// far outside the viewport rather than display:none, since html2canvas
-// needs real layout/paint to capture from) so captures are
-// resolution-consistent regardless of the viewport size that triggered
-// them. Preview inside the modal is the same node, just visually scaled
-// down and wrapped in a scrollable frame to fit the card's portrait
-// "paper" aspect ratio.
-export default function LeagueShareModal({ league, order, clubs, nation, onClose }) {
+// Mirrors LeagueShareModal.jsx's off-screen-render + capture/share pattern
+// exactly: the card is rendered off-screen at a fixed pixel width (real
+// layout/paint required for html2canvas) and previewed in-modal via a
+// scaled-down copy of the same node.
+export default function WorldCupShareModal({ title, hostLabel, champion, runnerUp, thirdPlace, fourthPlace, teamsByName, onClose }) {
   const { t } = useTranslation()
   const [busy, setBusy] = useState(false)
   const cardRef = useRef(null)
@@ -21,11 +18,13 @@ export default function LeagueShareModal({ league, order, clubs, nation, onClose
     setBusy(true)
     try {
       const blob = await captureNode(cardRef.current)
-      await shareOrDownload(blob, `mundial-${league.key}-table.png`)
+      await shareOrDownload(blob, `mundial-${(champion || 'champion').toLowerCase().replace(/\s+/g, '-')}-world-cup.png`)
     } finally {
       setBusy(false)
     }
   }
+
+  const cardProps = { title, hostLabel, champion, runnerUp, thirdPlace, fourthPlace, teamsByName }
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-sm" onClick={onClose}>
@@ -47,7 +46,7 @@ export default function LeagueShareModal({ league, order, clubs, nation, onClose
 
           <div className="rounded-2xl overflow-hidden border border-charcoal-900/10 dark:border-white/10 max-h-[60vh] overflow-y-auto flex justify-center bg-charcoal-900/5 dark:bg-black/20">
             <div className="origin-top" style={{ transform: 'scale(0.5)', width: 720, height: 'fit-content', margin: '-8px 0' }}>
-              <LeagueShareCard league={league} nation={nation} clubs={clubs} order={order} />
+              <WorldCupShareCard {...cardProps} />
             </div>
           </div>
 
@@ -67,7 +66,7 @@ export default function LeagueShareModal({ league, order, clubs, nation, onClose
           has real, painted layout to read from. */}
       <div className="fixed -left-[9999px] top-0" aria-hidden="true">
         <div ref={cardRef}>
-          <LeagueShareCard league={league} nation={nation} clubs={clubs} order={order} />
+          <WorldCupShareCard {...cardProps} />
         </div>
       </div>
     </div>

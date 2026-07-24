@@ -47,6 +47,7 @@ export default function ClubBadge({ club, size = 'md', accent = '#12805C', class
           alt={club.name}
           crossOrigin="anonymous"
           className="w-[82%] h-[82%] object-contain drop-shadow-md"
+          style={club.badgeScale ? { transform: `scale(${club.badgeScale})` } : undefined}
           onError={() => setFailed(true)}
         />
       </span>

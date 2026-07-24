@@ -7,11 +7,11 @@ import Dashboard from './pages/account/Dashboard'
 import SimulatorSetup from './pages/worldcup/SimulatorSetup'
 import GroupDraw from './pages/worldcup/GroupDraw'
 import SimulatorPlay from './pages/worldcup/SimulatorPlay'
-import WC2026 from './pages/worldcup/WC2026'
 import HistoricCups from './pages/worldcup/HistoricCups'
 import HistoricPlay from './pages/worldcup/HistoricPlay'
 import LeaguesHub from './pages/leagues/LeaguesHub'
 import LeaguePredict from './pages/leagues/LeaguePredict'
+import Compete from './pages/compete/Compete'
 import Admin from './pages/admin/Admin'
 import AdminDetail from './pages/admin/AdminDetail'
 import PrivacyPolicy from './pages/legal/PrivacyPolicy'
@@ -36,11 +36,14 @@ function RootRoute() {
   return user ? <Navigate to="/dashboard" replace /> : <Onboarding />
 }
 
-// Guards every page that assumes a logged-in user (gameplay + account).
-// Waits for AuthContext's initial session check before deciding, so a
-// returning logged-in user is never flashed to /login on a hard refresh
-// just because the async session lookup hasn't resolved yet.
-function RequireAuth({ children }) {
+// Guards pages that strictly require a logged-in user (currently just the
+// account/profile page). Gameplay routes are intentionally guest-accessible
+// -- see the guest-mode prompts in ProfileButton/TournamentPlay/LeaguePredict
+// instead of a hard route redirect. Waits for AuthContext's initial session
+// check before deciding, so a returning logged-in user is never flashed to
+// /login on a hard refresh just because the async session lookup hasn't
+// resolved yet.
+function RequireAccountPage({ children }) {
   const { user, loading } = useAuth()
   if (loading) return null
   if (isPasswordRecovery()) return <Navigate to="/reset-password" replace />
@@ -55,16 +58,16 @@ export default function App() {
         <Route path="/" element={<RootRoute />} />
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
-        <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
-        <Route path="/simulator/setup" element={<RequireAuth><SimulatorSetup /></RequireAuth>} />
-        <Route path="/simulator/draw" element={<RequireAuth><GroupDraw /></RequireAuth>} />
-        <Route path="/simulator/play" element={<RequireAuth><SimulatorPlay /></RequireAuth>} />
-        <Route path="/wc2026" element={<RequireAuth><WC2026 /></RequireAuth>} />
-        <Route path="/historic" element={<RequireAuth><HistoricCups /></RequireAuth>} />
-        <Route path="/historic/:year" element={<RequireAuth><HistoricPlay /></RequireAuth>} />
-        <Route path="/leagues" element={<RequireAuth><LeaguesHub /></RequireAuth>} />
-        <Route path="/leagues/:leagueKey" element={<RequireAuth><LeaguePredict /></RequireAuth>} />
+        <Route path="/account" element={<RequireAccountPage><Account /></RequireAccountPage>} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/simulator/setup" element={<SimulatorSetup />} />
+        <Route path="/simulator/draw" element={<GroupDraw />} />
+        <Route path="/simulator/play" element={<SimulatorPlay />} />
+        <Route path="/historic" element={<HistoricCups />} />
+        <Route path="/historic/:year" element={<HistoricPlay />} />
+        <Route path="/leagues" element={<LeaguesHub />} />
+        <Route path="/leagues/:leagueKey" element={<LeaguePredict />} />
+        <Route path="/compete" element={<Compete />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/detail" element={<AdminDetail />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />

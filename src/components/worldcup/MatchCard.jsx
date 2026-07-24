@@ -21,7 +21,7 @@ function ScorerList({ scorers, align }) {
 function FifaCode({ team }) {
   if (!team?.fifaCode) return null
   return (
-    <span className="font-display text-[10px] font-bold tracking-widest text-charcoal-600 bg-charcoal-900/5 rounded px-1.5 py-0.5 w-10 text-center shrink-0 tabular-nums">
+    <span translate="no" className="notranslate font-display text-[10px] font-bold tracking-widest text-charcoal-600 bg-charcoal-900/5 rounded px-1.5 py-0.5 w-10 text-center shrink-0 tabular-nums">
       {team.fifaCode}
     </span>
   )

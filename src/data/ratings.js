@@ -4,9 +4,12 @@
 // Nations not listed fall back to a confederation-tier default in getRating().
 
 export const CURRENT_RATINGS = {
-  // Elite tier
-  'Argentina': 90, 'France': 89, 'Brazil': 88, 'England': 86, 'Spain': 87,
-  'Portugal': 85, 'Netherlands': 85, 'Germany': 84,
+  // Elite tier -- reordered to reflect the post-Euro 2024 landscape: Spain's
+  // deep young core (Yamal/Pedri/Nico Williams) is now the form side in the
+  // world, France and Argentina remain top-tier but slightly ahead of a
+  // resurgent England, and Brazil/Portugal/Netherlands round out the group.
+  'Spain': 90, 'France': 89, 'Argentina': 89, 'England': 87, 'Brazil': 87,
+  'Portugal': 86, 'Netherlands': 84, 'Germany': 83,
 
   // Strong tier -- note Italy and Belgium are deliberately kept out of the
   // elite/auto-qualifier tier here: both have real recent pedigree

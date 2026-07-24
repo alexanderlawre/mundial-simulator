@@ -10,6 +10,7 @@ import ClubBadge from '../../components/leagues/ClubBadge'
 import LeagueDragBoard from '../../components/leagues/LeagueDragBoard'
 import LeagueShareModal from '../../components/leagues/LeagueShareModal'
 import SambaButton from '../../components/common/SambaButton'
+import GuestPrompt from '../../components/common/GuestPrompt'
 import { useTranslation } from '../../lib/i18n'
 
 // Simple, non-interactive numbered row for the locked/confirmed view --
@@ -73,6 +74,7 @@ export default function LeaguePredict() {
   const [prediction, setPrediction] = useState(() => (league ? getLeaguePrediction(league.key) : null))
   const [editing, setEditing] = useState(() => !prediction || !prediction.confirmed)
   const [showShare, setShowShare] = useState(false)
+  const [guestPromptDismissed, setGuestPromptDismissed] = useState(false)
 
   if (!league) {
     return (
@@ -149,6 +151,9 @@ export default function LeaguePredict() {
                 {t('leagues.share')}
               </SambaButton>
             </div>
+            {!user && !guestPromptDismissed && (
+              <GuestPrompt onDismiss={() => setGuestPromptDismissed(true)} />
+            )}
           </div>
         )}
 

@@ -15,7 +15,7 @@ import {
   buildWinnerOnlyResult,
 } from '../../lib/tournamentEngine'
 import { simulateMatch } from '../../lib/matchEngine'
-import { logSimulationResult, syncSimulationToCloud } from '../../lib/storage'
+import { logSimulationResult, syncSimulationToCloud, addLocalSimulationHistory, setSimulationPinned } from '../../lib/storage'
 import { useAuth } from '../../lib/AuthContext'
 import MatchCard from './MatchCard'
 import GroupTable from './GroupTable'
@@ -27,6 +27,8 @@ import TournamentSummary from './TournamentSummary'
 import SambaButton from '../common/SambaButton'
 import CountryFlag from '../common/CountryFlag'
 import NavBar from '../common/NavBar'
+import GuestPrompt from '../common/GuestPrompt'
+import WorldCupShareModal from './WorldCupShareModal'
 import { useTranslation, translateRoundLabel } from '../../lib/i18n'
 
 // Synthetic standings rows for a manually-ranked group -- shaped identically
@@ -122,6 +124,7 @@ export default function TournamentPlay({
 }) {
   const { t, tn } = useTranslation()
   const { user } = useAuth()
+  const [guestPromptDismissed, setGuestPromptDismissed] = useState(false)
   const teamsByName = useMemo(() => {
     const map = {}
     if (initialGroups) {
@@ -437,7 +440,13 @@ export default function TournamentPlay({
   }, [champion, stage, bracketSkeleton])
 
   // Log the outcome once, the first time this tournament reaches celebration.
+  // Also mirrors the result into a pin-able record (cloud row for logged-in
+  // users, local-storage record for guests) so the "Pin this result" button
+  // below has a stable id to spotlight on the Account page.
   const loggedRef = useRef(false)
+  const [resultId, setResultId] = useState(null)
+  const [pinned, setPinned] = useState(false)
+  const [showShare, setShowShare] = useState(false)
   useEffect(() => {
     if (stage !== 'celebration' || loggedRef.current || !mode) return
     loggedRef.current = true
@@ -450,8 +459,19 @@ export default function TournamentPlay({
       fourth: fourthPlaceTeam,
     }
     logSimulationResult(entry)
-    syncSimulationToCloud(user?.id, entry)
+    if (user?.id) {
+      syncSimulationToCloud(user.id, entry).then((id) => { if (id) setResultId(id) })
+    } else {
+      setResultId(addLocalSimulationHistory(entry).id)
+    }
   }, [stage, mode, descriptor, champion, runnerUpTeam, thirdPlaceTeam, fourthPlaceTeam, user])
+
+  function togglePin() {
+    if (!resultId) return
+    const next = !pinned
+    setSimulationPinned(resultId, next)
+    setPinned(next)
+  }
 
   // ---------- Render ----------
 
@@ -656,9 +676,32 @@ export default function TournamentPlay({
           teamsByName={teamsByName}
           champion={champion}
         />
-        <div className="mt-8">
+        {!user && !guestPromptDismissed && (
+          <div className="mt-6 text-left">
+            <GuestPrompt onDismiss={() => setGuestPromptDismissed(true)} />
+          </div>
+        )}
+        <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
           <SambaButton variant="gold" size="lg" onClick={onRestart}>{t('play.simulateAgain')}</SambaButton>
+          <SambaButton variant="outline" size="lg" onClick={() => setShowShare(true)}>{t('leagues.share')}</SambaButton>
+          {resultId && (
+            <SambaButton variant={pinned ? 'gold' : 'outline'} size="lg" onClick={togglePin}>
+              {pinned ? `\u2605 ${t('play.pinned')}` : `\u2606 ${t('play.pinResult')}`}
+            </SambaButton>
+          )}
         </div>
+        {showShare && (
+          <WorldCupShareModal
+            title={title}
+            hostLabel={hostLabel}
+            champion={champion}
+            runnerUp={runnerUpTeam}
+            thirdPlace={thirdPlaceTeam}
+            fourthPlace={fourthPlaceTeam}
+            teamsByName={teamsByName}
+            onClose={() => setShowShare(false)}
+          />
+        )}
       </div>
     )
   }

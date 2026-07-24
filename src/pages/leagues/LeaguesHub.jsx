@@ -17,7 +17,7 @@ export function TopPicksPreview({ league, order }) {
   const clubs = clubsByKey(league.key)
   const topThree = order.slice(0, 3).filter(Boolean)
   return (
-    <div className="flex items-center -space-x-2 mt-2">
+    <div className="flex items-center gap-1.5 mt-2">
       {topThree.map((clubKey) => {
         const club = clubs[clubKey]
         if (!club) return null

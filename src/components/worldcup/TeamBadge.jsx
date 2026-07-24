@@ -15,7 +15,7 @@ export default function TeamBadge({ team, size = 'md', showRating = true, select
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           {team.fifaCode && (
-            <span className="font-display text-[10px] font-bold tracking-widest text-charcoal-600 dark:text-charcoal-300 bg-charcoal-900/5 rounded px-1.5 py-0.5 shrink-0 tabular-nums">
+            <span translate="no" className="notranslate font-display text-[10px] font-bold tracking-widest text-charcoal-600 dark:text-charcoal-300 bg-charcoal-900/5 rounded px-1.5 py-0.5 shrink-0 tabular-nums">
               {team.fifaCode}
             </span>
           )}

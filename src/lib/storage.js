@@ -69,6 +69,50 @@ export function clearAllLeaguePredictions() {
   localStorage.removeItem(LEAGUE_PREDICTIONS_KEY)
 }
 
+// ---------- Guest-local simulation history + spotlight pin ----------
+// Cloud sync (syncSimulationToCloud/fetchCloudSimulationHistory below) is
+// the source of truth for a logged-in user's "Past Simulations" list on
+// the Account page. Guests (no Supabase session) have nowhere server-side
+// to persist that list, so this mirrors the same entry shape into
+// localStorage instead -- capped at 50 entries, newest first.
+const LOCAL_SIMULATION_HISTORY_KEY = 'mundial.localSimulationHistory'
+const PINNED_SIMULATIONS_KEY = 'mundial.pinnedSimulations'
+
+export function getLocalSimulationHistory() {
+  return safeParse(localStorage.getItem(LOCAL_SIMULATION_HISTORY_KEY), [])
+}
+
+// entry: { mode, descriptor, winner, runnerUp, third, fourth } -- returns
+// the stored record (with its generated id) so the caller can immediately
+// reference it, e.g. for a "pin this result" action right after finishing.
+export function addLocalSimulationHistory(entry) {
+  const id = `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const record = { id, ...entry, created_at: new Date().toISOString() }
+  const all = [record, ...getLocalSimulationHistory()].slice(0, 50)
+  localStorage.setItem(LOCAL_SIMULATION_HISTORY_KEY, JSON.stringify(all))
+  return record
+}
+
+// Spotlight/pin: a simple id-keyed set kept in localStorage on the device,
+// working equally for cloud `simulation_history` row ids (logged-in users)
+// and local-mirror ids (guests) so the "Pin this result" button on the
+// celebration screen and the Spotlight section on the Account page always
+// agree on the same id space, with no Supabase schema change required.
+export function getPinnedSimulationIds() {
+  return safeParse(localStorage.getItem(PINNED_SIMULATIONS_KEY), [])
+}
+
+export function isSimulationPinned(id) {
+  return !!id && getPinnedSimulationIds().includes(id)
+}
+
+export function setSimulationPinned(id, pinned) {
+  if (!id) return
+  const current = getPinnedSimulationIds()
+  const next = pinned ? [...new Set([...current, id])] : current.filter((x) => x !== id)
+  localStorage.setItem(PINNED_SIMULATIONS_KEY, JSON.stringify(next))
+}
+
 // ---------- Analytics (shared across all visitors via serverless API +
 // Vercel KV -- see api/signup.js, api/simulation.js, api/admin-data.js.
 // Logging calls are fire-and-forget: a network hiccup should never block
@@ -152,11 +196,13 @@ export async function fetchCloudLeaguePredictions(userId) {
   }
 }
 
-// entry: { mode, descriptor, winner, runnerUp, third, fourth }
+// entry: { mode, descriptor, winner, runnerUp, third, fourth } -- returns
+// the inserted row's id (or null on failure) so callers can immediately
+// reference this exact simulation, e.g. to pin it right after it finishes.
 export async function syncSimulationToCloud(userId, entry) {
-  if (!userId) return
+  if (!userId) return null
   try {
-    await supabase.from('simulation_history').insert({
+    const { data, error } = await supabase.from('simulation_history').insert({
       user_id: userId,
       mode: entry.mode,
       descriptor: entry.descriptor,
@@ -164,9 +210,11 @@ export async function syncSimulationToCloud(userId, entry) {
       runner_up: entry.runnerUp,
       third: entry.third,
       fourth: entry.fourth,
-    })
+    }).select().single()
+    if (error) return null
+    return data?.id ?? null
   } catch {
-    // best-effort only
+    return null
   }
 }
 

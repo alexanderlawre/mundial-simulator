@@ -71,11 +71,11 @@ export const LEAGUES = [
       { key: 'brentford', name: 'Brentford', badgeUrl: logo('logos/England - Premier League/Brentford FC.png') },
       { key: 'brighton', name: 'Brighton & Hove Albion', badgeUrl: logo('logos/England - Premier League/Brighton & Hove Albion.png') },
       { key: 'chelsea', name: 'Chelsea', badgeUrl: logo('logos/England - Premier League/Chelsea FC.png') },
-      { key: 'coventry-city', name: 'Coventry City', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/7/7b/Coventry_City_FC_crest.svg' },
+      { key: 'coventry-city', name: 'Coventry City', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/7/7b/Coventry_City_FC_crest.svg', badgeScale: 0.85 },
       { key: 'crystal-palace', name: 'Crystal Palace', badgeUrl: logo('logos/England - Premier League/Crystal Palace.png') },
       { key: 'everton', name: 'Everton', badgeUrl: logo('logos/England - Premier League/Everton FC.png') },
       { key: 'fulham', name: 'Fulham', badgeUrl: logo('logos/England - Premier League/Fulham FC.png') },
-      { key: 'hull-city', name: 'Hull City', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg' },
+      { key: 'hull-city', name: 'Hull City', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg', badgeScale: 0.85 },
       { key: 'ipswich-town', name: 'Ipswich Town', badgeUrl: logo('history/2024-25/England - Premier League/Ipswich Town.png') },
       { key: 'leeds-united', name: 'Leeds United', badgeUrl: logo('logos/England - Premier League/Leeds United.png') },
       { key: 'liverpool', name: 'Liverpool', badgeUrl: logo('logos/England - Premier League/Liverpool FC.png') },
@@ -99,14 +99,14 @@ export const LEAGUES = [
       { key: 'atletico-madrid', name: 'Atlético Madrid', badgeUrl: logo('logos/Spain - LaLiga/Atlético de Madrid.png') },
       { key: 'barcelona', name: 'Barcelona', badgeUrl: logo('logos/Spain - LaLiga/FC Barcelona.png') },
       { key: 'celta-vigo', name: 'Celta Vigo', badgeUrl: logo('logos/Spain - LaLiga/Celta de Vigo.png') },
-      { key: 'deportivo-la-coruna', name: 'Deportivo La Coruña', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/56/RC_Deportivo_A_Coru%C3%B1a_logo_2026.svg' },
+      { key: 'deportivo-la-coruna', name: 'Deportivo La Coruña', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/56/RC_Deportivo_A_Coru%C3%B1a_logo_2026.svg', badgeScale: 0.85 },
       { key: 'elche', name: 'Elche', badgeUrl: logo('logos/Spain - LaLiga/Elche CF.png') },
       { key: 'espanyol', name: 'Espanyol', badgeUrl: logo('logos/Spain - LaLiga/RCD Espanyol Barcelona.png') },
       { key: 'getafe', name: 'Getafe', badgeUrl: logo('logos/Spain - LaLiga/Getafe CF.png') },
       { key: 'levante', name: 'Levante', badgeUrl: logo('logos/Spain - LaLiga/Levante UD.png') },
-      { key: 'malaga', name: 'Málaga', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/6/6d/M%C3%A1laga_CF.svg' },
+      { key: 'malaga', name: 'Málaga', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/6/6d/M%C3%A1laga_CF.svg', badgeScale: 0.85 },
       { key: 'osasuna', name: 'Osasuna', badgeUrl: logo('logos/Spain - LaLiga/CA Osasuna.png') },
-      { key: 'racing-santander', name: 'Racing Santander', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/f/f5/Racing_de_Santander_logo.svg' },
+      { key: 'racing-santander', name: 'Racing Santander', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/f/f5/Racing_de_Santander_logo.svg', badgeScale: 0.85 },
       { key: 'rayo-vallecano', name: 'Rayo Vallecano', badgeUrl: logo('logos/Spain - LaLiga/Rayo Vallecano.png') },
       { key: 'real-betis', name: 'Real Betis', badgeUrl: logo('logos/Spain - LaLiga/Real Betis Balompié.png') },
       { key: 'real-madrid', name: 'Real Madrid', badgeUrl: logo('logos/Spain - LaLiga/Real Madrid.png') },
@@ -123,7 +123,7 @@ export const LEAGUES = [
     colors: { from: '#008C45', to: '#008FD7', accent: '#008C45' },
     zones: [zone('ucl', 1, 4), zone('uel', 5, 5), zone('uecl', 6, 6), zone('relegation', 18, 20)],
     clubs: [
-      { key: 'atalanta', name: 'Atalanta', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/f/f2/Atalanta_BC_new_logo.svg' },
+      { key: 'atalanta', name: 'Atalanta', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/f/f2/Atalanta_BC_new_logo.svg', badgeScale: 0.85 },
       { key: 'bologna', name: 'Bologna', badgeUrl: logo('logos/Italy - Serie A/Bologna FC 1909.png') },
       { key: 'cagliari', name: 'Cagliari', badgeUrl: logo('logos/Italy - Serie A/Cagliari Calcio.png') },
       { key: 'como', name: 'Como', badgeUrl: logo('logos/Italy - Serie A/Como 1907.png') },
@@ -149,7 +149,7 @@ export const LEAGUES = [
     key: 'ligue-1',
     name: 'Ligue 1',
     country: 'France',
-    colors: { from: '#0055A4', to: '#EF4135', accent: '#0055A4' },
+    colors: { from: '#0055A4', to: '#001B4C', accent: '#0055A4' },
     // 18 clubs: top 3 go straight to the UCL group stage, 4th enters UCL
     // qualifying, 5th/6th get UEL/UECL. 16th plays a relegation playoff
     // against a second-division side, bottom 2 go straight down.
@@ -163,7 +163,7 @@ export const LEAGUES = [
     ],
     clubs: [
       { key: 'psg', name: 'Paris Saint-Germain', badgeUrl: logo('logos/France - Ligue 1/Paris Saint-Germain.png') },
-      { key: 'marseille', name: 'Olympique Marseille', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Olympique_de_Marseille_2026_logo.svg' },
+      { key: 'marseille', name: 'Olympique Marseille', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Olympique_de_Marseille_2026_logo.svg', badgeScale: 0.85 },
       { key: 'monaco', name: 'AS Monaco', badgeUrl: logo('logos/France - Ligue 1/AS Monaco.png') },
       { key: 'lille', name: 'LOSC Lille', badgeUrl: logo('logos/France - Ligue 1/LOSC Lille.png') },
       { key: 'lyon', name: 'Olympique Lyon', badgeUrl: logo('logos/France - Ligue 1/Olympique Lyon.png') },
@@ -181,8 +181,8 @@ export const LEAGUES = [
       // Promoted for 2026-27 (replacing relegated Metz & Nantes); not yet in
       // the football-logos repo's current-season snapshot, so these two
       // hotlink Wikipedia crests instead, same fallback pattern as above.
-      { key: 'troyes', name: 'ES Troyes AC', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/ESTAC_Troyes_Logo.svg' },
-      { key: 'le-mans', name: 'Le Mans FC', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/57/Le_Mans_FC_logo.svg' },
+      { key: 'troyes', name: 'ES Troyes AC', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/ESTAC_Troyes_Logo.svg', badgeScale: 0.85 },
+      { key: 'le-mans', name: 'Le Mans FC', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/57/Le_Mans_FC_logo.svg', badgeScale: 0.85 },
     ],
   },
   {
@@ -220,9 +220,9 @@ export const LEAGUES = [
       // Promoted for 2026-27 (replacing relegated Wolfsburg, Heidenheim &
       // St. Pauli); not yet in the football-logos repo's current-season
       // snapshot, so these hotlink Wikipedia crests instead.
-      { key: 'schalke-04', name: 'Schalke 04', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/FC_Schalke_04_Logo.svg' },
-      { key: 'sv-elversberg', name: 'SV Elversberg', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d4/SV_Elversberg_Logo_2021.svg' },
-      { key: 'sc-paderborn', name: 'SC Paderborn 07', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/67/SC_Paderborn_07_Logo_new.svg' },
+      { key: 'schalke-04', name: 'Schalke 04', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/FC_Schalke_04_Logo.svg', badgeScale: 0.85 },
+      { key: 'sv-elversberg', name: 'SV Elversberg', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d4/SV_Elversberg_Logo_2021.svg', badgeScale: 0.85 },
+      { key: 'sc-paderborn', name: 'SC Paderborn 07', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/67/SC_Paderborn_07_Logo_new.svg', badgeScale: 0.85 },
     ],
   },
   {

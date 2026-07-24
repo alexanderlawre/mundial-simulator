@@ -10,7 +10,23 @@
 // ratings: per-tournament overrides for the era's strongest sides (1-99).
 // baseRating: default strength for every other team in that tournament.
 
+import { WC2026_GROUPS, WC2026_HOST } from './wc2026'
+
 export const HISTORIC_WORLD_CUPS = [
+  {
+    year: 2026, host: WC2026_HOST,
+    teamCount: 48,
+    groups: WC2026_GROUPS,
+    format: { groupCount: 12, advancePerGroup: 2, bestThirds: 8, has3rdPlace: true },
+    baseRating: 60,
+    ratings: {
+      Spain: 90, France: 89, Argentina: 89, England: 88, Brazil: 87, Portugal: 86,
+      Netherlands: 85, Germany: 84, Belgium: 82, Croatia: 81, Colombia: 81, Morocco: 81,
+      Uruguay: 80, 'United States': 78, Mexico: 78, Japan: 78, Switzerland: 77, Senegal: 77,
+      'Côte d\'Ivoire': 76, Ecuador: 76, Canada: 75, Austria: 76, Australia: 73,
+    },
+    winner: null, runnerUp: null,
+  },
   {
     year: 1930, host: 'Uruguay', teamCount: 13,
     groups: null,

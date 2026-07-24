@@ -7,6 +7,13 @@ import { useTranslation } from '../../lib/i18n'
 
 const MODES = [
   {
+    key: 'compete',
+    titleKey: 'dashboard.competeTitle',
+    descKey: 'dashboard.competeDesc',
+    path: '/compete',
+    accent: 'bg-gradient-to-r from-gold to-gold-light',
+  },
+  {
     key: 'leagues',
     titleKey: 'leagues.modeTitle',
     descKey: 'leagues.modeDesc',
@@ -19,13 +26,6 @@ const MODES = [
     descKey: 'dashboard.simulatorDesc',
     path: '/simulator/setup',
     accent: 'bg-emerald',
-  },
-  {
-    key: 'wc2026',
-    titleKey: 'dashboard.wc2026Title',
-    descKey: 'dashboard.wc2026Desc',
-    path: '/wc2026',
-    accent: 'bg-forest',
   },
   {
     key: 'historic',
