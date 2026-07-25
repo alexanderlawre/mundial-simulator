@@ -232,3 +232,272 @@ export async function fetchCloudSimulationHistory(userId) {
     return []
   }
 }
+
+// ---------- Groups ("Predict the League" competitions) ----------
+// Unlike the fire-and-forget analytics/sync helpers above, these return
+// { ok, data } / { ok, error } -- group actions (create/join/admin) are
+// the primary action a user is taking, not a best-effort mirror, so the
+// UI needs to know if something actually failed (e.g. "group is full",
+// enforced server-side by the trigger in supabase/schema.sql).
+
+const JOIN_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no 0/O/1/I ambiguity
+
+function generateJoinCode() {
+  let code = ''
+  for (let i = 0; i < 6; i++) {
+    code += JOIN_CODE_CHARS[Math.floor(Math.random() * JOIN_CODE_CHARS.length)]
+  }
+  return code
+}
+
+function friendlyGroupError(error) {
+  if (!error) return 'Something went wrong. Please try again.'
+  if (/full \(25 member max\)/i.test(error.message || '')) return 'This group is full (25/25 members).'
+  if (error.code === '23505') return 'That join code was not found.'
+  return error.message || 'Something went wrong. Please try again.'
+}
+
+// name/bio/leaguesEnabled/avatarUrl -> creates the group row and adds the
+// creator as its first member with role 'admin'. Retries once on a join
+// code collision (extremely unlikely at 6 chars from a 33-char alphabet,
+// but the column has a uniqueness constraint so we handle it cleanly).
+export async function createGroup(userId, { name, bio, leaguesEnabled, avatarUrl }) {
+  if (!userId) return { ok: false, error: 'You must be signed in to create a group.' }
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const joinCode = generateJoinCode()
+    const { data, error } = await supabase
+      .from('groups')
+      .insert({
+        name,
+        bio: bio || null,
+        avatar_url: avatarUrl || null,
+        leagues_enabled: leaguesEnabled || [],
+        admin_user_id: userId,
+        join_code: joinCode,
+      })
+      .select()
+      .single()
+    if (!error && data) {
+      const { error: memberError } = await supabase
+        .from('group_members')
+        .insert({ group_id: data.id, user_id: userId, role: 'admin' })
+      if (memberError) return { ok: false, error: friendlyGroupError(memberError) }
+      return { ok: true, data }
+    }
+    if (error?.code !== '23505') return { ok: false, error: friendlyGroupError(error) }
+    // 23505 = unique_violation on join_code -- loop and try a new code.
+  }
+  return { ok: false, error: 'Could not generate a unique join code. Please try again.' }
+}
+
+export async function joinGroupByCode(userId, code) {
+  if (!userId) return { ok: false, error: 'You must be signed in to join a group.' }
+  const normalized = (code || '').trim().toUpperCase()
+  if (!normalized) return { ok: false, error: 'Enter a join code.' }
+  const { data: group, error: lookupError } = await supabase
+    .from('groups')
+    .select('*')
+    .eq('join_code', normalized)
+    .single()
+  if (lookupError || !group) return { ok: false, error: 'No group found with that code.' }
+  const { error: joinError } = await supabase
+    .from('group_members')
+    .insert({ group_id: group.id, user_id: userId, role: 'member' })
+  if (joinError) {
+    if (joinError.code === '23505') return { ok: false, error: 'You\u2019re already a member of this group.' }
+    return { ok: false, error: friendlyGroupError(joinError) }
+  }
+  return { ok: true, data: group }
+}
+
+export async function fetchUserGroups(userId) {
+  if (!userId) return []
+  try {
+    const { data, error } = await supabase
+      .from('group_members')
+      .select('role, joined_at, groups(*)')
+      .eq('user_id', userId)
+    if (error || !data) return []
+    return data.map((row) => ({ ...row.groups, myRole: row.role, joinedAt: row.joined_at })).filter((g) => g.id)
+  } catch {
+    return []
+  }
+}
+
+export async function fetchGroup(groupId) {
+  try {
+    const { data, error } = await supabase.from('groups').select('*').eq('id', groupId).single()
+    if (error || !data) return null
+    return data
+  } catch {
+    return null
+  }
+}
+
+// Members joined with their profile name where available -- falls back
+// to null (UI shows a generic "Member" label) rather than failing the
+// whole roster fetch if a profile row is missing.
+export async function fetchGroupMembers(groupId) {
+  try {
+    const { data, error } = await supabase
+      .from('group_members')
+      .select('user_id, role, joined_at, profiles(name)')
+      .eq('group_id', groupId)
+      .order('joined_at', { ascending: true })
+    if (error || !data) return []
+    return data.map((row) => ({ userId: row.user_id, role: row.role, joinedAt: row.joined_at, name: row.profiles?.name || null }))
+  } catch {
+    return []
+  }
+}
+
+export async function updateGroup(groupId, patch) {
+  const payload = {}
+  if (patch.name !== undefined) payload.name = patch.name
+  if (patch.bio !== undefined) payload.bio = patch.bio
+  if (patch.avatarUrl !== undefined) payload.avatar_url = patch.avatarUrl
+  if (patch.leaguesEnabled !== undefined) payload.leagues_enabled = patch.leaguesEnabled
+  const { error } = await supabase.from('groups').update(payload).eq('id', groupId)
+  if (error) return { ok: false, error: friendlyGroupError(error) }
+  return { ok: true }
+}
+
+export async function regenerateJoinCode(groupId) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const joinCode = generateJoinCode()
+    const { data, error } = await supabase.from('groups').update({ join_code: joinCode }).eq('id', groupId).select().single()
+    if (!error) return { ok: true, data }
+    if (error.code !== '23505') return { ok: false, error: friendlyGroupError(error) }
+  }
+  return { ok: false, error: 'Could not generate a unique join code. Please try again.' }
+}
+
+export async function removeGroupMember(groupId, userId) {
+  const { error } = await supabase.from('group_members').delete().eq('group_id', groupId).eq('user_id', userId)
+  if (error) return { ok: false, error: friendlyGroupError(error) }
+  return { ok: true }
+}
+
+export async function leaveGroup(groupId, userId) {
+  return removeGroupMember(groupId, userId)
+}
+
+// Uploads a group avatar to the public `group-avatars` Supabase Storage
+// bucket (created by supabase/schema.sql) and returns its public URL.
+export async function uploadGroupAvatar(groupId, file) {
+  try {
+    const ext = file.name.split('.').pop() || 'jpg'
+    const path = `${groupId}-${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('group-avatars').upload(path, file, { upsert: true })
+    if (error) return { ok: false, error: friendlyGroupError(error) }
+    const { data } = supabase.storage.from('group-avatars').getPublicUrl(path)
+    return { ok: true, url: data.publicUrl }
+  } catch (e) {
+    return { ok: false, error: friendlyGroupError(e) }
+  }
+}
+
+// ---------- Group-scoped table predictions ----------
+// Same shape/convention as the ungrouped league_predictions
+// (getLeaguePrediction/syncLeaguePredictionToCloud above), just scoped
+// to a specific group so the same user can lock in different table
+// calls in different groups.
+
+export async function syncGroupTablePrediction(userId, groupId, leagueKey, state) {
+  if (!userId) return { ok: false, error: 'You must be signed in.' }
+  const { error } = await supabase.from('table_predictions').upsert(
+    {
+      user_id: userId,
+      group_id: groupId,
+      league_key: leagueKey,
+      ordered_club_keys: state.order,
+      locked: !!state.confirmed,
+      locked_at: state.confirmed ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'user_id,group_id,league_key' }
+  )
+  if (error) return { ok: false, error: friendlyGroupError(error) }
+  return { ok: true }
+}
+
+export async function fetchGroupTablePrediction(userId, groupId, leagueKey) {
+  if (!userId) return null
+  try {
+    const { data, error } = await supabase
+      .from('table_predictions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('group_id', groupId)
+      .eq('league_key', leagueKey)
+      .maybeSingle()
+    if (error || !data) return null
+    return { order: data.ordered_club_keys, confirmed: data.locked, updatedAt: data.updated_at }
+  } catch {
+    return null
+  }
+}
+
+// All locked table predictions for a group+league across every member --
+// used to render the Table leaderboard once there's an actual final
+// table to score against (RLS only returns rows where locked = true, so
+// in-progress picks stay private until confirmed).
+export async function fetchGroupTablePredictions(groupId, leagueKey) {
+  try {
+    const { data, error } = await supabase
+      .from('table_predictions')
+      .select('user_id, ordered_club_keys, locked, profiles(name)')
+      .eq('group_id', groupId)
+      .eq('league_key', leagueKey)
+      .eq('locked', true)
+    if (error || !data) return []
+    return data.map((row) => ({ userId: row.user_id, order: row.ordered_club_keys, name: row.profiles?.name || null }))
+  } catch {
+    return []
+  }
+}
+
+// ---------- Matchday predictions ----------
+// Scaffolded alongside src/lib/fixturesSource.js / MatchdayPredict.jsx --
+// functionally correct against the schema in supabase/schema.sql, but
+// unexercised until a real fixture source provides actual fixture rows
+// to predict against (the stub source always returns []).
+
+export async function syncMatchdayPrediction(userId, groupId, fixtureId, { outcome, homeScore, awayScore, isJoker }) {
+  if (!userId) return { ok: false, error: 'You must be signed in.' }
+  const { error } = await supabase.from('matchday_predictions').upsert(
+    {
+      user_id: userId,
+      group_id: groupId,
+      fixture_id: fixtureId,
+      outcome,
+      home_score: homeScore ?? null,
+      away_score: awayScore ?? null,
+      is_joker: !!isJoker,
+    },
+    { onConflict: 'user_id,group_id,fixture_id' }
+  )
+  if (error) return { ok: false, error: friendlyGroupError(error) }
+  return { ok: true }
+}
+
+export async function fetchMatchdayPredictions(userId, groupId, fixtureIds) {
+  if (!userId || !fixtureIds?.length) return {}
+  try {
+    const { data, error } = await supabase
+      .from('matchday_predictions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('group_id', groupId)
+      .in('fixture_id', fixtureIds)
+    if (error || !data) return {}
+    return Object.fromEntries(
+      data.map((row) => [
+        row.fixture_id,
+        { outcome: row.outcome, homeScore: row.home_score, awayScore: row.away_score, isJoker: row.is_joker },
+      ])
+    )
+  } catch {
+    return {}
+  }
+}
