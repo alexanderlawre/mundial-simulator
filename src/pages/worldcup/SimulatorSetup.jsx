@@ -121,7 +121,7 @@ export default function SimulatorSetup() {
           <div className="text-left mb-8">
             <NavBar />
           </div>
-          <h1 className="font-display text-3xl font-extrabold text-forest dark:text-mint mb-2">Custom World Cup</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-forest dark:text-mint mb-2">Custom World Cup</h1>
           <p className="text-charcoal-600 dark:text-charcoal-300 mb-8">How many teams should compete?</p>
           <div className="grid sm:grid-cols-3 gap-5">
             {[32, 48, 64].map((n) => (

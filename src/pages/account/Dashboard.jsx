@@ -46,13 +46,13 @@ export default function Dashboard() {
     <AppBackground>
       <div className="max-w-4xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-8">
-          {supported && <CountryFlag nation={supported} size="lg" />}
-          <div>
-            <h1 className="font-display font-bold text-3xl tracking-wide text-forest dark:text-mint">MUNDIAL</h1>
-            <p className="text-charcoal-600 dark:text-charcoal-300 text-sm font-medium">
+          {supported && <CountryFlag nation={supported} size="lg" className="shrink-0" />}
+          <div className="min-w-0">
+            <h1 className="font-display font-bold text-2xl sm:text-3xl tracking-wide text-forest dark:text-mint truncate">MUNDIAL</h1>
+            <p className="text-charcoal-600 dark:text-charcoal-300 text-xs sm:text-sm font-medium truncate">
               {profile ? t('dashboard.welcomeName', { name: profile.name }) : t('dashboard.welcomeGeneric')}
             </p>
-            {supported && <p className="text-charcoal-600 dark:text-charcoal-300 text-sm">{t('dashboard.supporting', { name: tn(supported.name) })}</p>}
+            {supported && <p className="text-charcoal-600 dark:text-charcoal-300 text-xs sm:text-sm truncate">{t('dashboard.supporting', { name: tn(supported.name) })}</p>}
           </div>
         </div>
 

@@ -658,7 +658,7 @@ export default function TournamentPlay({
         <p className="uppercase tracking-widest text-gold font-semibold mb-3">{t('play.champions')}</p>
         <div className="flex flex-col items-center gap-4 mb-6">
           <CountryFlag nation={championTeam} size="xl" />
-          <h1 className="font-display text-4xl font-extrabold text-forest dark:text-mint">{tn(champion)}</h1>
+          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-forest dark:text-mint px-2">{tn(champion)}</h1>
           <p className="text-charcoal-600 dark:text-charcoal-300">{title}{hostLabel ? ` · ${hostLabel}` : ''}</p>
         </div>
         <div className="mb-6">

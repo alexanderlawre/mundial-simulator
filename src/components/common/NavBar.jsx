@@ -25,8 +25,8 @@ export default function NavBar({ title, subtitle, onBack }) {
       </button>
       {(title || subtitle) && (
         <div className="flex-1 min-w-0">
-          {title && <h1 className="font-display font-bold text-3xl tracking-wide text-forest dark:text-mint truncate">{title}</h1>}
-          {subtitle && <p className="text-charcoal-600 dark:text-charcoal-300 text-sm truncate">{subtitle}</p>}
+          {title && <h1 className="font-display font-bold text-xl sm:text-2xl md:text-3xl tracking-wide text-forest dark:text-mint truncate">{title}</h1>}
+          {subtitle && <p className="text-charcoal-600 dark:text-charcoal-300 text-xs sm:text-sm truncate">{subtitle}</p>}
         </div>
       )}
     </div>

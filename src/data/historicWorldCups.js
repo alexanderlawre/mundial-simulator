@@ -25,7 +25,7 @@ export const HISTORIC_WORLD_CUPS = [
       Uruguay: 80, 'United States': 78, Mexico: 78, Japan: 78, Switzerland: 77, Senegal: 77,
       'Côte d\'Ivoire': 76, Ecuador: 76, Canada: 75, Austria: 76, Australia: 73,
     },
-    winner: null, runnerUp: null,
+    winner: 'Spain', runnerUp: 'France',
   },
   {
     year: 1930, host: 'Uruguay', teamCount: 13,

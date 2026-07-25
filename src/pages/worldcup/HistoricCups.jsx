@@ -12,7 +12,7 @@ export default function HistoricCups() {
           <NavBar title="Historic World Cups" subtitle="Replay any tournament from 1930 to 2022 with its real host and qualified teams." />
         </div>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {[...HISTORIC_WORLD_CUPS].reverse().map((cup) => (
+          {[...HISTORIC_WORLD_CUPS].sort((a, b) => b.year - a.year).map((cup) => (
             <button
               key={cup.year}
               onClick={() => navigate(`/historic/${cup.year}`)}

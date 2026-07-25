@@ -30,7 +30,7 @@ export default function ProfileButton() {
         </button>
         {showPrompt && (
           <GuestPrompt
-            className="absolute top-11 right-0 w-72 z-40"
+            className="absolute top-11 right-0 w-[calc(100vw-2rem)] max-w-72 z-40"
             onDismiss={() => setShowPrompt(false)}
           />
         )}
