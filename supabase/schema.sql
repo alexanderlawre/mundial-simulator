@@ -11,10 +11,17 @@
 --   league_predictions (user_id, league_key, club_order, confirmed, updated_at)
 --   simulation_history (user_id, mode, descriptor, winner, runner_up, third, fourth, created_at)
 -- Those are NOT redefined here. Everything below is additive.
+--
+-- Structured in two passes: all `create table` statements first, then all
+-- RLS/policy/trigger statements after -- several policies below reference
+-- other tables in this file (e.g. the `groups` policies check
+-- `group_members`), so every table must exist before any policy is
+-- created, regardless of which table "owns" that policy.
 
 -- ============================================================
--- groups
+-- PASS 1: tables
 -- ============================================================
+
 create table if not exists public.groups (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(name) between 1 and 60),
@@ -27,6 +34,74 @@ create table if not exists public.groups (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.group_members (
+  group_id uuid not null references public.groups(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role text not null default 'member' check (role in ('admin', 'member')),
+  joined_at timestamptz not null default now(),
+  primary key (group_id, user_id)
+);
+
+create table if not exists public.table_predictions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  group_id uuid not null references public.groups(id) on delete cascade,
+  league_key text not null,
+  ordered_club_keys text[] not null,
+  locked boolean not null default false,
+  locked_at timestamptz,
+  updated_at timestamptz not null default now(),
+  unique (user_id, group_id, league_key)
+);
+
+-- Public read; populated once a live data source is wired up -- see
+-- src/lib/fixturesSource.js. Empty for now.
+create table if not exists public.fixtures (
+  id uuid primary key default gen_random_uuid(),
+  league_key text not null,
+  matchday int not null,
+  home_club_key text not null,
+  away_club_key text not null,
+  kickoff_ts timestamptz not null,
+  home_score int,
+  away_score int,
+  status text not null default 'scheduled' check (status in ('scheduled', 'live', 'finished', 'postponed')),
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.matchday_predictions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  group_id uuid not null references public.groups(id) on delete cascade,
+  fixture_id uuid not null references public.fixtures(id) on delete cascade,
+  outcome text check (outcome in ('H', 'D', 'A')),
+  home_score int,
+  away_score int,
+  is_joker boolean not null default false,
+  created_at timestamptz not null default now(),
+  unique (user_id, group_id, fixture_id)
+);
+
+-- Cached/derived leaderboard rows -- recomputed client-side by
+-- src/lib/leagueScoring.js for now; a trusted server recompute is a
+-- Phase 2 concern once real results exist.
+create table if not exists public.scores (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  group_id uuid not null references public.groups(id) on delete cascade,
+  league_key text not null,
+  table_pts int not null default 0,
+  bonus_pts int not null default 0,
+  matchday_pts int not null default 0,
+  overall_pts int not null default 0,
+  updated_at timestamptz not null default now(),
+  primary key (user_id, group_id, league_key)
+);
+
+-- ============================================================
+-- PASS 2: row level security + policies
+-- ============================================================
+
+-- ---- groups ----
 alter table public.groups enable row level security;
 
 -- Anyone authenticated can look up a group by join code (needed to join);
@@ -60,17 +135,7 @@ create policy "groups: admin can delete"
   on public.groups for delete
   using (auth.uid() = admin_user_id);
 
--- ============================================================
--- group_members
--- ============================================================
-create table if not exists public.group_members (
-  group_id uuid not null references public.groups(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  role text not null default 'member' check (role in ('admin', 'member')),
-  joined_at timestamptz not null default now(),
-  primary key (group_id, user_id)
-);
-
+-- ---- group_members ----
 alter table public.group_members enable row level security;
 
 drop policy if exists "group_members: members can read roster" on public.group_members;
@@ -136,21 +201,7 @@ create trigger trg_group_member_count
   after insert or delete on public.group_members
   for each row execute function public.sync_group_member_count();
 
--- ============================================================
--- table_predictions (per-group preseason table calls)
--- ============================================================
-create table if not exists public.table_predictions (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  group_id uuid not null references public.groups(id) on delete cascade,
-  league_key text not null,
-  ordered_club_keys text[] not null,
-  locked boolean not null default false,
-  locked_at timestamptz,
-  updated_at timestamptz not null default now(),
-  unique (user_id, group_id, league_key)
-);
-
+-- ---- table_predictions ----
 alter table public.table_predictions enable row level security;
 
 drop policy if exists "table_predictions: own row full access" on public.table_predictions;
@@ -170,23 +221,7 @@ create policy "table_predictions: group members can read locked predictions"
     )
   );
 
--- ============================================================
--- fixtures (public read; populated once a live data source is wired up
--- -- see src/lib/fixturesSource.js. Empty for now.)
--- ============================================================
-create table if not exists public.fixtures (
-  id uuid primary key default gen_random_uuid(),
-  league_key text not null,
-  matchday int not null,
-  home_club_key text not null,
-  away_club_key text not null,
-  kickoff_ts timestamptz not null,
-  home_score int,
-  away_score int,
-  status text not null default 'scheduled' check (status in ('scheduled', 'live', 'finished', 'postponed')),
-  created_at timestamptz not null default now()
-);
-
+-- ---- fixtures ----
 alter table public.fixtures enable row level security;
 
 drop policy if exists "fixtures: public read" on public.fixtures;
@@ -197,22 +232,7 @@ create policy "fixtures: public read"
 -- a trusted server process (service-role key), once a live data source
 -- (e.g. football-data.org) is wired up in Phase 2.
 
--- ============================================================
--- matchday_predictions
--- ============================================================
-create table if not exists public.matchday_predictions (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  group_id uuid not null references public.groups(id) on delete cascade,
-  fixture_id uuid not null references public.fixtures(id) on delete cascade,
-  outcome text check (outcome in ('H', 'D', 'A')),
-  home_score int,
-  away_score int,
-  is_joker boolean not null default false,
-  created_at timestamptz not null default now(),
-  unique (user_id, group_id, fixture_id)
-);
-
+-- ---- matchday_predictions ----
 alter table public.matchday_predictions enable row level security;
 
 drop policy if exists "matchday_predictions: own row full access" on public.matchday_predictions;
@@ -235,23 +255,7 @@ create policy "matchday_predictions: group members can read after kickoff"
     )
   );
 
--- ============================================================
--- scores (cached/derived leaderboard rows -- recomputed client-side by
--- src/lib/leagueScoring.js for now; a trusted server recompute is a
--- Phase 2 concern once real results exist)
--- ============================================================
-create table if not exists public.scores (
-  user_id uuid not null references auth.users(id) on delete cascade,
-  group_id uuid not null references public.groups(id) on delete cascade,
-  league_key text not null,
-  table_pts int not null default 0,
-  bonus_pts int not null default 0,
-  matchday_pts int not null default 0,
-  overall_pts int not null default 0,
-  updated_at timestamptz not null default now(),
-  primary key (user_id, group_id, league_key)
-);
-
+-- ---- scores ----
 alter table public.scores enable row level security;
 
 drop policy if exists "scores: own row full access" on public.scores;
