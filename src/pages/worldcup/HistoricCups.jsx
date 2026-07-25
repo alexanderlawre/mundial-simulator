@@ -9,7 +9,7 @@ export default function HistoricCups() {
     <AppBackground>
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <NavBar title="Historic World Cups" subtitle="Replay any tournament from 1930 to 2022 with its real host and qualified teams." />
+          <NavBar title="Historic World Cups" subtitle="Replay any tournament from 1930 to 2026 with its real host and qualified teams." />
         </div>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           {[...HISTORIC_WORLD_CUPS].sort((a, b) => b.year - a.year).map((cup) => (
