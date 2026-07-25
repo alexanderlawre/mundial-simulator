@@ -1,21 +1,55 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppBackground from '../../components/common/AppBackground'
 import NavBar from '../../components/common/NavBar'
 import SambaButton from '../../components/common/SambaButton'
 import { useAuth } from '../../lib/AuthContext'
 import { useTranslation } from '../../lib/i18n'
+import { fetchUserGroups } from '../../lib/storage'
+import CreateGroupModal from './CreateGroupModal'
+import JoinGroupModal from './JoinGroupModal'
 
-// "Coming soon" mode-select cards, matching the disabled-card visual
-// language already used for UPCOMING_COMPETITIONS on the Leagues Hub.
-const COMING_SOON_CARDS = [
-  { key: 'create', titleKey: 'compete.createTitle', descKey: 'compete.createDesc', colors: { from: '#0A1428', to: '#1E3A8A' } },
-  { key: 'join', titleKey: 'compete.joinTitle', descKey: 'compete.joinDesc', colors: { from: '#00A651', to: '#0A3D24' } },
-]
-
+// Groups landing page (formerly a "coming soon" placeholder). Logged-out
+// users get the existing sign-up prompt. Logged-in users see their group
+// list (if any) plus dashed-border Create/Join cards -- per the spec,
+// those two entry points always stay visible even once a user already has
+// groups, not just on a first-run empty state.
 export default function Compete() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { t } = useTranslation()
+  const [groups, setGroups] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showCreate, setShowCreate] = useState(false)
+  const [showJoin, setShowJoin] = useState(false)
+
+  useEffect(() => {
+    if (!user) {
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    fetchUserGroups(user.id).then((data) => {
+      if (!cancelled) {
+        setGroups(data)
+        setLoading(false)
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [user])
+
+  function handleCreated(group) {
+    setShowCreate(false)
+    navigate(`/compete/group/${group.id}`)
+  }
+
+  function handleJoined(group) {
+    setShowJoin(false)
+    navigate(`/compete/group/${group.id}`)
+  }
 
   return (
     <AppBackground>
@@ -36,30 +70,60 @@ export default function Compete() {
               {t('compete.createAccount')}
             </SambaButton>
           </div>
+        ) : loading ? (
+          <p className="text-center text-charcoal-600 dark:text-charcoal-300 text-sm py-12">{t('account.loading')}</p>
         ) : (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {COMING_SOON_CARDS.map((card) => (
-              <div
-                key={card.key}
-                className="text-left rounded-2xl shadow-depth-lg overflow-hidden opacity-60 cursor-not-allowed"
-              >
-                <div
-                  className="p-5 text-white"
-                  style={{ background: `linear-gradient(135deg, ${card.colors.from}, ${card.colors.to})` }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[10px] uppercase tracking-wide font-semibold bg-white/25 rounded-full px-2 py-0.5">
-                      {t('leagues.comingSoon')}
-                    </span>
-                  </div>
-                  <p className="font-display text-2xl font-extrabold">{t(card.titleKey)}</p>
-                  <p className="text-white/80 text-xs mt-1">{t(card.descKey)}</p>
-                </div>
+          <div className="space-y-6">
+            {groups.length > 0 && (
+              <div className="grid sm:grid-cols-2 gap-4">
+                {groups.map((g) => (
+                  <button
+                    key={g.id}
+                    onClick={() => navigate(`/compete/group/${g.id}`)}
+                    className="text-left rounded-2xl bg-white dark:bg-night-card border border-charcoal-900/10 dark:border-white/10 shadow-depth-lg p-5 hover:shadow-depth-gold transition-shadow"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {g.avatar_url ? (
+                        <img src={g.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <span className="w-12 h-12 rounded-full bg-emerald text-white flex items-center justify-center font-display font-bold text-lg shrink-0">
+                          {g.name?.[0]?.toUpperCase() || '?'}
+                        </span>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-display font-bold text-charcoal-900 dark:text-sand truncate">{g.name}</p>
+                        <p className="text-xs text-charcoal-600 dark:text-charcoal-300">
+                          {t('compete.memberCount', { count: g.member_count || 1 })}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
-            ))}
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <button
+                onClick={() => setShowCreate(true)}
+                className="rounded-2xl border-2 border-dashed border-charcoal-900/20 dark:border-white/20 p-6 text-center hover:border-emerald dark:hover:border-mint transition-colors"
+              >
+                <p className="font-display font-bold text-charcoal-900 dark:text-sand">{t('compete.createTitle')}</p>
+                <p className="text-charcoal-600 dark:text-charcoal-300 text-xs mt-1">{t('compete.createDescActive')}</p>
+              </button>
+              <button
+                onClick={() => setShowJoin(true)}
+                className="rounded-2xl border-2 border-dashed border-charcoal-900/20 dark:border-white/20 p-6 text-center hover:border-emerald dark:hover:border-mint transition-colors"
+              >
+                <p className="font-display font-bold text-charcoal-900 dark:text-sand">{t('compete.joinTitle')}</p>
+                <p className="text-charcoal-600 dark:text-charcoal-300 text-xs mt-1">{t('compete.joinDescActive')}</p>
+              </button>
+            </div>
           </div>
         )}
       </div>
+
+      {showCreate && <CreateGroupModal onClose={() => setShowCreate(false)} onCreated={handleCreated} />}
+      {showJoin && <JoinGroupModal onClose={() => setShowJoin(false)} onJoined={handleJoined} />}
     </AppBackground>
   )
 }
