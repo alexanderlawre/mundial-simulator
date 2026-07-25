@@ -12,6 +12,9 @@ import HistoricPlay from './pages/worldcup/HistoricPlay'
 import LeaguesHub from './pages/leagues/LeaguesHub'
 import LeaguePredict from './pages/leagues/LeaguePredict'
 import Compete from './pages/compete/Compete'
+import GroupDashboard from './pages/compete/GroupDashboard'
+import GroupLeaguePredict from './pages/compete/GroupLeaguePredict'
+import MatchdayPredict from './pages/compete/MatchdayPredict'
 import Admin from './pages/admin/Admin'
 import AdminDetail from './pages/admin/AdminDetail'
 import PrivacyPolicy from './pages/legal/PrivacyPolicy'
@@ -68,6 +71,9 @@ export default function App() {
         <Route path="/leagues" element={<LeaguesHub />} />
         <Route path="/leagues/:leagueKey" element={<LeaguePredict />} />
         <Route path="/compete" element={<Compete />} />
+        <Route path="/compete/group/:groupId" element={<GroupDashboard />} />
+        <Route path="/compete/group/:groupId/predict/:leagueKey" element={<GroupLeaguePredict />} />
+        <Route path="/compete/group/:groupId/matchday/:leagueKey" element={<MatchdayPredict />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/detail" element={<AdminDetail />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
