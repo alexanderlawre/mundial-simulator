@@ -23,7 +23,7 @@ export default function HistoricCups() {
               <p className="text-charcoal-600/70 text-xs mt-1">{cup.teamCount || Object.values(cup.groups || {}).flat().length} teams</p>
               {cup.winner && (
                 <p className="text-charcoal-600/70 text-xs mt-2">
-                  <span className="font-semibold text-gold">{cup.winner}</span> d. {cup.runnerUp}
+                  Winner: <span className="font-semibold text-gold">{cup.winner}</span>
                 </p>
               )}
             </button>
