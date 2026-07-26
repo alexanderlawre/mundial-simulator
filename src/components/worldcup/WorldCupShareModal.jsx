@@ -38,7 +38,7 @@ export default function WorldCupShareModal({ title, hostLabel, champion, runnerU
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-full flex items-center justify-center text-charcoal-600 dark:text-charcoal-300 hover:bg-charcoal-900/5 dark:hover:bg-white/10"
-              aria-label="Close"
+              aria-label={t('leagues.close', null, 'Close')}
             >
               ✕
             </button>

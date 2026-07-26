@@ -5,10 +5,12 @@ import TeamBadge from '../../components/worldcup/TeamBadge'
 import SambaButton from '../../components/common/SambaButton'
 import AppBackground from '../../components/common/AppBackground'
 import NavBar from '../../components/common/NavBar'
+import { useTranslation } from '../../lib/i18n'
 
 export default function GroupDraw() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { teamCount, teamNames } = location.state || {}
   const teams = useMemo(() => (teamNames ? teamNames.map((n) => buildTeam(n)) : null), [teamNames])
 
@@ -27,8 +29,8 @@ export default function GroupDraw() {
     return (
       <AppBackground>
         <div className="max-w-xl mx-auto px-4 py-16 text-center">
-          <p className="text-charcoal-600 dark:text-charcoal-300 mb-4">No team selection found. Please start from setup.</p>
-          <SambaButton onClick={() => navigate('/simulator/setup')}>Back to Setup</SambaButton>
+          <p className="text-charcoal-600 dark:text-charcoal-300 mb-4">{t('play.noTeamSelection')}</p>
+          <SambaButton onClick={() => navigate('/simulator/setup')}>{t('play.backToSetup')}</SambaButton>
         </div>
       </AppBackground>
     )
@@ -72,18 +74,18 @@ export default function GroupDraw() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div className="flex-1 min-w-0">
-            <NavBar title="The Draw" subtitle="Click a team, then click another to swap them between groups." />
+            <NavBar title={t('play.drawTitle')} subtitle={t('play.drawSubtitle')} />
           </div>
           <div className="flex gap-2">
-            <SambaButton variant="outline" size="sm" onClick={reshuffle}>Re-draw</SambaButton>
-            <SambaButton variant="primary" size="sm" onClick={lockInAndSimulate}>Lock In &amp; Simulate</SambaButton>
+            <SambaButton variant="outline" size="sm" onClick={reshuffle}>{t('play.redraw')}</SambaButton>
+            <SambaButton variant="primary" size="sm" onClick={lockInAndSimulate}>{t('play.lockInSimulate')}</SambaButton>
           </div>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(groups).map(([letter, groupTeams]) => (
             <div key={letter} className="rounded-2xl bg-white/80 dark:bg-night-card/80 shadow-depth p-3">
-              <p className="font-display font-semibold text-charcoal-900 dark:text-sand mb-2">Group {letter}</p>
+              <p className="font-display font-semibold text-charcoal-900 dark:text-sand mb-2">{t('play.group', { letter })}</p>
               <div className="space-y-2">
                 {groupTeams.map((team, i) => (
                   <TeamBadge

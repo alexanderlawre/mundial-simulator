@@ -138,15 +138,35 @@ create policy "groups: admin can delete"
 -- ---- group_members ----
 alter table public.group_members enable row level security;
 
+-- A SELECT policy on group_members that checks membership by querying
+-- group_members itself (a correlated subquery on the *same* table) causes
+-- Postgres to re-apply this very policy to evaluate that subquery, which
+-- re-triggers the policy again, infinitely -- error 42P17 "infinite
+-- recursion detected in policy for relation group_members". This breaks
+-- not just reads of group_members but every other table whose policies
+-- reference group_members (groups, table_predictions,
+-- matchday_predictions, scores), since evaluating their exists(...)
+-- checks requires reading group_members through its own broken policy.
+-- Fix: do the membership check inside a SECURITY DEFINER function, which
+-- runs with the function owner's privileges and so bypasses RLS for its
+-- internal query, breaking the recursive cycle.
+create or replace function public.is_group_member(p_group_id uuid, p_user_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.group_members
+    where group_id = p_group_id and user_id = p_user_id
+  );
+$$;
+
 drop policy if exists "group_members: members can read roster" on public.group_members;
 create policy "group_members: members can read roster"
   on public.group_members for select
-  using (
-    exists (
-      select 1 from public.group_members me
-      where me.group_id = group_members.group_id and me.user_id = auth.uid()
-    )
-  );
+  using (public.is_group_member(group_members.group_id, auth.uid()));
 
 drop policy if exists "group_members: user can join self" on public.group_members;
 create policy "group_members: user can join self"

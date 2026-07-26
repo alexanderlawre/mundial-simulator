@@ -535,7 +535,7 @@ export default function TournamentPlay({
                     {nextIdx !== -1 && (
                       <MatchCard
                         variant="hero"
-                        label={`Matchday ${fixtures[letter].matchday[nextIdx] + 1}`}
+                        label={t('play.matchdayLabel', { number: fixtures[letter].matchday[nextIdx] + 1 })}
                         teamA={teamsByName[fixtures[letter].pairs[nextIdx][0]]}
                         teamB={teamsByName[fixtures[letter].pairs[nextIdx][1]]}
                       />
@@ -547,7 +547,7 @@ export default function TournamentPlay({
                           <MatchCard
                             key={idx}
                             variant="compact"
-                            label={`Matchday ${fixtures[letter].matchday[idx] + 1}`}
+                            label={t('play.matchdayLabel', { number: fixtures[letter].matchday[idx] + 1 })}
                             match={matches[idx]}
                             teamA={teamsByName[fixtures[letter].pairs[idx][0]]}
                             teamB={teamsByName[fixtures[letter].pairs[idx][1]]}

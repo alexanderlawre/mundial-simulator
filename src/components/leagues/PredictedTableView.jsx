@@ -1,11 +1,13 @@
 import ClubBadge from './ClubBadge'
 import { clubsByKey, getZoneForRank } from '../../data/leagues'
+import { useTranslation } from '../../lib/i18n'
 
 // Read-only numbered table row -- extracted from LeaguePredict.jsx's
 // former inline `LockedRow` so both the solo prediction view and the
 // Groups member-table popover render an identical locked/confirmed
 // table with zero duplicated markup.
 export function PredictedTableRow({ index, club, accent, zone, score }) {
+  const { t } = useTranslation()
   if (!club) return null
   return (
     <div
@@ -18,7 +20,7 @@ export function PredictedTableRow({ index, club, accent, zone, score }) {
       <ClubBadge club={club} size="sm" accent={accent} />
       <span className="flex-1 min-w-0 truncate font-medium text-charcoal-900 dark:text-sand text-sm">{club.name}</span>
       {score != null && (
-        <span className="shrink-0 text-xs font-display font-bold text-emerald dark:text-mint tabular-nums">{score} pts</span>
+        <span className="shrink-0 text-xs font-display font-bold text-emerald dark:text-mint tabular-nums">{t('leagues.scorePts', { score })}</span>
       )}
     </div>
   )

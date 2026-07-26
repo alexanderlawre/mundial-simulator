@@ -61,8 +61,8 @@ export default function LeaguePredict() {
     return (
       <AppBackground>
         <div className="max-w-xl mx-auto px-4 py-16 text-center">
-          <p className="text-charcoal-600 dark:text-charcoal-300 mb-4">League not found.</p>
-          <SambaButton onClick={() => navigate('/leagues')}>Back to Leagues</SambaButton>
+          <p className="text-charcoal-600 dark:text-charcoal-300 mb-4">{t('leagues.notFound')}</p>
+          <SambaButton onClick={() => navigate('/leagues')}>{t('leagues.backToLeagues')}</SambaButton>
         </div>
       </AppBackground>
     )

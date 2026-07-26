@@ -5,10 +5,12 @@ import AppBackground from '../../components/common/AppBackground'
 import SambaButton from '../../components/common/SambaButton'
 import { buildTeam } from '../../lib/tournamentEngine'
 import { getProfile } from '../../lib/storage'
+import { useTranslation } from '../../lib/i18n'
 
 export default function SimulatorPlay() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { teamCount, groupNames } = location.state || {}
   const groups = useMemo(() => {
     if (!groupNames) return null
@@ -24,8 +26,8 @@ export default function SimulatorPlay() {
     return (
       <AppBackground>
         <div className="max-w-xl mx-auto px-4 py-16 text-center">
-          <p className="text-charcoal-600 dark:text-charcoal-300 mb-4">No tournament in progress. Please start from setup.</p>
-          <SambaButton onClick={() => navigate('/simulator/setup')}>Back to Setup</SambaButton>
+          <p className="text-charcoal-600 dark:text-charcoal-300 mb-4">{t('play.noTournamentInProgress')}</p>
+          <SambaButton onClick={() => navigate('/simulator/setup')}>{t('play.backToSetup')}</SambaButton>
         </div>
       </AppBackground>
     )
@@ -45,7 +47,7 @@ export default function SimulatorPlay() {
         key={JSON.stringify(groups) /* fresh engine state per new draw */}
         initialGroups={groups}
         format={format}
-        title={`Custom World Cup · ${teamCount} Teams`}
+        title={t('play.customWorldCupTitle', { count: teamCount })}
         userNation={profile?.supportedCountry}
         onRestart={() => navigate('/simulator/setup')}
         interactivity="full"

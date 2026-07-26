@@ -118,7 +118,7 @@ export default function MatchdayPredict() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-semibold text-charcoal-900 dark:text-sand truncate">
-                      {home?.name} vs {away?.name}
+                      {home?.name} {t('play.vs')} {away?.name}
                     </span>
                     {locked && (
                       <span className="text-[10px] uppercase tracking-wide text-charcoal-600 dark:text-charcoal-300 shrink-0">
@@ -141,7 +141,7 @@ export default function MatchdayPredict() {
                         }`}
                         style={p.outcome === o ? { backgroundColor: league.colors.accent } : undefined}
                       >
-                        {o === 'H' ? home?.name : o === 'A' ? away?.name : t('play.levelScorePickWinner', null, 'Draw')}
+                        {o === 'H' ? home?.name : o === 'A' ? away?.name : t('compete.draw')}
                       </button>
                     ))}
                   </div>

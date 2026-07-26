@@ -6,6 +6,7 @@ import TournamentPlay from '../../components/worldcup/TournamentPlay'
 import AppBackground from '../../components/common/AppBackground'
 import SambaButton from '../../components/common/SambaButton'
 import { getProfile } from '../../lib/storage'
+import { useTranslation } from '../../lib/i18n'
 
 function buildTeamsForCup(cup) {
   const ratingFor = (name) => cup.ratings?.[name] ?? cup.baseRating
@@ -37,6 +38,7 @@ function buildTeamsForCup(cup) {
 export default function HistoricPlay() {
   const { year } = useParams()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const profile = getProfile()
   const cup = getHistoricCup(year)
   const [runKey, setRunKey] = useState(0)
@@ -46,8 +48,8 @@ export default function HistoricPlay() {
     return (
       <AppBackground>
         <div className="max-w-xl mx-auto px-4 py-16 text-center">
-          <p className="text-charcoal-600 dark:text-charcoal-300 mb-4">No World Cup found for {year}.</p>
-          <SambaButton onClick={() => navigate('/historic')}>Back to Historic Cups</SambaButton>
+          <p className="text-charcoal-600 dark:text-charcoal-300 mb-4">{t('play.noHistoricCupFound', { year })}</p>
+          <SambaButton onClick={() => navigate('/historic')}>{t('play.backToHistoricCups')}</SambaButton>
         </div>
       </AppBackground>
     )
@@ -66,8 +68,8 @@ export default function HistoricPlay() {
         initialGroups={built.groups}
         knockoutOnlyTeams={built.knockoutOnlyTeams}
         format={format}
-        title={`${cup.year} World Cup`}
-        hostLabel={`Hosted by ${cup.host}`}
+        title={t('play.historicCupTitle', { year: cup.year })}
+        hostLabel={t('play.hostedBy', { host: cup.host })}
         userNation={profile?.supportedCountry}
         onRestart={() => setRunKey((k) => k + 1)}
         interactivity="simulateOnly"

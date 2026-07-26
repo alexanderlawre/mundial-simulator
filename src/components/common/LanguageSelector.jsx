@@ -6,7 +6,7 @@ import { LANGUAGES, useTranslation } from '../../lib/i18n'
 // then this) so it's available on every page regardless of whether that page
 // uses NavBar.
 export default function LanguageSelector() {
-  const { language, setLanguage } = useTranslation()
+  const { language, setLanguage, t } = useTranslation()
   const [open, setOpen] = useState(false)
   const current = LANGUAGES.find((l) => l.code === language) || LANGUAGES[0]
 
@@ -14,7 +14,7 @@ export default function LanguageSelector() {
     <div className="relative shrink-0">
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label="Change language"
+        aria-label={t('common.changeLanguage')}
         aria-expanded={open}
         className="w-7 h-7 rounded-full bg-white dark:bg-night-card shadow-depth border border-charcoal-900/10 dark:border-white/10 flex items-center justify-center overflow-hidden hover:bg-sand dark:hover:bg-night active:scale-95 transition-all"
       >

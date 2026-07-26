@@ -14,7 +14,7 @@ import { useTranslation } from '../../lib/i18n'
 
 export default function SimulatorSetup() {
   const navigate = useNavigate()
-  const { tn } = useTranslation()
+  const { t, tn } = useTranslation()
   const [teamCount, setTeamCount] = useState(null)
   const [picked, setPicked] = useState({}) // confederation -> [nation names]
 
@@ -121,8 +121,8 @@ export default function SimulatorSetup() {
           <div className="text-left mb-8">
             <NavBar />
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-forest dark:text-mint mb-2">Custom World Cup</h1>
-          <p className="text-charcoal-600 dark:text-charcoal-300 mb-8">How many teams should compete?</p>
+          <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-forest dark:text-mint mb-2">{t('play.customTitle')}</h1>
+          <p className="text-charcoal-600 dark:text-charcoal-300 mb-8">{t('play.customSubtitle')}</p>
           <div className="grid sm:grid-cols-3 gap-5">
             {[32, 48, 64].map((n) => (
               <button
@@ -132,7 +132,7 @@ export default function SimulatorSetup() {
               >
                 <p className="font-display text-4xl font-extrabold text-emerald">{n}</p>
                 <p className="text-charcoal-600 dark:text-charcoal-300 mt-2">
-                  {n === 32 ? 'Classic format (pre-2026)' : n === 48 ? '2026 format · 12 groups of 4' : 'Expanded format · 16 groups of 4'}
+                  {n === 32 ? t('play.formatClassic') : n === 48 ? t('play.format2026') : t('play.formatExpanded')}
                 </p>
               </button>
             ))}
@@ -147,14 +147,14 @@ export default function SimulatorSetup() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div className="flex-1 min-w-0">
-            <NavBar title={`Pick Your ${teamCount} Teams`} subtitle={`${totalPicked} / ${totalNeeded} selected`} />
+            <NavBar title={t('play.pickTeamsTitle', { count: teamCount })} subtitle={t('play.selectedCount', { picked: totalPicked, total: totalNeeded })} />
           </div>
           <div className="flex gap-2">
             <SambaButton variant="outline" size="sm" onClick={() => { setTeamCount(null); setPicked({}) }}>
-              Change Format
+              {t('play.changeFormat')}
             </SambaButton>
             <SambaButton variant="gold" size="sm" onClick={simulateQualifyingAll}>
-              Simulate All Qualifying
+              {t('play.simulateAllQualifying')}
             </SambaButton>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function SimulatorSetup() {
                     {conf} <span className="text-charcoal-600 dark:text-charcoal-300 text-sm tabular-nums">({selected.length}/{quota})</span>
                   </h2>
                   <SambaButton variant="secondary" size="sm" onClick={() => simulateQualifyingForConf(conf)}>
-                    Simulate Qualifying
+                    {t('play.simulateQualifying')}
                   </SambaButton>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-64 overflow-y-auto p-1">
@@ -205,10 +205,10 @@ export default function SimulatorSetup() {
           <div className="rounded-2xl bg-white dark:bg-night-card shadow-depth p-4 mt-6 space-y-5">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
-                <h2 className="font-display font-semibold text-charcoal-900 dark:text-sand">Intercontinental Playoff</h2>
-                <p className="text-charcoal-600 dark:text-charcoal-300 text-sm">The final 2 slots are decided by two 3-team mini-knockouts.</p>
+                <h2 className="font-display font-semibold text-charcoal-900 dark:text-sand">{t('play.playoffTitle')}</h2>
+                <p className="text-charcoal-600 dark:text-charcoal-300 text-sm">{t('play.playoffDesc')}</p>
               </div>
-              <SambaButton variant="secondary" size="sm" onClick={autoFillPlayoffEntrants}>Auto-fill Entrants</SambaButton>
+              <SambaButton variant="secondary" size="sm" onClick={autoFillPlayoffEntrants}>{t('play.autoFillEntrants')}</SambaButton>
             </div>
             {PLAYOFF_PATHS.map((path, pathIdx) => {
               const entrants = playoffEntrants[pathIdx]
@@ -217,7 +217,7 @@ export default function SimulatorSetup() {
               return (
                 <div key={path.id} className="rounded-xl bg-sand/40 dark:bg-night/40 p-3 space-y-3">
                   <p className="text-xs uppercase tracking-wide text-charcoal-600 dark:text-charcoal-300 font-semibold">
-                    Path {pathIdx + 1}: {path.legs[0]} v {path.legs[1]}, winner v {path.legs[2]}
+                    {t('play.playoffPathLabel', { number: pathIdx + 1, legA: path.legs[0], legB: path.legs[1], legC: path.legs[2] })}
                   </p>
                   <div className="grid sm:grid-cols-3 gap-3">
                     {path.legs.map((conf, legIdx) => {
@@ -227,13 +227,13 @@ export default function SimulatorSetup() {
                         .sort((a, b) => getRating(b.name, conf) - getRating(a.name, conf))
                       return (
                         <div key={legIdx}>
-                          <p className="text-[11px] text-charcoal-600 dark:text-charcoal-300 mb-1">{conf}{legIdx === 2 ? ' (bye)' : ''}</p>
+                          <p className="text-[11px] text-charcoal-600 dark:text-charcoal-300 mb-1">{conf}{legIdx === 2 ? ` ${t('play.byeSuffix')}` : ''}</p>
                           <select
                             className="w-full rounded-lg border border-charcoal-900/10 dark:border-white/10 px-2 py-1.5 text-sm bg-white dark:bg-night-card"
                             value={selectedName || ''}
                             onChange={(e) => setPlayoffEntrant(pathIdx, legIdx, e.target.value)}
                           >
-                            <option value="">Choose {conf} team&hellip;</option>
+                            <option value="">{t('play.choosePlayoffTeam', { conf })}</option>
                             {options.map((n) => (
                               <option key={n.name} value={n.name}>{tn(n.name)}</option>
                             ))}
@@ -249,7 +249,7 @@ export default function SimulatorSetup() {
                         size="sm"
                         onClick={() => simulatePlayoffPath(pathIdx)}
                       >
-                        {result ? 'Re-simulate Path' : 'Simulate Playoff Path'}
+                        {result ? t('play.resimulatePath') : t('play.simulatePlayoffPath')}
                       </SambaButton>
                     </div>
                   )}
@@ -259,15 +259,15 @@ export default function SimulatorSetup() {
                         match={result.semifinal}
                         teamA={buildTeam(entrants[0])}
                         teamB={buildTeam(entrants[1])}
-                        label="Semifinal"
+                        label={t('play.semifinal')}
                       />
                       <MatchCard
                         match={result.final}
                         teamA={buildTeam(result.semifinal.winner)}
                         teamB={buildTeam(entrants[2])}
-                        label="Final"
+                        label={t('rounds.Final')}
                       />
-                      <p className="text-center text-sm text-charcoal-900 dark:text-sand font-semibold">Winner: {tn(result.winner)}</p>
+                      <p className="text-center text-sm text-charcoal-900 dark:text-sand font-semibold">{t('play.winnerPrefix')}{tn(result.winner)}</p>
                     </div>
                   )}
                 </div>
@@ -279,8 +279,8 @@ export default function SimulatorSetup() {
         <div className="sticky bottom-4 mt-6 flex justify-center">
           <SambaButton variant="primary" size="lg" disabled={!readyToDraw} onClick={goToDraw}>
             {hasPlayoff && directPicksDone && !playoffDone
-              ? 'Simulate Both Playoff Paths to Continue'
-              : `Continue to Draw (${totalPicked + (hasPlayoff ? playoffResults.filter(Boolean).length : 0)}/${totalNeeded + (hasPlayoff ? 2 : 0)})`}
+              ? t('play.simulateBothPlayoffPaths')
+              : t('play.continueToDraw', { done: totalPicked + (hasPlayoff ? playoffResults.filter(Boolean).length : 0), total: totalNeeded + (hasPlayoff ? 2 : 0) })}
           </SambaButton>
         </div>
       </div>

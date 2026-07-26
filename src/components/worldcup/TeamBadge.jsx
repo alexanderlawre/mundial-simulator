@@ -2,7 +2,7 @@ import CountryFlag from '../common/CountryFlag'
 import { useTranslation } from '../../lib/i18n'
 
 export default function TeamBadge({ team, size = 'md', showRating = true, selected = false, onClick, right }) {
-  const { tn } = useTranslation()
+  const { t, tn } = useTranslation()
   const clickable = typeof onClick === 'function'
   return (
     <div
@@ -22,7 +22,7 @@ export default function TeamBadge({ team, size = 'md', showRating = true, select
           <p className="font-display font-semibold text-charcoal-900 dark:text-sand truncate">{tn(team.name)}</p>
         </div>
         {showRating && (
-          <p className="text-xs text-charcoal-600 dark:text-charcoal-300 tabular-nums">OVR {team.rating ?? '--'}</p>
+          <p className="text-xs text-charcoal-600 dark:text-charcoal-300 tabular-nums">{t('play.ovr')} {team.rating ?? '--'}</p>
         )}
       </div>
       {right}
