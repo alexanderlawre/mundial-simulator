@@ -70,7 +70,7 @@ function ManualStandingsList({ letter, order, teamsByName, advanceCount }) {
               <span className="text-xs text-charcoal-600 dark:text-charcoal-300 w-4">{i + 1}</span>
               {team && <CountryFlag nation={team} size="sm" />}
               {team?.fifaCode && (
-                <span className="font-display text-[10px] font-bold tracking-widest text-charcoal-600 dark:text-charcoal-300 bg-charcoal-900/5 rounded px-1.5 py-0.5 w-10 text-center shrink-0 tabular-nums">
+                <span translate="no" className="notranslate font-display text-[10px] font-bold tracking-widest text-charcoal-600 dark:text-charcoal-300 bg-charcoal-900/5 rounded px-1.5 py-0.5 w-10 text-center shrink-0 tabular-nums">
                   {team.fifaCode}
                 </span>
               )}

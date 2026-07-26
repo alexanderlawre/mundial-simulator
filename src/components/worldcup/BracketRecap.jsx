@@ -14,7 +14,7 @@ function MiniTeamChip({ team, isWinner, isChampionPick }) {
   return (
     <div className={`flex items-center gap-1 min-w-0 ${isWinner ? '' : 'opacity-40 grayscale'}`}>
       <CountryFlag nation={team} size="xs" className={isChampionPick ? 'ring-2 ring-gold' : ''} />
-      <span className={`text-[8px] font-bold tracking-wide tabular-nums truncate ${isWinner ? 'text-charcoal-900 dark:text-sand' : 'text-charcoal-600 dark:text-charcoal-400'}`}>
+      <span translate="no" className={`notranslate text-[8px] font-bold tracking-wide tabular-nums truncate ${isWinner ? 'text-charcoal-900 dark:text-sand' : 'text-charcoal-600 dark:text-charcoal-400'}`}>
         {team.fifaCode}
       </span>
     </div>
