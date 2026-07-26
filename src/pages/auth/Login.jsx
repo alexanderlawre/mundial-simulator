@@ -67,7 +67,7 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   autoComplete="email"
-                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 focus:outline-none focus:ring-2 focus:ring-emerald"
+                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 bg-white dark:bg-night-card text-charcoal-900 dark:text-sand focus:outline-none focus:ring-2 focus:ring-emerald"
                 />
               </div>
               <div>
@@ -78,7 +78,7 @@ export default function Login() {
                   type="password"
                   autoComplete="current-password"
                   onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 focus:outline-none focus:ring-2 focus:ring-emerald"
+                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 bg-white dark:bg-night-card text-charcoal-900 dark:text-sand focus:outline-none focus:ring-2 focus:ring-emerald"
                 />
               </div>
               <button
@@ -128,7 +128,7 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   autoComplete="email"
-                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 focus:outline-none focus:ring-2 focus:ring-emerald"
+                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 bg-white dark:bg-night-card text-charcoal-900 dark:text-sand focus:outline-none focus:ring-2 focus:ring-emerald"
                 />
               </div>
 

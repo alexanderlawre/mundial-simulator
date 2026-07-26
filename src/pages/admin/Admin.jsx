@@ -355,7 +355,7 @@ export default function Admin() {
               onChange={(e) => { setPassword(e.target.value); setError(false) }}
               placeholder="Password"
               autoFocus
-              className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 focus:outline-none focus:ring-2 focus:ring-emerald"
+              className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 bg-white dark:bg-night-card text-charcoal-900 dark:text-sand focus:outline-none focus:ring-2 focus:ring-emerald"
             />
             {error && <p className="text-sm text-red-500 text-center">Incorrect password.</p>}
             <SambaButton type="submit" variant="gold" className="w-full" disabled={loading}>

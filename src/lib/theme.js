@@ -1,22 +1,20 @@
 // Dark/light mode preference, persisted to localStorage and applied via a
 // `dark` class on <html>, matching Tailwind's `darkMode: 'class'` strategy.
+//
+// Dark mode is the app's default: a first-time visitor with no stored
+// preference gets dark mode regardless of system preference. Users can
+// still switch to light mode, and that explicit choice is persisted.
 
 const THEME_KEY = 'mundial.theme'
-
-function systemPrefersDark() {
-  return typeof window !== 'undefined' && window.matchMedia
-    ? window.matchMedia('(prefers-color-scheme: dark)').matches
-    : false
-}
 
 export function getTheme() {
   try {
     const stored = localStorage.getItem(THEME_KEY)
     if (stored === 'dark' || stored === 'light') return stored
   } catch {
-    // localStorage unavailable -- fall through to system preference
+    // localStorage unavailable -- fall through to default
   }
-  return systemPrefersDark() ? 'dark' : 'light'
+  return 'dark'
 }
 
 export function applyTheme(theme) {

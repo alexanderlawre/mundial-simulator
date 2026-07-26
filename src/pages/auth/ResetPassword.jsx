@@ -59,7 +59,7 @@ export default function ResetPassword() {
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   autoComplete="new-password"
-                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 focus:outline-none focus:ring-2 focus:ring-emerald"
+                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 bg-white dark:bg-night-card text-charcoal-900 dark:text-sand focus:outline-none focus:ring-2 focus:ring-emerald"
                 />
                 {password.length > 0 && !passwordValid && (
                   <p className="text-xs text-red-500 mt-1">{t('onboarding.passwordTooShort')}</p>
@@ -72,7 +72,7 @@ export default function ResetPassword() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   type="password"
                   autoComplete="new-password"
-                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 focus:outline-none focus:ring-2 focus:ring-emerald"
+                  className="w-full px-4 py-2.5 rounded-xl border border-charcoal-900/15 dark:border-white/15 bg-white dark:bg-night-card text-charcoal-900 dark:text-sand focus:outline-none focus:ring-2 focus:ring-emerald"
                 />
                 {confirmPassword.length > 0 && !passwordsMatch && (
                   <p className="text-xs text-red-500 mt-1">{t('onboarding.passwordsDontMatch')}</p>
