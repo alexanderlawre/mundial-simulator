@@ -43,11 +43,19 @@ export default function Compete() {
 
   function handleCreated(group) {
     setShowCreate(false)
+    // Add it to the dashboard list immediately rather than waiting on a
+    // re-fetch next time this page mounts -- guarantees the new group shows
+    // up on the main landing page even if the user comes straight back here.
+    setGroups((prev) => [{ ...group, member_count: 1 }, ...prev])
     navigate(`/compete/group/${group.id}`)
   }
 
   function handleJoined(group) {
     setShowJoin(false)
+    // joinGroupByCode() returns the group row as it was *before* the join
+    // (fetched to validate the code, prior to inserting the membership row),
+    // so its member_count is one behind -- correct that here too.
+    setGroups((prev) => [{ ...group, member_count: (group.member_count || 0) + 1 }, ...prev])
     navigate(`/compete/group/${group.id}`)
   }
 

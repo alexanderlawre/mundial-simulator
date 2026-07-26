@@ -30,7 +30,12 @@ create table if not exists public.groups (
   join_code text not null unique,
   leagues_enabled text[] not null default '{}',
   admin_user_id uuid not null references auth.users(id) on delete cascade,
-  member_count int not null default 1,
+  -- Starts at 0, not 1: the trg_group_member_count trigger below increments
+  -- this on every group_members insert, including the admin's own row that
+  -- createGroup() always inserts right after creating the group. Defaulting
+  -- to 1 here would double-count the creator (every new group would start
+  -- at 2 members instead of 1).
+  member_count int not null default 0,
   created_at timestamptz not null default now()
 );
 
