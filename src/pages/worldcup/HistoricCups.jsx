@@ -13,18 +13,20 @@ export default function HistoricCups() {
         <div className="mb-6">
           <NavBar title={t('dashboard.historicTitle')} subtitle={t('play.historicCupsSubtitle')} />
         </div>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-3">
           {[...HISTORIC_WORLD_CUPS].sort((a, b) => b.year - a.year).map((cup) => (
             <button
               key={cup.year}
               onClick={() => navigate(`/historic/${cup.year}`)}
-              className="rounded-2xl bg-white dark:bg-night-card shadow-depth p-5 text-left hover:-translate-y-1 active:scale-[0.98] transition-all"
+              className="w-full flex items-center gap-4 rounded-2xl bg-white dark:bg-night-card shadow-depth p-4 sm:p-5 text-left hover:-translate-y-0.5 active:scale-[0.99] transition-all"
             >
-              <p className="font-display text-3xl font-extrabold text-emerald">{cup.year}</p>
-              <p className="text-charcoal-600 dark:text-charcoal-300 text-sm mt-1">{cup.host}</p>
-              <p className="text-charcoal-600/70 text-xs mt-1">{t('play.teamsCountLabel', { count: cup.teamCount || Object.values(cup.groups || {}).flat().length })}</p>
+              <p className="font-display text-2xl sm:text-3xl font-extrabold text-emerald shrink-0 w-16 sm:w-20">{cup.year}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-charcoal-900 dark:text-sand text-sm font-semibold truncate">{cup.host}</p>
+                <p className="text-charcoal-600/70 dark:text-charcoal-300/70 text-xs mt-0.5 truncate">{t('play.teamsCountLabel', { count: cup.teamCount || Object.values(cup.groups || {}).flat().length })}</p>
+              </div>
               {cup.winner && (
-                <p className="text-charcoal-600/70 text-xs mt-2">
+                <p className="text-charcoal-600/70 dark:text-charcoal-300/70 text-xs shrink-0 text-right">
                   {t('play.winnerPrefix')}<span className="font-semibold text-gold">{cup.winner}</span>
                 </p>
               )}

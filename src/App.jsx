@@ -5,6 +5,7 @@ import ResetPassword from './pages/auth/ResetPassword'
 import Account from './pages/account/Account'
 import Dashboard from './pages/account/Dashboard'
 import InternationalTournamentsHub from './pages/worldcup/InternationalTournamentsHub'
+import WorldCupHub from './pages/worldcup/WorldCupHub'
 import SimulatorSetup from './pages/worldcup/SimulatorSetup'
 import GroupDraw from './pages/worldcup/GroupDraw'
 import SimulatorPlay from './pages/worldcup/SimulatorPlay'
@@ -65,6 +66,7 @@ export default function App() {
         <Route path="/account" element={<RequireAccountPage><Account /></RequireAccountPage>} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tournaments" element={<InternationalTournamentsHub />} />
+        <Route path="/world-cup" element={<WorldCupHub />} />
         <Route path="/simulator/setup" element={<SimulatorSetup />} />
         <Route path="/simulator/draw" element={<GroupDraw />} />
         <Route path="/simulator/play" element={<SimulatorPlay />} />

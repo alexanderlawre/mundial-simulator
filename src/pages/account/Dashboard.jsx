@@ -27,13 +27,6 @@ const MODES = [
     path: '/tournaments',
     accent: 'bg-emerald',
   },
-  {
-    key: 'historic',
-    titleKey: 'dashboard.historicTitle',
-    descKey: 'dashboard.historicDesc',
-    path: '/historic',
-    accent: 'bg-olive',
-  },
 ]
 
 export default function Dashboard() {

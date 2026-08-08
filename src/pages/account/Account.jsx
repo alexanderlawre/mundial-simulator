@@ -199,7 +199,7 @@ export default function Account() {
 
         <div>
           <h2 className="font-display font-bold text-lg text-charcoal-900 dark:text-sand mb-3">{t('account.submittedTables')}</h2>
-          <div className="grid sm:grid-cols-3 gap-3">
+          <div className="flex flex-col gap-2">
             {LEAGUES.map((league) => (
               <LeagueCard
                 key={league.key}

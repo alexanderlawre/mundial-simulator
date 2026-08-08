@@ -5,18 +5,21 @@ import NavBar from '../../components/common/NavBar'
 import { useTranslation } from '../../lib/i18n'
 
 // World Cup card colors -- kept here rather than in internationalTournaments.js
-// since the World Cup itself isn't part of that config (it keeps its own
-// dedicated 32/48/64 team-count flow, untouched by this feature).
+// since the World Cup itself isn't part of that config (it has its own
+// two-mode hub -- Create Your Own vs Historic -- at /world-cup instead of a
+// single config entry here).
 const WORLD_CUP_COLORS = { from: '#0A1428', to: '#1E3A8A' }
 
 // Landing page for every simulate-able international tournament. World Cup
-// always leads (its own existing /simulator/setup flow, no state passed --
-// byte-for-byte the same experience as before this feature existed); the
-// five new tournaments follow in the exact order specified by the product
-// requirement (Euro, Copa América, AFCON, Asian Cup, Gold Cup), each
-// passing `tournamentKey` through router state so /simulator/setup,
-// /simulator/draw and /simulator/play can branch off the World Cup's
-// hardcoded team-count flow without altering it.
+// always leads, now routing to its own /world-cup hub (Create Your Own +
+// Historic, see WorldCupHub.jsx) rather than straight into the team-count
+// picker; the five new tournaments follow in the exact order specified by
+// the product requirement (Euro, Copa América, AFCON, Asian Cup, Gold
+// Cup), each passing `tournamentKey` through router state so
+// /simulator/setup, /simulator/draw and /simulator/play can branch off the
+// World Cup's hardcoded team-count flow without altering it. Rendered as a
+// single stacked column (not a grid) so cards read top-to-bottom and stay
+// comfortably tappable on narrow phone widths.
 export default function InternationalTournamentsHub() {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -27,7 +30,7 @@ export default function InternationalTournamentsHub() {
       name: t('tournaments.worldCupName'),
       desc: t('tournaments.worldCupDesc'),
       colors: WORLD_CUP_COLORS,
-      onClick: () => navigate('/simulator/setup'),
+      onClick: () => navigate('/world-cup'),
     },
     ...INTERNATIONAL_TOURNAMENTS.slice()
       .sort((a, b) => a.order - b.order)
@@ -46,19 +49,19 @@ export default function InternationalTournamentsHub() {
         <div className="mb-6">
           <NavBar title={t('tournaments.hubTitle')} subtitle={t('tournaments.hubSubtitle')} />
         </div>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-3">
           {cards.map((card) => (
             <button
               key={card.key}
               onClick={card.onClick}
-              className="text-left rounded-2xl shadow-depth-lg overflow-hidden hover:-translate-y-1 active:scale-[0.98] transition-all"
+              className="w-full text-left rounded-2xl shadow-depth-lg overflow-hidden hover:-translate-y-0.5 active:scale-[0.99] transition-all"
             >
               <div
-                className="p-5 text-white h-full"
+                className="p-4 sm:p-5 text-white"
                 style={{ background: `linear-gradient(135deg, ${card.colors.from}, ${card.colors.to})` }}
               >
-                <p className="font-display text-2xl font-extrabold">{card.name}</p>
-                <p className="text-white/80 text-xs mt-1">{card.desc}</p>
+                <p className="font-display text-lg sm:text-xl font-extrabold">{card.name}</p>
+                <p className="text-white/80 text-xs sm:text-sm mt-1">{card.desc}</p>
               </div>
             </button>
           ))}
