@@ -23,9 +23,14 @@ export async function waitForImages(node) {
   )
 }
 
+// scale: 3 (not 2) -- extra resolution headroom because most share
+// destinations (iMessage, WhatsApp, Instagram, etc.) re-encode whatever we
+// hand them to JPEG on their own end regardless of the PNG we export here;
+// capturing at a higher pixel density keeps the result looking closer to
+// the crisp on-device view even after that out-of-our-control re-compression.
 export async function captureNode(node) {
   await waitForImages(node)
-  const canvas = await html2canvas(node, { useCORS: true, backgroundColor: '#F4EFE6', scale: 2 })
+  const canvas = await html2canvas(node, { useCORS: true, backgroundColor: '#F4EFE6', scale: 3 })
   return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), 'image/png'))
 }
 

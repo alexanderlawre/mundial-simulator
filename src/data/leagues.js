@@ -53,8 +53,6 @@ export function getZoneForRank(league, rank) {
 // "Coming Soon" card with the same gradient-card visual language.
 export const UPCOMING_COMPETITIONS = [
   { key: 'champions-league', name: 'Champions League', colors: { from: '#0A1428', to: '#1E3A8A' } },
-  { key: 'europa-league', name: 'Europa League', colors: { from: '#FF6B00', to: '#7A2E00' } },
-  { key: 'conference-league', name: 'Conference League', colors: { from: '#00A651', to: '#0A3D24' } },
 ]
 
 export const LEAGUES = [
