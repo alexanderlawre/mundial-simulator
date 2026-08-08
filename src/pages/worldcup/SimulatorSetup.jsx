@@ -187,7 +187,15 @@ export default function SimulatorSetup() {
 
         <div className="space-y-6">
           {CONFEDERATIONS.map((conf) => {
-            const quota = quotas[conf]
+            // `|| 0` matters here: World Cup's quota objects always list every
+            // confederation explicitly (even `OFC: 0`), but the fixed-format
+            // international tournaments (e.g. Euro's `{ UEFA: 24 }`) only
+            // include the confederations that actually compete in them --
+            // every other confederation is simply absent from the object, so
+            // `quotas[conf]` is `undefined` there, not `0`. Without this
+            // fallback, `undefined === 0` is false and those confederations'
+            // full (uncapped) team lists would incorrectly render.
+            const quota = quotas[conf] || 0
             if (quota === 0) return null
             const nations = nationsByConfederation(conf).sort(
               (a, b) => getRating(b.name, conf) - getRating(a.name, conf)
