@@ -22,8 +22,11 @@ function logo(path) {
 }
 
 // Shared UEFA-style zone colors, reused across leagues so the legend/UI has
-// one consistent palette. `relegationPlayoff` (Ligue 1 / Bundesliga's 16th
-// place) gets its own color since it's neither safe nor a direct relegation.
+// one consistent palette. `relegationPlayoff` gets its own color for a spot
+// that's neither safe nor a direct relegation (e.g. a 16th-place two-legged
+// playoff) -- currently unused now that Ligue 1 and Bundesliga (the only
+// leagues here with that zone) have been removed, but kept for any future
+// league that has one.
 const ZONE_COLORS = {
   ucl: '#10b981', // emerald
   uclQualifying: '#6ee7b7', // light emerald
@@ -141,86 +144,6 @@ export const LEAGUES = [
       { key: 'torino', name: 'Torino', badgeUrl: logo('logos/Italy - Serie A/Torino FC.png') },
       { key: 'udinese', name: 'Udinese', badgeUrl: logo('logos/Italy - Serie A/Udinese Calcio.png') },
       { key: 'venezia', name: 'Venezia', badgeUrl: logo('history/2024-25/Italy - Serie A/Venezia FC.png') },
-    ],
-  },
-  {
-    key: 'ligue-1',
-    name: 'Ligue 1',
-    country: 'France',
-    colors: { from: '#0055A4', to: '#001B4C', accent: '#0055A4' },
-    // 18 clubs: top 3 go straight to the UCL group stage, 4th enters UCL
-    // qualifying, 5th/6th get UEL/UECL. 16th plays a relegation playoff
-    // against a second-division side, bottom 2 go straight down.
-    zones: [
-      zone('ucl', 1, 3),
-      zone('uclQualifying', 4, 4),
-      zone('uel', 5, 5),
-      zone('uecl', 6, 6),
-      zone('relegationPlayoff', 16, 16),
-      zone('relegation', 17, 18),
-    ],
-    clubs: [
-      { key: 'psg', name: 'Paris Saint-Germain', badgeUrl: logo('logos/France - Ligue 1/Paris Saint-Germain.png') },
-      { key: 'marseille', name: 'Olympique Marseille', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Olympique_de_Marseille_2026_logo.svg', badgeScale: 0.85 },
-      { key: 'monaco', name: 'AS Monaco', badgeUrl: logo('logos/France - Ligue 1/AS Monaco.png') },
-      { key: 'lille', name: 'LOSC Lille', badgeUrl: logo('logos/France - Ligue 1/LOSC Lille.png') },
-      { key: 'lyon', name: 'Olympique Lyon', badgeUrl: logo('logos/France - Ligue 1/Olympique Lyon.png') },
-      { key: 'nice', name: 'OGC Nice', badgeUrl: logo('logos/France - Ligue 1/OGC Nice.png') },
-      { key: 'lens', name: 'RC Lens', badgeUrl: logo('logos/France - Ligue 1/RC Lens.png') },
-      { key: 'rennes', name: 'Stade Rennais FC', badgeUrl: logo('logos/France - Ligue 1/Stade Rennais FC.png') },
-      { key: 'strasbourg', name: 'RC Strasbourg Alsace', badgeUrl: logo('logos/France - Ligue 1/RC Strasbourg Alsace.png') },
-      { key: 'toulouse', name: 'FC Toulouse', badgeUrl: logo('logos/France - Ligue 1/FC Toulouse.png') },
-      { key: 'brest', name: 'Stade Brestois 29', badgeUrl: logo('logos/France - Ligue 1/Stade Brestois 29.png') },
-      { key: 'le-havre', name: 'Le Havre AC', badgeUrl: logo('logos/France - Ligue 1/Le Havre AC.png') },
-      { key: 'auxerre', name: 'AJ Auxerre', badgeUrl: logo('logos/France - Ligue 1/AJ Auxerre.png') },
-      { key: 'angers', name: 'Angers SCO', badgeUrl: logo('logos/France - Ligue 1/Angers SCO.png') },
-      { key: 'lorient', name: 'FC Lorient', badgeUrl: logo('logos/France - Ligue 1/FC Lorient.png') },
-      { key: 'paris-fc', name: 'Paris FC', badgeUrl: logo('logos/France - Ligue 1/Paris FC.png') },
-      // Promoted for 2026-27 (replacing relegated Metz & Nantes); not yet in
-      // the football-logos repo's current-season snapshot, so these two
-      // hotlink Wikipedia crests instead, same fallback pattern as above.
-      { key: 'troyes', name: 'ES Troyes AC', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/ESTAC_Troyes_Logo.svg', badgeScale: 0.85 },
-      { key: 'le-mans', name: 'Le Mans FC', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/5/57/Le_Mans_FC_logo.svg', badgeScale: 0.85 },
-    ],
-  },
-  {
-    key: 'bundesliga',
-    name: 'Bundesliga',
-    country: 'Germany',
-    colors: { from: '#D20515', to: '#FFCC00', accent: '#D20515' },
-    // 18 clubs: top 4 go to UCL, 5th/6th to UEL/UECL (Germany's UEL berth
-    // is currently a straight allocation, no playoff round). 16th plays a
-    // two-legged relegation playoff against the 2. Bundesliga's 3rd place,
-    // bottom 2 go straight down.
-    zones: [
-      zone('ucl', 1, 4),
-      zone('uel', 5, 5),
-      zone('uecl', 6, 6),
-      zone('relegationPlayoff', 16, 16),
-      zone('relegation', 17, 18),
-    ],
-    clubs: [
-      { key: 'bayern-munich', name: 'Bayern Munich', badgeUrl: logo('logos/Germany - Bundesliga/Bayern Munich.png') },
-      { key: 'bayer-leverkusen', name: 'Bayer Leverkusen', badgeUrl: logo('logos/Germany - Bundesliga/Bayer 04 Leverkusen.png') },
-      { key: 'rb-leipzig', name: 'RB Leipzig', badgeUrl: logo('logos/Germany - Bundesliga/RB Leipzig.png') },
-      { key: 'borussia-dortmund', name: 'Borussia Dortmund', badgeUrl: logo('logos/Germany - Bundesliga/Borussia Dortmund.png') },
-      { key: 'eintracht-frankfurt', name: 'Eintracht Frankfurt', badgeUrl: logo('logos/Germany - Bundesliga/Eintracht Frankfurt.png') },
-      { key: 'vfb-stuttgart', name: 'VfB Stuttgart', badgeUrl: logo('logos/Germany - Bundesliga/VfB Stuttgart.png') },
-      { key: 'borussia-monchengladbach', name: 'Borussia Mönchengladbach', badgeUrl: logo('logos/Germany - Bundesliga/Borussia Mönchengladbach.png') },
-      { key: 'sc-freiburg', name: 'SC Freiburg', badgeUrl: logo('logos/Germany - Bundesliga/SC Freiburg.png') },
-      { key: 'union-berlin', name: 'Union Berlin', badgeUrl: logo('logos/Germany - Bundesliga/1.FC Union Berlin.png') },
-      { key: 'werder-bremen', name: 'Werder Bremen', badgeUrl: logo('logos/Germany - Bundesliga/SV Werder Bremen.png') },
-      { key: 'mainz-05', name: 'Mainz 05', badgeUrl: logo('logos/Germany - Bundesliga/1.FSV Mainz 05.png') },
-      { key: 'fc-augsburg', name: 'FC Augsburg', badgeUrl: logo('logos/Germany - Bundesliga/FC Augsburg.png') },
-      { key: 'tsg-hoffenheim', name: 'TSG Hoffenheim', badgeUrl: logo('logos/Germany - Bundesliga/TSG 1899 Hoffenheim.png') },
-      { key: 'hamburger-sv', name: 'Hamburger SV', badgeUrl: logo('logos/Germany - Bundesliga/Hamburger SV.png') },
-      { key: 'fc-koln', name: '1. FC Köln', badgeUrl: logo('logos/Germany - Bundesliga/1.FC Köln.png') },
-      // Promoted for 2026-27 (replacing relegated Wolfsburg, Heidenheim &
-      // St. Pauli); not yet in the football-logos repo's current-season
-      // snapshot, so these hotlink Wikipedia crests instead.
-      { key: 'schalke-04', name: 'Schalke 04', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/FC_Schalke_04_Logo.svg', badgeScale: 0.85 },
-      { key: 'sv-elversberg', name: 'SV Elversberg', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d4/SV_Elversberg_Logo_2021.svg', badgeScale: 0.85 },
-      { key: 'sc-paderborn', name: 'SC Paderborn 07', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/67/SC_Paderborn_07_Logo_new.svg', badgeScale: 0.85 },
     ],
   },
   {

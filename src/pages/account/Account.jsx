@@ -8,7 +8,7 @@ import CountryFlag from '../../components/common/CountryFlag'
 import AppBackground from '../../components/common/AppBackground'
 import NavBar from '../../components/common/NavBar'
 import SambaButton from '../../components/common/SambaButton'
-import { TopPicksPreview } from '../leagues/LeaguesHub'
+import LeagueCard from '../../components/leagues/LeagueCard'
 import { useTranslation } from '../../lib/i18n'
 
 const MODE_LABEL_KEYS = { historic: 'account.modeHistoric', custom: 'account.modeCustom', wc2026: 'account.modeWc2026' }
@@ -200,24 +200,15 @@ export default function Account() {
         <div>
           <h2 className="font-display font-bold text-lg text-charcoal-900 dark:text-sand mb-3">{t('account.submittedTables')}</h2>
           <div className="grid sm:grid-cols-3 gap-3">
-            {LEAGUES.map((league) => {
-              const prediction = predictions[league.key]
-              return (
-                <button
-                  key={league.key}
-                  onClick={() => navigate(`/leagues/${league.key}`)}
-                  className="text-left rounded-xl overflow-hidden shadow-depth hover:-translate-y-0.5 transition-all"
-                >
-                  <div className="p-3 text-white" style={{ background: `linear-gradient(135deg, ${league.colors.from}, ${league.colors.to})` }}>
-                    <p className="font-display font-bold text-sm">{league.name}</p>
-                    <p className="text-[11px] text-white/80 mt-0.5">
-                      {prediction?.confirmed ? t('leagues.predictionsLocked') : prediction ? t('leagues.inProgress') : t('account.notStarted')}
-                    </p>
-                    <TopPicksPreview league={league} order={prediction?.order} />
-                  </div>
-                </button>
-              )
-            })}
+            {LEAGUES.map((league) => (
+              <LeagueCard
+                key={league.key}
+                league={league}
+                prediction={predictions[league.key]}
+                onClick={() => navigate(`/leagues/${league.key}`)}
+                compact
+              />
+            ))}
           </div>
         </div>
 
