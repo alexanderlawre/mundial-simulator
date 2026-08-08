@@ -11,7 +11,7 @@ export default function GroupDraw() {
   const location = useLocation()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { teamCount, teamNames } = location.state || {}
+  const { teamCount, teamNames, tournamentKey } = location.state || {}
   const teams = useMemo(() => (teamNames ? teamNames.map((n) => buildTeam(n)) : null), [teamNames])
 
   const groupCount = teamCount / 4
@@ -66,7 +66,7 @@ export default function GroupDraw() {
     Object.entries(groups).forEach(([letter, groupTeams]) => {
       groupNames[letter] = groupTeams.map((t) => t.name)
     })
-    navigate('/simulator/play', { state: { teamCount, groupNames } })
+    navigate('/simulator/play', { state: { teamCount, groupNames, tournamentKey } })
   }
 
   return (

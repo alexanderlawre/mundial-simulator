@@ -24,7 +24,7 @@ const MODES = [
     key: 'simulator',
     titleKey: 'dashboard.simulatorTitle',
     descKey: 'dashboard.simulatorDesc',
-    path: '/simulator/setup',
+    path: '/tournaments',
     accent: 'bg-emerald',
   },
   {

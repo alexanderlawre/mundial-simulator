@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { nationsByConfederation, CONFEDERATIONS } from '../../data/nations'
 import { getQuotas, totalFromQuotas, PLAYOFF_PATHS, PLAYOFF_TEAM_COUNTS } from '../../data/confederationQuotas'
+import { getTournamentConfig, tournamentI18nPrefix } from '../../data/internationalTournaments'
 import { getRating } from '../../data/ratings'
 import { simulateFullQualifying, simulateQualifyingForConfederation } from '../../lib/qualifying'
 import { buildTeam, simulateInterconfedPlayoff } from '../../lib/tournamentEngine'
@@ -12,22 +13,33 @@ import NavBar from '../../components/common/NavBar'
 import MatchCard from '../../components/worldcup/MatchCard'
 import { useTranslation } from '../../lib/i18n'
 
+// tournamentKey is only ever set when arriving from the new International
+// Tournaments hub for one of the non-World-Cup competitions (Euro, Copa
+// América, AFCON, Asian Cup, Gold Cup). When absent (the World Cup card, or
+// any old bookmarked /simulator/setup link), every branch below behaves
+// exactly as it did before this feature existed.
 export default function SimulatorSetup() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t, tn } = useTranslation()
+  const tournamentKey = location.state?.tournamentKey || null
+  const tournamentConfig = tournamentKey ? getTournamentConfig(tournamentKey) : null
   const [teamCount, setTeamCount] = useState(null)
   const [picked, setPicked] = useState({}) // confederation -> [nation names]
 
-  const quotas = teamCount ? getQuotas(teamCount) : null
+  // Fixed-format tournaments skip the count picker entirely -- their team
+  // count is implied by the config's quotas, never chosen by the user.
+  const quotas = tournamentConfig ? tournamentConfig.quotas : teamCount ? getQuotas(teamCount) : null
 
   const pickedFlat = useMemo(
     () => Object.entries(picked).flatMap(([conf, names]) => names.map((n) => ({ name: n, confederation: conf }))),
     [picked]
   )
 
-  // Intercontinental playoff (48- and 64-team formats only): 2 mini-knockouts
-  // decide the last 2 slots beyond the direct quota picks.
-  const hasPlayoff = PLAYOFF_TEAM_COUNTS.includes(teamCount)
+  // Intercontinental playoff (48- and 64-team World Cup formats only): 2
+  // mini-knockouts decide the last 2 slots beyond the direct quota picks.
+  // None of the fixed-format international tournaments have one.
+  const hasPlayoff = !tournamentConfig && PLAYOFF_TEAM_COUNTS.includes(teamCount)
   const [playoffEntrants, setPlayoffEntrants] = useState(() => PLAYOFF_PATHS.map((p) => p.legs.map(() => null)))
   const [playoffResults, setPlayoffResults] = useState(() => PLAYOFF_PATHS.map(() => null))
 
@@ -104,17 +116,20 @@ export default function SimulatorSetup() {
 
   const totalNeeded = quotas ? totalFromQuotas(quotas) : 0
   const totalPicked = pickedFlat.length
-  const directPicksDone = teamCount && totalPicked === totalNeeded
+  const directPicksDone = (tournamentConfig || teamCount) && totalPicked === totalNeeded
   const playoffDone = hasPlayoff ? playoffResults.every((r) => r) : true
   const readyToDraw = directPicksDone && playoffDone
 
   function goToDraw() {
     const directNames = pickedFlat.map((t) => t.name)
     const playoffWinnerNames = hasPlayoff ? playoffResults.map((r) => r.winner) : []
-    navigate('/simulator/draw', { state: { teamCount, teamNames: [...directNames, ...playoffWinnerNames] } })
+    const effectiveTeamCount = tournamentConfig ? totalFromQuotas(quotas) : teamCount
+    navigate('/simulator/draw', {
+      state: { teamCount: effectiveTeamCount, teamNames: [...directNames, ...playoffWinnerNames], tournamentKey },
+    })
   }
 
-  if (!teamCount) {
+  if (!tournamentConfig && !teamCount) {
     return (
       <AppBackground>
         <div className="max-w-2xl mx-auto px-4 py-8 text-center">
@@ -147,10 +162,21 @@ export default function SimulatorSetup() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div className="flex-1 min-w-0">
-            <NavBar title={t('play.pickTeamsTitle', { count: teamCount })} subtitle={t('play.selectedCount', { picked: totalPicked, total: totalNeeded })} />
+            <NavBar
+              title={tournamentConfig ? t(`tournaments.${tournamentI18nPrefix(tournamentConfig.key)}Name`) : t('play.pickTeamsTitle', { count: teamCount })}
+              subtitle={t('play.selectedCount', { picked: totalPicked, total: totalNeeded })}
+            />
           </div>
           <div className="flex gap-2">
-            <SambaButton variant="outline" size="sm" onClick={() => { setTeamCount(null); setPicked({}) }}>
+            <SambaButton
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (tournamentConfig) { navigate('/tournaments'); return }
+                setTeamCount(null)
+                setPicked({})
+              }}
+            >
               {t('play.changeFormat')}
             </SambaButton>
             <SambaButton variant="gold" size="sm" onClick={simulateQualifyingAll}>
