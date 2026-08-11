@@ -9,7 +9,7 @@ import { useTranslation } from '../../lib/i18n'
 export default function Footer() {
   const { t } = useTranslation()
   return (
-    <footer className="relative z-10 mt-auto pt-10 pb-6 px-4 flex flex-col items-center gap-3">
+    <footer className="relative mt-auto pt-10 pb-6 px-4 flex flex-col items-center gap-3">
       <Logo className="h-6 w-auto opacity-80" />
       <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-charcoal-600 dark:text-charcoal-300 border-t border-charcoal-900/10 dark:border-white/10 pt-4">
         <span>© {new Date().getFullYear()} Mundial</span>
