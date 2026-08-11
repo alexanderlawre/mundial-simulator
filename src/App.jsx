@@ -3,6 +3,7 @@ import Onboarding from './pages/auth/Onboarding'
 import Login from './pages/auth/Login'
 import ResetPassword from './pages/auth/ResetPassword'
 import Account from './pages/account/Account'
+import UserProfile from './pages/account/UserProfile'
 import Dashboard from './pages/account/Dashboard'
 import InternationalTournamentsHub from './pages/worldcup/InternationalTournamentsHub'
 import WorldCupHub from './pages/worldcup/WorldCupHub'
@@ -64,6 +65,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/account" element={<RequireAccountPage><Account /></RequireAccountPage>} />
+        <Route path="/profile/:userId" element={<RequireAccountPage><UserProfile /></RequireAccountPage>} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tournaments" element={<InternationalTournamentsHub />} />
         <Route path="/world-cup" element={<WorldCupHub />} />

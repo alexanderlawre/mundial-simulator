@@ -46,12 +46,12 @@ export function AuthProvider({ children }) {
     }
     supabase
       .from('profiles')
-      .select('name, favorite_team')
+      .select('name, favorite_team, avatar_url')
       .eq('id', userId)
       .single()
       .then(({ data, error }) => {
         if (error || !data) return
-        saveProfile({ name: data.name, email: session.user.email, supportedCountry: data.favorite_team })
+        saveProfile({ name: data.name, email: session.user.email, supportedCountry: data.favorite_team, avatarUrl: data.avatar_url || null })
       })
   }, [session])
 

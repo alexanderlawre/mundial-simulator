@@ -18,7 +18,7 @@ export default function WorldCupShareModal({ title, hostLabel, champion, runnerU
     setBusy(true)
     try {
       const blob = await captureNode(cardRef.current)
-      await shareOrDownload(blob, `mundial-${(champion || 'champion').toLowerCase().replace(/\s+/g, '-')}-world-cup.png`)
+      await shareOrDownload(blob, `mundial-${(champion || 'champion').toLowerCase().replace(/\s+/g, '-')}-world-cup.jpg`)
     } finally {
       setBusy(false)
     }

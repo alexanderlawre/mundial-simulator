@@ -21,7 +21,7 @@ export default function LeagueShareModal({ league, order, clubs, nation, onClose
     setBusy(true)
     try {
       const blob = await captureNode(cardRef.current)
-      await shareOrDownload(blob, `mundial-${league.key}-table.png`)
+      await shareOrDownload(blob, `mundial-${league.key}-table.jpg`)
     } finally {
       setBusy(false)
     }

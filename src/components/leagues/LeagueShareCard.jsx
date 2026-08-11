@@ -3,6 +3,20 @@ import { getZoneForRank } from '../../data/leagues'
 import Logo from '../common/Logo'
 import { useTranslation } from '../../lib/i18n'
 
+// Same zone display order as ZoneLegend in LeaguePredict.jsx, kept in sync
+// so the exported card's legend always matches what's shown on the actual
+// prediction page above the table.
+const ZONE_LABEL_ORDER = [
+  ['ucl', 'leagues.zoneUcl'],
+  ['uclQualifying', 'leagues.zoneUclQualifying'],
+  ['uel', 'leagues.zoneUel'],
+  ['uecl', 'leagues.zoneUecl'],
+  ['libertadores', 'leagues.zoneLibertadores'],
+  ['sudamericana', 'leagues.zoneSudamericana'],
+  ['relegationPlayoff', 'leagues.zoneRelegationPlayoff'],
+  ['relegation', 'leagues.zoneRelegation'],
+]
+
 // A minimal, ALWAYS-LIGHT inline flag renderer -- deliberately not reusing
 // CountryFlag.jsx here, since that component carries `dark:` frame classes
 // that would leak the user's current app theme into this share "poster"
@@ -35,21 +49,15 @@ function LightFlag({ nation, size = 40 }) {
 // squeezing every row shorter than its own content, which is what used to
 // cause crests/text to overflow their row and visually overlap the row
 // below on 18-20 club leagues.
-// Podium background treatment for top 3 stays as poster flair (adds
-// emphasis, loses no information), but the left border always reflects the
-// club's *real* qualification zone color (Champions League / Europa /
-// Conference / relegation playoff / relegation) exactly as shown in the
-// on-device predicted table.
-function Row({ rank, club, accent, podium, zoneColor }) {
-  const podiumClasses = {
-    gold: 'bg-gradient-to-r from-gold-light via-gold to-gold-light shadow-depth-gold',
-    silver: 'bg-gradient-to-r from-charcoal-100 to-white',
-    bronze: 'bg-gradient-to-r from-[#e8c9a8] to-white',
-  }[podium] || 'bg-white'
-
+// Mirrors PredictedTableRow (PredictedTableView.jsx) exactly -- plain white
+// row, left border is the club's real qualification zone color (Champions
+// League / Europa / Conference / relegation playoff / relegation) -- so the
+// exported "poster" matches what's actually shown on the prediction page,
+// with no extra gold/silver/bronze podium styling that doesn't exist there.
+function Row({ rank, club, accent, zoneColor }) {
   return (
     <div
-      className={`min-h-[52px] flex items-center gap-3 px-3 py-2 rounded-xl border border-charcoal-900/10 border-l-4 ${podiumClasses}`}
+      className="min-h-[52px] flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-charcoal-900/10 border-l-4"
       style={{ borderLeftColor: zoneColor || 'transparent' }}
     >
       <span className="w-7 text-center font-display font-extrabold text-sm text-charcoal-900 tabular-nums shrink-0">
@@ -61,27 +69,51 @@ function Row({ rank, club, accent, podium, zoneColor }) {
   )
 }
 
+// Light-only mirror of ZoneLegend (LeaguePredict.jsx) -- the colored-dot
+// legend row shown above the table on the actual prediction page. Included
+// here so the exported card carries the same context (what each border
+// color means) instead of leaving unlabeled colored bars.
+function Legend({ league, t }) {
+  if (!league.zones?.length) return null
+  const present = ZONE_LABEL_ORDER.filter(([key]) => league.zones.some((z) => z.key === key))
+  if (!present.length) return null
+  return (
+    <div className="flex flex-wrap gap-x-4 gap-y-1.5 px-1 pb-3">
+      {present.map(([key, labelKey]) => {
+        const z = league.zones.find((zz) => zz.key === key)
+        return (
+          <span key={key} className="flex items-center gap-1.5 text-xs text-charcoal-600">
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: z.color }} />
+            {t(labelKey)}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
 // Portrait "paper" share card rendered off-screen by LeagueShareModal.jsx
-// and captured to PNG via shareImage.js. Fixed WIDTH only (720px) -- height
-// is intentionally natural/auto, growing with however many rows the league
-// has, rather than forced into a fixed aspect ratio. Squeezing every league
-// (18 clubs, 20 clubs, ...) into the same total height is exactly what
-// caused crests/names to compress and overlap before; letting the card
-// grow instead keeps every row at a fixed, legible size with crests, names,
-// and positions always in order and never overlapping. Top 3 get
-// gold/silver/bronze podium treatment on top of a real per-position
-// zone-color left border (Champions League/Europa/Conference/relegation
-// playoff/relegation, same colors + ranges as the on-device table via
-// getZoneForRank). Never uses any `dark:`-prefixed class anywhere in this
-// file, so the exported image is always a consistent, legible light
-// "poster" no matter the app's current theme.
+// and captured to a structured JPEG via shareImage.js. Fixed WIDTH only
+// (720px) -- height is intentionally natural/auto, growing with however
+// many rows the league has, rather than forced into a fixed aspect ratio.
+// Squeezing every league (18 clubs, 20 clubs, ...) into the same total
+// height is exactly what caused crests/names to compress and overlap
+// before; letting the card grow instead keeps every row at a fixed,
+// legible size with crests, names, and positions always in order and never
+// overlapping. Deliberately mirrors the real on-page predicted-table UI
+// (PredictedTableView.jsx + the ZoneLegend/header in LeaguePredict.jsx)
+// exactly -- same club-count subtitle, same zone legend, same plain
+// zone-color-bordered rows with no extra podium styling -- so the exported
+// image always matches what the user actually sees in the app. Never uses
+// any `dark:`-prefixed class anywhere in this file, so the exported image
+// is always a consistent, legible light "poster" no matter the app's
+// current theme.
 export default function LeagueShareCard({ league, nation, clubs, order }) {
   const { t } = useTranslation()
   const accent = league.colors.accent
   const rows = order.map((k, i) => {
     const rank = i + 1
-    const podium = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : null
-    return { rank, club: clubs[k], podium, zoneColor: getZoneForRank(league, rank)?.color }
+    return { rank, club: clubs[k], zoneColor: getZoneForRank(league, rank)?.color }
   })
 
   return (
@@ -94,15 +126,18 @@ export default function LeagueShareCard({ league, nation, clubs, order }) {
           <LightFlag nation={nation} size={52} />
           <div>
             <p className="font-display text-3xl font-extrabold leading-tight">{league.name}</p>
-            <p className="text-white/80 text-xs font-semibold uppercase tracking-wide">{t('leagues.shareFullTitle')}</p>
+            <p className="text-white/80 text-xs font-semibold">{t('leagues.clubCount', { count: league.clubs.length })}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col px-6 py-4 gap-1.5">
-        {rows.map(({ rank, club, podium, zoneColor }) => club && (
-          <Row key={rank} rank={rank} club={club} accent={accent} podium={podium} zoneColor={zoneColor} />
-        ))}
+      <div className="flex flex-col px-6 pt-4">
+        <Legend league={league} t={t} />
+        <div className="flex flex-col gap-1.5 pb-2">
+          {rows.map(({ rank, club, zoneColor }) => club && (
+            <Row key={rank} rank={rank} club={club} accent={accent} zoneColor={zoneColor} />
+          ))}
+        </div>
       </div>
 
       <div className="px-6 pb-6 pt-2 flex flex-col items-center gap-1.5 shrink-0">

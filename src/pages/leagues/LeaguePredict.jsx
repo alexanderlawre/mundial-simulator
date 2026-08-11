@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getLeague, clubsByKey } from '../../data/leagues'
 import { getNation } from '../../data/nations'
 import { getLeaguePrediction, saveLeaguePrediction, syncLeaguePredictionToCloud } from '../../lib/storage'
+import { predictionsLocked, PREDICTIONS_LOCK_AT } from '../../lib/predictionsLock'
 import { useAuth } from '../../lib/AuthContext'
 import AppBackground from '../../components/common/AppBackground'
 import CountryFlag from '../../components/common/CountryFlag'
@@ -26,6 +27,17 @@ const ZONE_LABEL_ORDER = [
   ['relegationPlayoff', 'leagues.zoneRelegationPlayoff'],
   ['relegation', 'leagues.zoneRelegation'],
 ]
+
+const UNLOCK_LABEL = PREDICTIONS_LOCK_AT.toLocaleString('en-US', {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZone: 'America/New_York',
+  timeZoneName: 'short',
+})
 
 function ZoneLegend({ league }) {
   const { t } = useTranslation()
@@ -56,6 +68,7 @@ export default function LeaguePredict() {
   const [editing, setEditing] = useState(() => !prediction || !prediction.confirmed)
   const [showShare, setShowShare] = useState(false)
   const [guestPromptDismissed, setGuestPromptDismissed] = useState(false)
+  const locked = predictionsLocked()
 
   if (!league) {
     return (
@@ -79,6 +92,7 @@ export default function LeaguePredict() {
   }
 
   function handleEdit() {
+    if (locked) return
     saveLeaguePrediction(league.key, { confirmed: false })
     setPrediction((p) => ({ ...p, confirmed: false }))
     setEditing(true)
@@ -109,15 +123,20 @@ export default function LeaguePredict() {
           <ZoneLegend league={league} />
         </div>
 
-        {editing ? (
+        {editing && locked ? (
+          <p className="text-center text-sm text-charcoal-600 dark:text-charcoal-300 py-8">{t('profile.locked', { date: UNLOCK_LABEL })}</p>
+        ) : editing ? (
           <LeagueDragBoard league={league} initialOrder={prediction?.order || null} onConfirm={handleConfirm} />
         ) : (
           <div className="space-y-5">
             <PredictedTableView league={league} order={prediction.order} />
+            {locked && <p className="text-xs text-center text-charcoal-600 dark:text-charcoal-300">{t('leagues.predictionsLocked')}</p>}
             <div className="flex gap-2">
-              <SambaButton variant="outline" className="flex-1" onClick={handleEdit}>
-                {t('leagues.editPredictions')}
-              </SambaButton>
+              {!locked && (
+                <SambaButton variant="outline" className="flex-1" onClick={handleEdit}>
+                  {t('leagues.editPredictions')}
+                </SambaButton>
+              )}
               <SambaButton variant="gold" className="flex-1" onClick={() => setShowShare(true)}>
                 {t('leagues.share')}
               </SambaButton>

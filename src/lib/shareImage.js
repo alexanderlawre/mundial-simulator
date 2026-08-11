@@ -23,15 +23,16 @@ export async function waitForImages(node) {
   )
 }
 
-// scale: 3 (not 2) -- extra resolution headroom because most share
-// destinations (iMessage, WhatsApp, Instagram, etc.) re-encode whatever we
-// hand them to JPEG on their own end regardless of the PNG we export here;
-// capturing at a higher pixel density keeps the result looking closer to
-// the crisp on-device view even after that out-of-our-control re-compression.
+// scale: 3 (not 2) -- extra resolution headroom for a crisp result even
+// after share destinations (iMessage, WhatsApp, Instagram, etc.) apply
+// their own re-compression on top of ours. Exported directly as a
+// structured JPEG (quality 0.95) rather than PNG -- these cards are always
+// an opaque, flat "poster" (no transparency needed), and JPEG is the
+// universally expected format for downloading/sharing a photo-like image.
 export async function captureNode(node) {
   await waitForImages(node)
   const canvas = await html2canvas(node, { useCORS: true, backgroundColor: '#F4EFE6', scale: 3 })
-  return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), 'image/png'))
+  return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95))
 }
 
 // navigator.share({files}) on mobile (where supported), a blob: URL +
@@ -40,7 +41,7 @@ export async function captureNode(node) {
 // anything fetched from an external/untrusted source.
 export async function shareOrDownload(blob, filename) {
   if (!blob) return
-  const file = new File([blob], filename, { type: 'image/png' })
+  const file = new File([blob], filename, { type: 'image/jpeg' })
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file] })

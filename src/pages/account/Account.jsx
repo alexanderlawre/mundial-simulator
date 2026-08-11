@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/AuthContext'
-import { fetchCloudLeaguePredictions, fetchCloudSimulationHistory, getPinnedSimulationIds, setSimulationPinned } from '../../lib/storage'
+import { fetchCloudLeaguePredictions, fetchCloudSimulationHistory, getPinnedSimulationIds, setSimulationPinned, uploadUserAvatar, updateProfileAvatar, getProfile, saveProfile } from '../../lib/storage'
 import { LEAGUES } from '../../data/leagues'
 import { getNation } from '../../data/nations'
 import CountryFlag from '../../components/common/CountryFlag'
@@ -9,9 +9,9 @@ import AppBackground from '../../components/common/AppBackground'
 import NavBar from '../../components/common/NavBar'
 import SambaButton from '../../components/common/SambaButton'
 import LeagueCard from '../../components/leagues/LeagueCard'
+import SpotlightCard, { MODE_LABEL_KEYS, PinToggle } from '../../components/account/SpotlightCard'
 import { useTranslation } from '../../lib/i18n'
 
-const MODE_LABEL_KEYS = { historic: 'account.modeHistoric', custom: 'account.modeCustom', wc2026: 'account.modeWc2026' }
 const SIMULATIONS_PREVIEW_N = 3
 
 // Themed dropdown for filtering the simulations list -- mirrors the
@@ -63,22 +63,6 @@ function SimFilterDropdown({ value, onChange, total }) {
   )
 }
 
-function PinToggle({ pinned, onToggle }) {
-  const { t } = useTranslation()
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-label={pinned ? t('account.unpin') : t('play.pinResult')}
-      className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center transition-colors ${
-        pinned ? 'text-gold' : 'text-charcoal-600/50 dark:text-charcoal-300/50 hover:text-charcoal-600 dark:hover:text-charcoal-300'
-      }`}
-    >
-      {pinned ? '\u2605' : '\u2606'}
-    </button>
-  )
-}
-
 function SimRow({ entry, pinned, onTogglePin }) {
   const { t, tn } = useTranslation()
   const winnerNation = entry.winner ? getNation(entry.winner) : null
@@ -99,38 +83,6 @@ function SimRow({ entry, pinned, onTogglePin }) {
   )
 }
 
-function SpotlightPodiumRow({ rank, label, name }) {
-  const { tn } = useTranslation()
-  if (!name) return null
-  const nation = getNation(name)
-  return (
-    <div className={`flex items-center gap-3 px-3 py-2 rounded-xl ${rank === 1 ? 'bg-gold/15 border border-gold' : 'bg-white/70 dark:bg-night-card/70 border border-charcoal-900/10 dark:border-white/10'}`}>
-      <span className="font-display text-xs font-bold text-charcoal-600 dark:text-charcoal-300 w-6 text-center shrink-0">{rank}</span>
-      {nation && <CountryFlag nation={nation} size="sm" />}
-      <span className="text-sm font-semibold flex-1 min-w-0 truncate text-left">{tn(name)}</span>
-      <span className="text-xs text-charcoal-600 dark:text-charcoal-300 shrink-0">{label}</span>
-    </div>
-  )
-}
-
-function SpotlightCard({ entry, onUnpin }) {
-  const { t } = useTranslation()
-  return (
-    <div className="rounded-2xl bg-gradient-to-br from-gold-light via-white dark:via-night-card to-gold-light/40 border-2 border-gold shadow-depth-gold p-4 space-y-2">
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-wide font-bold text-charcoal-900/70">
-          {t(MODE_LABEL_KEYS[entry.mode] || 'account.modeCustom')}{entry.descriptor ? ` · ${entry.descriptor}` : ''}
-        </p>
-        <PinToggle pinned onToggle={onUnpin} />
-      </div>
-      <div className="space-y-1.5">
-        <SpotlightPodiumRow rank={1} label={t('summary.winner')} name={entry.winner} />
-        <SpotlightPodiumRow rank={2} label={t('summary.runnerUp')} name={entry.runnerUp} />
-      </div>
-    </div>
-  )
-}
-
 export default function Account() {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -140,6 +92,9 @@ export default function Account() {
   const [loading, setLoading] = useState(true)
   const [simFilter, setSimFilter] = useState('recent')
   const [pinnedIds, setPinnedIds] = useState(() => getPinnedSimulationIds())
+  const [avatarUrl, setAvatarUrl] = useState(() => getProfile()?.avatarUrl || null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const avatarInputRef = useRef(null)
 
   useEffect(() => {
     if (!user) return
@@ -170,7 +125,31 @@ export default function Account() {
     navigate('/')
   }
 
+  // Instant local preview via createObjectURL (mirrors the group-avatar
+  // upload flow in CreateGroupModal.jsx), then upload to the public
+  // `user-avatars` bucket and persist the resulting URL on the profile row.
+  // Also mirrors it into the local profile cache immediately so
+  // ProfileButton/Dashboard pick up the change without a reload.
+  async function handleAvatarChange(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !user) return
+    setAvatarUrl(URL.createObjectURL(file))
+    setUploadingAvatar(true)
+    const result = await uploadUserAvatar(user.id, file)
+    if (!result.ok) {
+      setUploadingAvatar(false)
+      window.alert(result.error)
+      return
+    }
+    await updateProfileAvatar(user.id, result.url)
+    setUploadingAvatar(false)
+    setAvatarUrl(result.url)
+    saveProfile({ ...(getProfile() || {}), avatarUrl: result.url })
+  }
+
   const favoriteNation = user?.user_metadata?.favorite_team ? getNation(user.user_metadata.favorite_team) : null
+  const initial = (user?.user_metadata?.name || user?.email || '?').trim().charAt(0).toUpperCase()
 
   return (
     <AppBackground>
@@ -178,13 +157,36 @@ export default function Account() {
         <NavBar title={t('account.title')} />
 
         <div className="rounded-2xl bg-white/90 dark:bg-night-card/90 shadow-depth-lg p-5 flex items-center gap-4">
-          {favoriteNation && <CountryFlag nation={favoriteNation} size="lg" />}
+          <div className="relative shrink-0">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="w-14 h-14 rounded-full object-cover border border-charcoal-900/10 dark:border-white/10" />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-emerald text-white flex items-center justify-center font-display font-bold text-xl">
+                {initial}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              aria-label={t('profile.changePhoto')}
+              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gold text-charcoal-900 shadow-depth flex items-center justify-center hover:brightness-105 active:scale-95 transition-all disabled:opacity-60"
+            >
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 7h3l2-2h6l2 2h3v12H4z" />
+                <circle cx="12" cy="13" r="3.5" />
+              </svg>
+            </button>
+            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+          </div>
           <div className="flex-1 min-w-0">
             <p className="font-display font-bold text-lg text-charcoal-900 dark:text-sand truncate">{user?.user_metadata?.name || '—'}</p>
             <p className="text-sm text-charcoal-600 dark:text-charcoal-300 truncate">{user?.email}</p>
           </div>
+          {favoriteNation && <CountryFlag nation={favoriteNation} size="lg" className="shrink-0" />}
           <SambaButton variant="outline" size="sm" onClick={handleSignOut}>{t('account.signOut')}</SambaButton>
         </div>
+        {uploadingAvatar && <p className="-mt-3 text-xs text-charcoal-600 dark:text-charcoal-300">{t('profile.uploadingPhoto')}</p>}
 
         {spotlighted.length > 0 && (
           <div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LEAGUES, getLeague } from '../../data/leagues'
 import { fetchGroup, fetchGroupMembers, fetchGroupTablePrediction } from '../../lib/storage'
+import { predictionsLocked, PREDICTIONS_LOCK_AT } from '../../lib/predictionsLock'
 import { useAuth } from '../../lib/AuthContext'
 import { useTranslation } from '../../lib/i18n'
 import AppBackground from '../../components/common/AppBackground'
@@ -16,17 +17,31 @@ import MatchweekLeaderboard from './MatchweekLeaderboard'
 
 const TABS = ['members', 'table', 'overall', 'matchweek']
 
+const UNLOCK_LABEL = PREDICTIONS_LOCK_AT.toLocaleString('en-US', {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZone: 'America/New_York',
+  timeZoneName: 'short',
+})
+
 // A member's predicted table for one league, shown in a small popup when
 // tapping their circular per-league button on the roster. Reuses
 // fetchGroupTablePrediction against the *target* member's userId --
 // allowed by RLS's "group members can read locked predictions" policy
-// (see supabase/schema.sql), same call the leaderboards make.
-function MemberTableModal({ groupId, leagueKey, member, onClose }) {
+// (see supabase/schema.sql), same call the leaderboards make. `isSelf`
+// skips the lock check entirely -- you can always see your own picks.
+function MemberTableModal({ groupId, leagueKey, member, isSelf, onClose }) {
   const { t } = useTranslation()
   const league = getLeague(leagueKey)
+  const locked = !isSelf && !predictionsLocked()
   const [prediction, setPrediction] = useState(undefined)
 
   useEffect(() => {
+    if (locked) return
     let cancelled = false
     fetchGroupTablePrediction(member.userId, groupId, leagueKey).then((data) => {
       if (!cancelled) setPrediction(data)
@@ -34,7 +49,7 @@ function MemberTableModal({ groupId, leagueKey, member, onClose }) {
     return () => {
       cancelled = true
     }
-  }, [member.userId, groupId, leagueKey])
+  }, [member.userId, groupId, leagueKey, locked])
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-sm" onClick={onClose}>
@@ -55,7 +70,9 @@ function MemberTableModal({ groupId, leagueKey, member, onClose }) {
               ✕
             </button>
           </div>
-          {prediction === undefined ? (
+          {locked ? (
+            <p className="text-center text-charcoal-600 dark:text-charcoal-300 text-sm py-8">{t('profile.locked', { date: UNLOCK_LABEL })}</p>
+          ) : prediction === undefined ? (
             <p className="text-center text-charcoal-600 dark:text-charcoal-300 text-sm py-8">{t('account.loading')}</p>
           ) : prediction?.order ? (
             <PredictedTableView league={league} order={prediction.order} />
@@ -188,12 +205,25 @@ export default function GroupDashboard() {
           <div className="space-y-1.5">
             {members.map((m) => (
               <div key={m.userId} className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-white dark:bg-night-card border border-charcoal-900/10 dark:border-white/10">
-                <span className="text-sm text-charcoal-900 dark:text-sand truncate min-w-0">
-                  {m.name || t('compete.unnamedMember')}
-                  {m.role === 'admin' && (
-                    <span className="ml-2 text-[10px] uppercase tracking-wide text-gold-dark dark:text-gold font-semibold">{t('compete.adminBadge')}</span>
+                <button
+                  onClick={() => (m.userId === user?.id ? navigate('/account') : navigate(`/profile/${m.userId}`))}
+                  aria-label={t('compete.viewProfile', { name: m.name || t('compete.unnamedMember') })}
+                  className="flex items-center gap-2.5 min-w-0 flex-1 text-left hover:opacity-80 transition-opacity"
+                >
+                  {m.avatarUrl ? (
+                    <img src={m.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <span className="w-8 h-8 rounded-full bg-emerald text-white flex items-center justify-center font-display font-bold text-xs shrink-0">
+                      {(m.name || '?').trim().charAt(0).toUpperCase()}
+                    </span>
                   )}
-                </span>
+                  <span className="text-sm text-charcoal-900 dark:text-sand truncate min-w-0">
+                    {m.name || t('compete.unnamedMember')}
+                    {m.role === 'admin' && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide text-gold-dark dark:text-gold font-semibold">{t('compete.adminBadge')}</span>
+                    )}
+                  </span>
+                </button>
                 <div className="flex gap-1.5 shrink-0">
                   {enabledLeagues.map((league) => (
                     <button
@@ -232,6 +262,7 @@ export default function GroupDashboard() {
           groupId={groupId}
           leagueKey={openMemberTable.leagueKey}
           member={openMemberTable.member}
+          isSelf={openMemberTable.member.userId === user?.id}
           onClose={() => setOpenMemberTable(null)}
         />
       )}

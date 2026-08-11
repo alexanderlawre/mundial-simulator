@@ -106,11 +106,27 @@ export function isSimulationPinned(id) {
   return !!id && getPinnedSimulationIds().includes(id)
 }
 
+// `id` is either a real Supabase `simulation_history` row id (a uuid) for
+// logged-in users, or a `local-...` guest-mirror id (see
+// addLocalSimulationHistory above) that has no server-side row at all.
+// Only the former can be promoted to a cloud `pinned` write -- guest pins
+// stay local-only, same as the rest of their history.
+function looksLikeCloudSimulationId(id) {
+  return typeof id === 'string' && !id.startsWith('local-')
+}
+
 export function setSimulationPinned(id, pinned) {
   if (!id) return
   const current = getPinnedSimulationIds()
   const next = pinned ? [...new Set([...current, id])] : current.filter((x) => x !== id)
   localStorage.setItem(PINNED_SIMULATIONS_KEY, JSON.stringify(next))
+  // Best-effort mirror to the cloud row's `pinned` column so this result
+  // can show up on this user's public profile (/profile/:userId) for
+  // other signed-in users to see -- local-only storage above stays the
+  // source of truth for the owner's own star-toggle UI either way.
+  if (looksLikeCloudSimulationId(id)) {
+    supabase.from('simulation_history').update({ pinned }).eq('id', id).then(() => {}, () => {})
+  }
 }
 
 // ---------- Analytics (shared across all visitors via serverless API +
@@ -233,6 +249,86 @@ export async function fetchCloudSimulationHistory(userId) {
   }
 }
 
+// ---------- Public profiles (name + team + predictions + spotlight,
+// viewable by any signed-in user -- see src/pages/account/UserProfile.jsx)
+// ----------
+// Deliberately fetch only the columns a profile page is allowed to show
+// (name/favorite_team/avatar_url) -- there is no email or other personal
+// data in the `profiles` table to accidentally leak here.
+
+export async function fetchPublicProfile(userId) {
+  if (!userId) return null
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('name, favorite_team, avatar_url')
+      .eq('id', userId)
+      .single()
+    if (error || !data) return null
+    return data
+  } catch {
+    return null
+  }
+}
+
+// Same shape as fetchCloudLeaguePredictions, but for any userId. Before the
+// prediction-lock deadline (see src/lib/predictionsLock.js), RLS only
+// returns rows belonging to the caller themselves, so this naturally comes
+// back empty when viewing someone else's still-locked-to-them-only picks --
+// no client-side date check needed for correctness.
+export async function fetchPublicPredictions(userId) {
+  if (!userId) return {}
+  try {
+    const { data, error } = await supabase.from('league_predictions').select('*').eq('user_id', userId)
+    if (error || !data) return {}
+    return Object.fromEntries(data.map((row) => [row.league_key, { order: row.club_order, confirmed: row.confirmed, updatedAt: row.updated_at }]))
+  } catch {
+    return {}
+  }
+}
+
+// Only ever returns pinned=true rows for *any* userId thanks to the
+// "simulation_history: pinned rows are publicly readable" RLS policy --
+// works the same whether userId is the caller or someone else.
+export async function fetchPublicSpotlight(userId) {
+  if (!userId) return []
+  try {
+    const { data, error } = await supabase
+      .from('simulation_history')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('pinned', true)
+      .order('created_at', { ascending: false })
+    if (error || !data) return []
+    return data
+  } catch {
+    return []
+  }
+}
+
+// Uploads a profile picture to the public `user-avatars` Supabase Storage
+// bucket (created by supabase/add_profiles_predictions_lock.sql) and
+// returns its public URL -- mirrors uploadGroupAvatar below exactly.
+export async function uploadUserAvatar(userId, file) {
+  try {
+    const ext = file.name.split('.').pop() || 'jpg'
+    const path = `${userId}-${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('user-avatars').upload(path, file, { upsert: true })
+    if (error) return { ok: false, error: error.message || 'Could not upload photo.' }
+    const { data } = supabase.storage.from('user-avatars').getPublicUrl(path)
+    return { ok: true, url: data.publicUrl }
+  } catch (e) {
+    return { ok: false, error: e?.message || 'Could not upload photo.' }
+  }
+}
+
+export async function updateProfileAvatar(userId, avatarUrl) {
+  if (!userId) return { ok: false, error: 'You must be signed in.' }
+  const { error } = await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', userId)
+  if (error) return { ok: false, error: error.message || 'Could not save photo.' }
+  return { ok: true }
+}
+
 // ---------- Groups ("Predict the League" competitions) ----------
 // Unlike the fire-and-forget analytics/sync helpers above, these return
 // { ok, data } / { ok, error } -- group actions (create/join/admin) are
@@ -341,11 +437,17 @@ export async function fetchGroupMembers(groupId) {
   try {
     const { data, error } = await supabase
       .from('group_members')
-      .select('user_id, role, joined_at, profiles(name)')
+      .select('user_id, role, joined_at, profiles(name, avatar_url)')
       .eq('group_id', groupId)
       .order('joined_at', { ascending: true })
     if (error || !data) return []
-    return data.map((row) => ({ userId: row.user_id, role: row.role, joinedAt: row.joined_at, name: row.profiles?.name || null }))
+    return data.map((row) => ({
+      userId: row.user_id,
+      role: row.role,
+      joinedAt: row.joined_at,
+      name: row.profiles?.name || null,
+      avatarUrl: row.profiles?.avatar_url || null,
+    }))
   } catch {
     return []
   }

@@ -114,6 +114,7 @@ const en = {
     saveChanges: 'Save Changes',
     membersLabel: 'Members',
     unnamedMember: 'Unnamed Member',
+    viewProfile: 'View {name}\u2019s profile',
     adminBadge: 'Admin',
     removeMember: 'Remove',
     manageGroup: 'Manage',
@@ -333,6 +334,16 @@ const en = {
     modeHistoric: 'Historic World Cup',
     modeCustom: 'Custom Simulation',
     modeWc2026: 'World Cup 2026',
+  },
+  profile: {
+    notFound: 'Profile not found.',
+    predictedTables: 'Predicted Tables',
+    noPredictions: 'No predicted tables yet.',
+    spotlightedTournaments: 'Spotlighted Tournaments',
+    noSpotlight: 'No spotlighted tournaments yet.',
+    locked: 'Predictions unlock {date}.',
+    changePhoto: 'Change profile photo',
+    uploadingPhoto: 'Uploading photo\u2026',
   },
 }
 
@@ -586,6 +597,7 @@ const es = {
     saveChanges: 'Guardar Cambios',
     membersLabel: 'Miembros',
     unnamedMember: 'Miembro sin Nombre',
+    viewProfile: 'Ver el perfil de {name}',
     adminBadge: 'Admin',
     removeMember: 'Eliminar',
     manageGroup: 'Gestionar',
@@ -649,6 +661,16 @@ const es = {
     modeHistoric: 'Mundial Histórico',
     modeCustom: 'Simulación Personalizada',
     modeWc2026: 'Mundial 2026',
+  },
+  profile: {
+    notFound: 'Perfil no encontrado.',
+    predictedTables: 'Tablas Predichas',
+    noPredictions: 'Aún no hay tablas predichas.',
+    spotlightedTournaments: 'Torneos Destacados',
+    noSpotlight: 'Aún no hay torneos destacados.',
+    locked: 'Las predicciones se desbloquean el {date}.',
+    changePhoto: 'Cambiar foto de perfil',
+    uploadingPhoto: 'Subiendo foto\u2026',
   },
 }
 
@@ -902,6 +924,7 @@ const pt = {
     saveChanges: 'Guardar Alterações',
     membersLabel: 'Membros',
     unnamedMember: 'Membro Sem Nome',
+    viewProfile: 'Ver o perfil de {name}',
     adminBadge: 'Admin',
     removeMember: 'Remover',
     manageGroup: 'Gerir',
@@ -965,6 +988,16 @@ const pt = {
     modeHistoric: 'Copa Histórica',
     modeCustom: 'Simulação Personalizada',
     modeWc2026: 'Copa do Mundo 2026',
+  },
+  profile: {
+    notFound: 'Perfil não encontrado.',
+    predictedTables: 'Tabelas Previstas',
+    noPredictions: 'Ainda não há tabelas previstas.',
+    spotlightedTournaments: 'Torneios em Destaque',
+    noSpotlight: 'Ainda não há torneios em destaque.',
+    locked: 'As previsões são liberadas em {date}.',
+    changePhoto: 'Alterar foto de perfil',
+    uploadingPhoto: 'Enviando foto\u2026',
   },
 }
 
@@ -1218,6 +1251,7 @@ const fr = {
     saveChanges: 'Enregistrer',
     membersLabel: 'Membres',
     unnamedMember: 'Membre Sans Nom',
+    viewProfile: 'Voir le profil de {name}',
     adminBadge: 'Admin',
     removeMember: 'Retirer',
     manageGroup: 'Gérer',
@@ -1281,6 +1315,16 @@ const fr = {
     modeHistoric: 'Coupe du Monde Historique',
     modeCustom: 'Simulation Personnalisée',
     modeWc2026: 'Coupe du Monde 2026',
+  },
+  profile: {
+    notFound: 'Profil introuvable.',
+    predictedTables: 'Classements Prédits',
+    noPredictions: 'Aucun classement prédit pour le moment.',
+    spotlightedTournaments: 'Tournois en Vedette',
+    noSpotlight: 'Aucun tournoi en vedette pour le moment.',
+    locked: 'Les prédictions se débloquent le {date}.',
+    changePhoto: 'Changer la photo de profil',
+    uploadingPhoto: 'Téléchargement de la photo\u2026',
   },
 }
 
@@ -1534,6 +1578,7 @@ const de = {
     saveChanges: 'Änderungen Speichern',
     membersLabel: 'Mitglieder',
     unnamedMember: 'Unbenanntes Mitglied',
+    viewProfile: 'Profil von {name} ansehen',
     adminBadge: 'Admin',
     removeMember: 'Entfernen',
     manageGroup: 'Verwalten',
@@ -1597,6 +1642,16 @@ const de = {
     modeHistoric: 'Historische WM',
     modeCustom: 'Eigene Simulation',
     modeWc2026: 'WM 2026',
+  },
+  profile: {
+    notFound: 'Profil nicht gefunden.',
+    predictedTables: 'Vorhergesagte Tabellen',
+    noPredictions: 'Noch keine vorhergesagten Tabellen.',
+    spotlightedTournaments: 'Hervorgehobene Turniere',
+    noSpotlight: 'Noch keine hervorgehobenen Turniere.',
+    locked: 'Vorhersagen werden am {date} freigeschaltet.',
+    changePhoto: 'Profilbild ändern',
+    uploadingPhoto: 'Foto wird hochgeladen\u2026',
   },
 }
 

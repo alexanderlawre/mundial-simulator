@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getLeague } from '../../data/leagues'
 import { getNation } from '../../data/nations'
 import { fetchGroupTablePrediction, syncGroupTablePrediction } from '../../lib/storage'
+import { predictionsLocked, PREDICTIONS_LOCK_AT } from '../../lib/predictionsLock'
 import { useAuth } from '../../lib/AuthContext'
 import AppBackground from '../../components/common/AppBackground'
 import CountryFlag from '../../components/common/CountryFlag'
@@ -10,6 +11,17 @@ import LeagueDragBoard from '../../components/leagues/LeagueDragBoard'
 import PredictedTableView from '../../components/leagues/PredictedTableView'
 import SambaButton from '../../components/common/SambaButton'
 import { useTranslation } from '../../lib/i18n'
+
+const UNLOCK_LABEL = PREDICTIONS_LOCK_AT.toLocaleString('en-US', {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZone: 'America/New_York',
+  timeZoneName: 'short',
+})
 
 // Group-scoped variant of LeaguePredict.jsx: same LeagueDragBoard /
 // PredictedTableView, but persists to the group-scoped `table_predictions`
@@ -57,8 +69,10 @@ export default function GroupLeaguePredict() {
   }
 
   const nation = getNation(league.country)
+  const locked = predictionsLocked()
 
   async function handleConfirm(table) {
+    if (locked) return
     const state = { order: table, confirmed: true }
     setPrediction(state)
     setEditing(false)
@@ -92,7 +106,9 @@ export default function GroupLeaguePredict() {
           {editing && <p className="text-sm text-charcoal-600 dark:text-charcoal-300 mb-4">{t('leagues.dragHint')}</p>}
         </div>
 
-        {editing ? (
+        {editing && locked ? (
+          <p className="text-center text-sm text-charcoal-600 dark:text-charcoal-300 py-8">{t('profile.locked', { date: UNLOCK_LABEL })}</p>
+        ) : editing ? (
           <LeagueDragBoard league={league} initialOrder={prediction?.order || null} onConfirm={handleConfirm} />
         ) : (
           <div className="space-y-5">

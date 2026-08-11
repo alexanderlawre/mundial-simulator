@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/AuthContext'
 import { useTranslation } from '../../lib/i18n'
+import { getProfile } from '../../lib/storage'
 import GuestPrompt from './GuestPrompt'
 
 // Header icon linking to /account when logged in. Guests (no Supabase
@@ -39,14 +40,15 @@ export default function ProfileButton() {
   }
 
   const initial = (user.user_metadata?.name || user.email || '?').trim().charAt(0).toUpperCase()
+  const avatarUrl = getProfile()?.avatarUrl || null
 
   return (
     <button
       onClick={() => navigate('/account')}
       aria-label={t('account.title')}
-      className="w-9 h-9 shrink-0 rounded-full bg-emerald text-white shadow-depth border border-charcoal-900/10 dark:border-white/10 flex items-center justify-center font-display font-bold text-sm hover:brightness-105 active:scale-95 transition-all"
+      className="w-9 h-9 shrink-0 rounded-full bg-emerald text-white shadow-depth border border-charcoal-900/10 dark:border-white/10 flex items-center justify-center font-display font-bold text-sm hover:brightness-105 active:scale-95 transition-all overflow-hidden"
     >
-      {initial}
+      {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : initial}
     </button>
   )
 }
