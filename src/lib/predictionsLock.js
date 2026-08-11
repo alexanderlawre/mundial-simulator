@@ -9,7 +9,7 @@
 // RLS policies in supabase/add_profiles_predictions_lock.sql. A user with a
 // skewed device clock can never edit or peek early because of that, no
 // matter what this file says.
-export const PREDICTIONS_LOCK_AT = new Date('2026-08-21T16:00:00Z') // Fri Aug 21, 2026, 12:00 PM ET (EDT, UTC-4)
+export const PREDICTIONS_LOCK_AT = new Date('2026-09-01T04:01:00Z') // Tue Sep 1, 2026, 12:01 AM ET (EDT, UTC-4) -- right as the summer transfer window closes
 
 export function predictionsLocked() {
   return Date.now() >= PREDICTIONS_LOCK_AT.getTime()

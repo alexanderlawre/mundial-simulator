@@ -1,10 +1,10 @@
 -- Adds: user avatars, a public "pinned/spotlighted" flag on simulation
--- history, and a hard prediction-lock deadline (Fri Aug 21, 2026, 12:00 PM
--- ET / 16:00 UTC -- August is within US daylight saving, so ET = EDT =
--- UTC-4). Before this deadline, predictions are private to their owner and
--- freely editable; from this instant on, they're read-only and visible to
--- any signed-in user (used by the new /profile/:userId page and the group
--- Members tab).
+-- history, and a hard prediction-lock deadline (Tue Sep 1, 2026, 12:01 AM
+-- ET / 04:01 UTC -- right as the summer transfer window closes; September
+-- is within US daylight saving, so ET = EDT = UTC-4). Before this deadline,
+-- predictions are private to their owner and freely editable; from this
+-- instant on, they're read-only and visible to any signed-in user (used by
+-- the new /profile/:userId page and the group Members tab).
 --
 -- Run this once in the Supabase Dashboard -> SQL Editor -> New query.
 -- Safe to run standalone and safe to re-run (every statement is
@@ -48,14 +48,14 @@ create policy "profiles: own row can update"
 alter table public.league_predictions enable row level security;
 
 -- Full access to your own row, but only *before* the deadline -- this is
--- the server-side half of "predictions lock on Aug 21" (the client also
+-- the server-side half of "predictions lock on Sep 1" (the client also
 -- disables the editing UI past this instant, but this is what actually
 -- can't be bypassed).
 drop policy if exists "league_predictions: own row full access before lock" on public.league_predictions;
 create policy "league_predictions: own row full access before lock"
   on public.league_predictions for all
   using (auth.uid() = user_id)
-  with check (auth.uid() = user_id and now() < '2026-08-21T16:00:00Z'::timestamptz);
+  with check (auth.uid() = user_id and now() < '2026-09-01T04:01:00Z'::timestamptz);
 
 -- Once locked, any signed-in user can read anyone's predicted table
 -- (matches "we can view everyone's predicted table once the league season
@@ -63,7 +63,7 @@ create policy "league_predictions: own row full access before lock"
 drop policy if exists "league_predictions: readable by anyone after lock" on public.league_predictions;
 create policy "league_predictions: readable by anyone after lock"
   on public.league_predictions for select
-  using (now() >= '2026-08-21T16:00:00Z'::timestamptz);
+  using (now() >= '2026-09-01T04:01:00Z'::timestamptz);
 
 -- ============================================================
 -- simulation_history: row level security
@@ -93,7 +93,7 @@ drop policy if exists "table_predictions: group members can read locked predicti
 drop policy if exists "table_predictions: readable by anyone after lock" on public.table_predictions;
 create policy "table_predictions: readable by anyone after lock"
   on public.table_predictions for select
-  using (now() >= '2026-08-21T16:00:00Z'::timestamptz);
+  using (now() >= '2026-09-01T04:01:00Z'::timestamptz);
 -- Note: "table_predictions: own row full access" (existing policy, see
 -- schema.sql) already covers the owner reading/writing their own row at
 -- any time -- untouched by this migration.

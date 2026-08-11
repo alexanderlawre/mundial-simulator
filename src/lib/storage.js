@@ -433,20 +433,37 @@ export async function fetchGroup(groupId) {
 // Members joined with their profile name where available -- falls back
 // to null (UI shows a generic "Member" label) rather than failing the
 // whole roster fetch if a profile row is missing.
+//
+// Deliberately two separate queries instead of a single PostgREST embed
+// (`.select('..., profiles(name, avatar_url)')`): embedding requires a
+// *direct* foreign key between group_members and profiles, but
+// group_members.user_id and profiles.id both only reference auth.users(id)
+// independently (see schema.sql / add_profiles_predictions_lock.sql) --
+// there's no FK edge directly between the two tables for PostgREST to
+// find. That made the embed always fail, which silently emptied the whole
+// roster (every member, not just missing avatars) because of the
+// `if (error) return []` below. Fetching profiles separately by id and
+// merging client-side works regardless of FK relationships.
 export async function fetchGroupMembers(groupId) {
   try {
     const { data, error } = await supabase
       .from('group_members')
-      .select('user_id, role, joined_at, profiles(name, avatar_url)')
+      .select('user_id, role, joined_at')
       .eq('group_id', groupId)
       .order('joined_at', { ascending: true })
     if (error || !data) return []
+    const userIds = data.map((row) => row.user_id)
+    let profilesById = {}
+    if (userIds.length) {
+      const { data: profileRows } = await supabase.from('profiles').select('id, name, avatar_url').in('id', userIds)
+      profilesById = Object.fromEntries((profileRows || []).map((p) => [p.id, p]))
+    }
     return data.map((row) => ({
       userId: row.user_id,
       role: row.role,
       joinedAt: row.joined_at,
-      name: row.profiles?.name || null,
-      avatarUrl: row.profiles?.avatar_url || null,
+      name: profilesById[row.user_id]?.name || null,
+      avatarUrl: profilesById[row.user_id]?.avatar_url || null,
     }))
   } catch {
     return []
@@ -544,16 +561,28 @@ export async function fetchGroupTablePrediction(userId, groupId, leagueKey) {
 // used to render the Table leaderboard once there's an actual final
 // table to score against (RLS only returns rows where locked = true, so
 // in-progress picks stay private until confirmed).
+//
+// Same two-query pattern as fetchGroupMembers above, for the same reason:
+// table_predictions and profiles have no direct foreign key between them
+// (both only reference auth.users(id) independently), so a PostgREST
+// embed (`profiles(name)`) here always fails and used to silently empty
+// the whole leaderboard.
 export async function fetchGroupTablePredictions(groupId, leagueKey) {
   try {
     const { data, error } = await supabase
       .from('table_predictions')
-      .select('user_id, ordered_club_keys, locked, profiles(name)')
+      .select('user_id, ordered_club_keys, locked')
       .eq('group_id', groupId)
       .eq('league_key', leagueKey)
       .eq('locked', true)
     if (error || !data) return []
-    return data.map((row) => ({ userId: row.user_id, order: row.ordered_club_keys, name: row.profiles?.name || null }))
+    const userIds = data.map((row) => row.user_id)
+    let namesById = {}
+    if (userIds.length) {
+      const { data: profileRows } = await supabase.from('profiles').select('id, name').in('id', userIds)
+      namesById = Object.fromEntries((profileRows || []).map((p) => [p.id, p.name]))
+    }
+    return data.map((row) => ({ userId: row.user_id, order: row.ordered_club_keys, name: namesById[row.user_id] || null }))
   } catch {
     return []
   }
