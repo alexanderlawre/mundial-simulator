@@ -1,5 +1,6 @@
 import ClubBadge from './ClubBadge'
 import { getZoneForRank } from '../../data/leagues'
+import Logo from '../common/Logo'
 import { useTranslation } from '../../lib/i18n'
 
 // A minimal, ALWAYS-LIGHT inline flag renderer -- deliberately not reusing
@@ -27,17 +28,18 @@ function LightFlag({ nation, size = 40 }) {
   )
 }
 
-// One numbered row, light-only, badge + name. `h-full` lets it stretch to
-// fill an equal-share flex slot in the portrait card body below, so every
-// row grows/shrinks together to exactly fill the fixed page height
-// regardless of how many clubs the league has.
+// One numbered row, light-only, badge + name. Fixed, generous min-height
+// (rather than a flex-1 equal-share of a fixed total page height) so a
+// club's crest and name always render at their real, legible size no
+// matter how many clubs the league has -- the card grows taller instead of
+// squeezing every row shorter than its own content, which is what used to
+// cause crests/text to overflow their row and visually overlap the row
+// below on 18-20 club leagues.
 // Podium background treatment for top 3 stays as poster flair (adds
 // emphasis, loses no information), but the left border always reflects the
 // club's *real* qualification zone color (Champions League / Europa /
 // Conference / relegation playoff / relegation) exactly as shown in the
-// on-device predicted table -- previously this collapsed everything outside
-// the top 3 and the relegation zone down to a plain white row, silently
-// dropping the Europa/Conference/playoff zone info the live table shows.
+// on-device predicted table.
 function Row({ rank, club, accent, podium, zoneColor }) {
   const podiumClasses = {
     gold: 'bg-gradient-to-r from-gold-light via-gold to-gold-light shadow-depth-gold',
@@ -47,7 +49,7 @@ function Row({ rank, club, accent, podium, zoneColor }) {
 
   return (
     <div
-      className={`h-full flex items-center gap-3 px-3 rounded-xl border border-charcoal-900/10 border-l-4 ${podiumClasses}`}
+      className={`min-h-[52px] flex items-center gap-3 px-3 py-2 rounded-xl border border-charcoal-900/10 border-l-4 ${podiumClasses}`}
       style={{ borderLeftColor: zoneColor || 'transparent' }}
     >
       <span className="w-7 text-center font-display font-extrabold text-sm text-charcoal-900 tabular-nums shrink-0">
@@ -59,17 +61,20 @@ function Row({ rank, club, accent, podium, zoneColor }) {
   )
 }
 
-// Portrait, "paper size" share card (A4-like 1:1.414 aspect, fixed
-// dimensions) rendered off-screen by LeagueShareModal.jsx and captured to
-// PNG via shareImage.js. The full table always flows as a single tall
-// column -- top3 get gold/silver/bronze podium treatment on top of a real
-// per-position zone-color left border (Champions League/Europa/Conference/
-// relegation playoff/relegation, same colors + ranges as the on-device
-// table via getZoneForRank) -- and every row takes an equal flex share of
-// the body height so an 18-club league and a 20-club league both fill the
-// same page shape edge-to-edge. Never uses any `dark:`-prefixed class
-// anywhere in this file, so the exported image is always a consistent,
-// legible light "poster" no matter the app's current theme.
+// Portrait "paper" share card rendered off-screen by LeagueShareModal.jsx
+// and captured to PNG via shareImage.js. Fixed WIDTH only (720px) -- height
+// is intentionally natural/auto, growing with however many rows the league
+// has, rather than forced into a fixed aspect ratio. Squeezing every league
+// (18 clubs, 20 clubs, ...) into the same total height is exactly what
+// caused crests/names to compress and overlap before; letting the card
+// grow instead keeps every row at a fixed, legible size with crests, names,
+// and positions always in order and never overlapping. Top 3 get
+// gold/silver/bronze podium treatment on top of a real per-position
+// zone-color left border (Champions League/Europa/Conference/relegation
+// playoff/relegation, same colors + ranges as the on-device table via
+// getZoneForRank). Never uses any `dark:`-prefixed class anywhere in this
+// file, so the exported image is always a consistent, legible light
+// "poster" no matter the app's current theme.
 export default function LeagueShareCard({ league, nation, clubs, order }) {
   const { t } = useTranslation()
   const accent = league.colors.accent
@@ -80,7 +85,7 @@ export default function LeagueShareCard({ league, nation, clubs, order }) {
   })
 
   return (
-    <div className="w-[720px] aspect-[1/1.414] bg-[#F4EFE6] rounded-3xl overflow-hidden shadow-depth-lg font-sans flex flex-col">
+    <div className="w-[720px] bg-[#F4EFE6] rounded-3xl overflow-hidden shadow-depth-lg font-sans flex flex-col">
       <div
         className="p-7 text-white shrink-0"
         style={{ background: `linear-gradient(135deg, ${league.colors.from}, ${league.colors.to})` }}
@@ -94,15 +99,14 @@ export default function LeagueShareCard({ league, nation, clubs, order }) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col px-6 py-4 gap-1.5">
+      <div className="flex flex-col px-6 py-4 gap-1.5">
         {rows.map(({ rank, club, podium, zoneColor }) => club && (
-          <div key={rank} className="flex-1 min-h-0">
-            <Row rank={rank} club={club} accent={accent} podium={podium} zoneColor={zoneColor} />
-          </div>
+          <Row key={rank} rank={rank} club={club} accent={accent} podium={podium} zoneColor={zoneColor} />
         ))}
       </div>
 
-      <div className="px-6 pb-6 flex items-center justify-center shrink-0">
+      <div className="px-6 pb-6 pt-2 flex flex-col items-center gap-1.5 shrink-0">
+        <Logo className="h-8 w-auto" />
         <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-charcoal-600/50">MUNDIAL</p>
       </div>
     </div>

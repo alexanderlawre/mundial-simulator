@@ -1,3 +1,4 @@
+import Logo from '../common/Logo'
 import { useTranslation } from '../../lib/i18n'
 
 // A minimal, ALWAYS-LIGHT inline flag renderer -- deliberately not reusing
@@ -82,7 +83,8 @@ export default function WorldCupShareCard({ title, hostLabel, champion, runnerUp
         </div>
       </div>
 
-      <div className="px-6 pb-6 flex items-center justify-center shrink-0">
+      <div className="px-6 pb-6 pt-2 flex flex-col items-center gap-1.5 shrink-0">
+        <Logo className="h-8 w-auto" />
         <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-charcoal-600/50">MUNDIAL</p>
       </div>
     </div>
