@@ -228,7 +228,11 @@ export default function GroupDashboard() {
                   {enabledLeagues.map((league) => (
                     <button
                       key={league.key}
-                      onClick={() => setOpenMemberTable({ member: m, leagueKey: league.key })}
+                      onClick={() =>
+                        m.userId === user?.id
+                          ? navigate(`/compete/group/${groupId}/predict/${league.key}`)
+                          : setOpenMemberTable({ member: m, leagueKey: league.key })
+                      }
                       title={league.name}
                       className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-display font-bold text-white shrink-0"
                       style={{ backgroundColor: league.colors.accent }}
