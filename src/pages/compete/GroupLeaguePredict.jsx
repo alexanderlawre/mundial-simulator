@@ -27,9 +27,12 @@ const UNLOCK_LABEL = PREDICTIONS_LOCK_AT.toLocaleString('en-US', {
 // PredictedTableView, but persists to the group-scoped `table_predictions`
 // table (via syncGroupTablePrediction/fetchGroupTablePrediction) instead
 // of the ungrouped solo `league_predictions` table, so the same user can
-// lock in a different table call per group. Unlike the solo flow, there
-// is intentionally no "Edit predictions" button once locked -- per spec,
-// preseason table calls cannot be re-predicted mid-season.
+// lock in a different table call per group. Mirrors the solo flow's
+// edit-until-the-deadline behavior: confirming just flips `locked` on the
+// row (so it's excluded from the group's Table leaderboard, which only
+// reads locked=true rows) -- it's freely re-editable up until the real
+// prediction-lock deadline (see predictionsLock.js), not a one-time,
+// irreversible confirm.
 export default function GroupLeaguePredict() {
   const { groupId, leagueKey } = useParams()
   const navigate = useNavigate()
@@ -79,6 +82,20 @@ export default function GroupLeaguePredict() {
     await syncGroupTablePrediction(user?.id, groupId, league.key, state)
   }
 
+  // Re-opens the drag board on an already-confirmed table, same as
+  // LeaguePredict.jsx's handleEdit. Also flips `locked` back to false on
+  // the server row so a table mid-edit drops out of the group's Table
+  // leaderboard (which only reads locked=true rows) until re-confirmed --
+  // never blocked before the real deadline.
+  async function handleEdit() {
+    if (locked) return
+    setPrediction((p) => ({ ...p, confirmed: false }))
+    setEditing(true)
+    if (prediction?.order) {
+      await syncGroupTablePrediction(user?.id, groupId, league.key, { order: prediction.order, confirmed: false })
+    }
+  }
+
   if (loading) {
     return (
       <AppBackground>
@@ -113,10 +130,17 @@ export default function GroupLeaguePredict() {
         ) : (
           <div className="space-y-5">
             <PredictedTableView league={league} order={prediction.order} />
-            <p className="text-xs text-center text-charcoal-600 dark:text-charcoal-300">{t('compete.tablePredictionLocked')}</p>
-            <SambaButton variant="outline" className="w-full" onClick={() => navigate(`/compete/group/${groupId}`)}>
-              {t('common.back')}
-            </SambaButton>
+            {locked && <p className="text-xs text-center text-charcoal-600 dark:text-charcoal-300">{t('compete.tablePredictionLocked')}</p>}
+            <div className="flex gap-2">
+              {!locked && (
+                <SambaButton variant="outline" className="flex-1" onClick={handleEdit}>
+                  {t('leagues.editPredictions')}
+                </SambaButton>
+              )}
+              <SambaButton variant={locked ? 'outline' : 'gold'} className="flex-1" onClick={() => navigate(`/compete/group/${groupId}`)}>
+                {t('common.back')}
+              </SambaButton>
+            </div>
           </div>
         )}
       </div>
