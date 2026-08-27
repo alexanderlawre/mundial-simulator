@@ -15,6 +15,9 @@ const ZONE_LABEL_ORDER = [
   ['sudamericana', 'leagues.zoneSudamericana'],
   ['relegationPlayoff', 'leagues.zoneRelegationPlayoff'],
   ['relegation', 'leagues.zoneRelegation'],
+  ['clR16', 'leagues.zoneClR16'],
+  ['clPlayoff', 'leagues.zoneClPlayoff'],
+  ['clOut', 'leagues.zoneClOut'],
 ]
 
 // A minimal, ALWAYS-LIGHT inline flag renderer -- deliberately not reusing

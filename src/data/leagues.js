@@ -36,6 +36,9 @@ const ZONE_COLORS = {
   relegation: '#ef4444', // red
   libertadores: '#10b981', // emerald
   sudamericana: '#3b82f6', // blue
+  clR16: '#10b981', // emerald -- Champions League: ranks 1-8, auto-advance to Round of 16
+  clPlayoff: '#6ee7b7', // light emerald -- Champions League: ranks 9-24, knockout play-off round
+  clOut: '#ef4444', // red -- Champions League: ranks 25-36, eliminated
 }
 
 // `zones` is a declarative list of 1-indexed inclusive rank ranges per
@@ -54,9 +57,7 @@ export function getZoneForRank(league, rank) {
 // Placeholder cards shown on the Leagues Hub for competitions that aren't
 // predictable yet -- no `clubs`/`zones`, just enough to render a disabled
 // "Coming Soon" card with the same gradient-card visual language.
-export const UPCOMING_COMPETITIONS = [
-  { key: 'champions-league', name: 'Champions League', colors: { from: '#0A1428', to: '#1E3A8A' } },
-]
+export const UPCOMING_COMPETITIONS = []
 
 export const LEAGUES = [
   {
@@ -178,6 +179,62 @@ export const LEAGUES = [
       { key: 'athletico-paranaense', name: 'Athletico Paranaense', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Athletico_Paranaense_%28Logo_2019%29.svg' },
       { key: 'chapecoense', name: 'Chapecoense', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Logo_Associa%C3%A7%C3%A3o_Chapecoense_de_Futebol.svg' },
       { key: 'remo', name: 'Remo', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/70/Clube_do_Remo.svg' },
+    ],
+  },
+  {
+    key: 'champions-league',
+    name: 'Champions League',
+    // International club competition -- no single country flag, unlike
+    // every domestic league above (LeaguePredict.jsx's `getNation(league.country)`
+    // already returns null/renders nothing when `country` is omitted).
+    colors: { from: '#0A1428', to: '#1E3A8A', accent: '#1E3A8A' },
+    // 36-club league phase (2026-27 format): ranks 1-8 auto-advance straight
+    // to the Round of 16, ranks 9-24 go into a knockout play-off round,
+    // ranks 25-36 are eliminated. See src/lib/leagues/championsLeagueBracket.js
+    // for how the knockout bracket itself is seeded from this table.
+    zones: [zone('clR16', 1, 8), zone('clPlayoff', 9, 24), zone('clOut', 25, 36)],
+    clubs: [
+      // Clubs also playing in a domestic league above reuse that exact
+      // badgeUrl. The rest are sourced from the same luukhopman/football-logos
+      // repo (folder confirmed to exist for each country below) or a
+      // Wikipedia hotlink for the 2 clubs (Slovakia, Azerbaijan) that repo
+      // doesn't cover -- every URL below was verified to return HTTP 200.
+      { key: 'arsenal', name: 'Arsenal', badgeUrl: logo('logos/England - Premier League/Arsenal FC.png') },
+      { key: 'aston-villa', name: 'Aston Villa', badgeUrl: logo('logos/England - Premier League/Aston Villa.png') },
+      { key: 'liverpool', name: 'Liverpool', badgeUrl: logo('logos/England - Premier League/Liverpool FC.png') },
+      { key: 'manchester-city', name: 'Manchester City', badgeUrl: logo('logos/England - Premier League/Manchester City.png') },
+      { key: 'manchester-united', name: 'Manchester United', badgeUrl: logo('logos/England - Premier League/Manchester United.png') },
+      { key: 'atletico-madrid', name: 'Atlético Madrid', badgeUrl: logo('logos/Spain - LaLiga/Atlético de Madrid.png') },
+      { key: 'barcelona', name: 'Barcelona', badgeUrl: logo('logos/Spain - LaLiga/FC Barcelona.png') },
+      { key: 'real-madrid', name: 'Real Madrid', badgeUrl: logo('logos/Spain - LaLiga/Real Madrid.png') },
+      { key: 'real-betis', name: 'Real Betis', badgeUrl: logo('logos/Spain - LaLiga/Real Betis Balompié.png') },
+      { key: 'villarreal', name: 'Villarreal', badgeUrl: logo('logos/Spain - LaLiga/Villarreal CF.png') },
+      { key: 'inter-milan', name: 'Inter Milan', badgeUrl: logo('logos/Italy - Serie A/Inter Milan.png') },
+      { key: 'napoli', name: 'Napoli', badgeUrl: logo('logos/Italy - Serie A/SSC Napoli.png') },
+      { key: 'roma', name: 'Roma', badgeUrl: logo('logos/Italy - Serie A/AS Roma.png') },
+      { key: 'como', name: 'Como', badgeUrl: logo('logos/Italy - Serie A/Como 1907.png') },
+      { key: 'bayern-munich', name: 'Bayern Munich', badgeUrl: logo('logos/Germany - Bundesliga/Bayern Munich.png') },
+      { key: 'borussia-dortmund', name: 'Borussia Dortmund', badgeUrl: logo('logos/Germany - Bundesliga/Borussia Dortmund.png') },
+      { key: 'rb-leipzig', name: 'RB Leipzig', badgeUrl: logo('logos/Germany - Bundesliga/RB Leipzig.png') },
+      { key: 'stuttgart', name: 'Stuttgart', badgeUrl: logo('logos/Germany - Bundesliga/VfB Stuttgart.png') },
+      { key: 'paris-saint-germain', name: 'Paris Saint-Germain', badgeUrl: logo('logos/France - Ligue 1/Paris Saint-Germain.png') },
+      { key: 'lille', name: 'Lille', badgeUrl: logo('logos/France - Ligue 1/LOSC Lille.png') },
+      { key: 'lens', name: 'Lens', badgeUrl: logo('logos/France - Ligue 1/RC Lens.png') },
+      { key: 'psv', name: 'PSV', badgeUrl: logo('logos/Netherlands - Eredivisie/PSV Eindhoven.png') },
+      { key: 'feyenoord', name: 'Feyenoord', badgeUrl: logo('logos/Netherlands - Eredivisie/Feyenoord Rotterdam.png') },
+      { key: 'porto', name: 'Porto', badgeUrl: logo('logos/Portugal - Liga Portugal/FC Porto.png') },
+      { key: 'sporting-cp', name: 'Sporting CP', badgeUrl: logo('logos/Portugal - Liga Portugal/Sporting CP.png') },
+      { key: 'club-brugge', name: 'Club Brugge', badgeUrl: logo('logos/Belgium - Jupiler Pro League/Club Brugge KV.png') },
+      { key: 'slavia-praha', name: 'Slavia Praha', badgeUrl: logo('logos/Czech Republic - Chance Liga/SK Slavia Prague.png') },
+      { key: 'galatasaray', name: 'Galatasaray', badgeUrl: logo('logos/Türkiye - Süper Lig/Galatasaray.png') },
+      { key: 'fenerbahce', name: 'Fenerbahçe', badgeUrl: logo('logos/Türkiye - Süper Lig/Fenerbahce.png') },
+      { key: 'shakhtar-donetsk', name: 'Shakhtar Donetsk', badgeUrl: logo('logos/Ukraine - Premier Liga/Shakhtar Donetsk.png') },
+      { key: 'bodo-glimt', name: 'Bodø/Glimt', badgeUrl: logo('logos/Norway - Eliteserien/FK BodøGlimt.png') },
+      { key: 'viking', name: 'Viking', badgeUrl: logo('logos/Norway - Eliteserien/Viking FK.png') },
+      { key: 'slovan-bratislava', name: 'Slovan Bratislava', badgeUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/01/SK_Slovan_Bratislava_logo.svg' },
+      { key: 'lask', name: 'LASK', badgeUrl: logo('logos/Austria - Bundesliga/LASK.png') },
+      { key: 'aek-athens', name: 'AEK Athens', badgeUrl: logo('logos/Greece - Super League 1/AEK Athens.png') },
+      { key: 'sabah', name: 'Sabah', badgeUrl: 'https://upload.wikimedia.org/wikipedia/en/a/a9/Sabah_FC_%28Azerbaijan%29.png' },
     ],
   },
 ]

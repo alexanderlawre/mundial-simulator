@@ -632,3 +632,109 @@ export async function fetchMatchdayPredictions(userId, groupId, fixtureIds) {
     return {}
   }
 }
+
+// ---------- Champions League knockout bracket ----------
+// Dictionary keyed by league (only 'champions-league' today, but kept
+// generic like LEAGUE_PREDICTIONS_KEY above) so bracket progress persists
+// the same way table predictions do. Shape per entry: { playoff, knockout }
+// -- see src/lib/leagues/championsLeagueBracket.js for the exact contents.
+
+const BRACKETS_KEY = 'mundial.brackets'
+
+export function getBracket(leagueKey) {
+  const all = safeParse(localStorage.getItem(BRACKETS_KEY), {})
+  return all[leagueKey] || null
+}
+
+export function saveBracket(leagueKey, matchState) {
+  const all = safeParse(localStorage.getItem(BRACKETS_KEY), {})
+  all[leagueKey] = matchState
+  localStorage.setItem(BRACKETS_KEY, JSON.stringify(all))
+}
+
+export async function syncBracketToCloud(userId, leagueKey, matchState) {
+  if (!userId) return
+  try {
+    await supabase.from('league_brackets').upsert({
+      user_id: userId,
+      league_key: leagueKey,
+      match_state: matchState,
+      updated_at: new Date().toISOString(),
+    })
+  } catch {
+    // best-effort only
+  }
+}
+
+export async function fetchCloudBracket(userId, leagueKey) {
+  if (!userId) return null
+  try {
+    const { data, error } = await supabase
+      .from('league_brackets')
+      .select('match_state')
+      .eq('user_id', userId)
+      .eq('league_key', leagueKey)
+      .maybeSingle()
+    if (error || !data) return null
+    return data.match_state || null
+  } catch {
+    return null
+  }
+}
+
+// ---------- Group-scoped Champions League bracket ----------
+// Same { playoff, knockout } shape, scoped to a group so the same user can
+// keep an independent bracket per group -- mirrors the group-scoped table
+// prediction split above.
+
+const GROUP_BRACKETS_KEY = 'mundial.groupBrackets'
+
+function groupBracketLocalKey(groupId, leagueKey) {
+  return `${groupId}:${leagueKey}`
+}
+
+export function getGroupBracket(groupId, leagueKey) {
+  const all = safeParse(localStorage.getItem(GROUP_BRACKETS_KEY), {})
+  return all[groupBracketLocalKey(groupId, leagueKey)] || null
+}
+
+export function saveGroupBracket(groupId, leagueKey, matchState) {
+  const all = safeParse(localStorage.getItem(GROUP_BRACKETS_KEY), {})
+  all[groupBracketLocalKey(groupId, leagueKey)] = matchState
+  localStorage.setItem(GROUP_BRACKETS_KEY, JSON.stringify(all))
+}
+
+export async function syncGroupBracketToCloud(userId, groupId, leagueKey, matchState) {
+  if (!userId) return
+  try {
+    await supabase.from('group_brackets').upsert(
+      {
+        user_id: userId,
+        group_id: groupId,
+        league_key: leagueKey,
+        match_state: matchState,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id,group_id,league_key' }
+    )
+  } catch {
+    // best-effort only
+  }
+}
+
+export async function fetchGroupBracket(userId, groupId, leagueKey) {
+  if (!userId) return null
+  try {
+    const { data, error } = await supabase
+      .from('group_brackets')
+      .select('match_state')
+      .eq('user_id', userId)
+      .eq('group_id', groupId)
+      .eq('league_key', leagueKey)
+      .maybeSingle()
+    if (error || !data) return null
+    return data.match_state || null
+  } catch {
+    return null
+  }
+}

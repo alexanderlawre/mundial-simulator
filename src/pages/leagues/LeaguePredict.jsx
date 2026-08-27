@@ -26,6 +26,9 @@ const ZONE_LABEL_ORDER = [
   ['sudamericana', 'leagues.zoneSudamericana'],
   ['relegationPlayoff', 'leagues.zoneRelegationPlayoff'],
   ['relegation', 'leagues.zoneRelegation'],
+  ['clR16', 'leagues.zoneClR16'],
+  ['clPlayoff', 'leagues.zoneClPlayoff'],
+  ['clOut', 'leagues.zoneClOut'],
 ]
 
 const UNLOCK_LABEL = PREDICTIONS_LOCK_AT.toLocaleString('en-US', {
@@ -131,6 +134,11 @@ export default function LeaguePredict() {
           <div className="space-y-5">
             <PredictedTableView league={league} order={prediction.order} />
             {locked && <p className="text-xs text-center text-charcoal-600 dark:text-charcoal-300">{t('leagues.predictionsLocked')}</p>}
+            {league.key === 'champions-league' && (
+              <SambaButton variant="primary" className="w-full" onClick={() => navigate(`/leagues/${league.key}/bracket`)}>
+                {t('leagues.continueToBracket')}
+              </SambaButton>
+            )}
             <div className="flex gap-2">
               {!locked && (
                 <SambaButton variant="outline" className="flex-1" onClick={handleEdit}>

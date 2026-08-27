@@ -6,7 +6,16 @@ import { useTranslation, translateRoundLabel } from '../../lib/i18n'
 // A single team row inside a match card: the real team (tappable to
 // pick/flip the winner, or cosmetically "predict" it), or a dashed "TBD"
 // placeholder when this slot hasn't been fed a team yet.
-function TeamRow({ team, compact, isWinner, isPredicted, clickable, onClick, showScore, score, wentToPenalties, pen, showAdvances, tbdLabel, advancesLabel }) {
+function defaultRenderTeam(team, compact, tn) {
+  return (
+    <>
+      <CountryFlag nation={team} size={compact ? 'sm' : 'md'} />
+      <span className={`truncate text-charcoal-900 dark:text-sand ${compact ? 'text-xs' : 'text-sm'}`}>{tn(team.name)}</span>
+    </>
+  )
+}
+
+function TeamRow({ team, compact, isWinner, isPredicted, clickable, onClick, showScore, score, wentToPenalties, pen, showAdvances, tbdLabel, advancesLabel, renderTeam }) {
   const { tn } = useTranslation()
   if (!team) {
     return (
@@ -27,8 +36,7 @@ function TeamRow({ team, compact, isWinner, isPredicted, clickable, onClick, sho
         ${clickable ? 'hover:bg-sand dark:hover:bg-night cursor-pointer' : 'cursor-default'}`}
     >
       <span className="flex items-center gap-2 min-w-0">
-        <CountryFlag nation={team} size={compact ? 'sm' : 'md'} />
-        <span className={`truncate text-charcoal-900 dark:text-sand ${compact ? 'text-xs' : 'text-sm'}`}>{tn(team.name)}</span>
+        {(renderTeam || defaultRenderTeam)(team, compact, tn)}
       </span>
       {showScore && (
         <span className="font-display tabular-nums font-semibold shrink-0 text-charcoal-900 dark:text-sand">
@@ -49,7 +57,7 @@ function TeamRow({ team, compact, isWinner, isPredicted, clickable, onClick, sho
 // match, when `interactive`, STAYS tap-to-edit -- not just the newest
 // round -- so changing an earlier match's winner is reachable from anywhere
 // in the tree, live stage or celebration recap alike.
-function MatchNode({ matchId, meta, data, teamsByName, interactive, allowPredict, onSimulateMatch, onEditMatch, onPredict, userNation, compact, emphasis, registerRef }) {
+function MatchNode({ matchId, meta, data, teamsByName, interactive, allowPredict, onSimulateMatch, onEditMatch, onPredict, userNation, compact, emphasis, registerRef, renderTeam }) {
   const { t } = useTranslation()
   const teamA = data.teamA ? teamsByName[data.teamA] : null
   const teamB = data.teamB ? teamsByName[data.teamB] : null
@@ -106,11 +114,12 @@ function MatchNode({ matchId, meta, data, teamsByName, interactive, allowPredict
               showAdvances={played && !hasScore && isWinner}
               tbdLabel={t('play.tbd')}
               advancesLabel={t('play.advances')}
+              renderTeam={renderTeam}
             />
           )
         })}
       </div>
-      {ready && !played && (
+      {ready && !played && onSimulateMatch && (
         <div className="px-2 pb-1.5">
           <SambaButton size="sm" variant="outline" className="w-full" onClick={() => onSimulateMatch(matchId)}>
             {t('play.simulateMatchButton')}
@@ -140,6 +149,7 @@ export default function BracketTree({
   onEditMatch,
   onPredict,
   userNation,
+  renderTeam,
 }) {
   const { t } = useTranslation()
   const containerRef = useRef(null)
@@ -218,6 +228,7 @@ export default function BracketTree({
         compact={compactForRound(meta.roundIdx)}
         emphasis={matchId === finalMatchId ? 'final' : matchId === thirdMatchId ? 'third' : null}
         registerRef={(el) => cardRefs.current.set(matchId, el)}
+        renderTeam={renderTeam}
       />
     )
   }

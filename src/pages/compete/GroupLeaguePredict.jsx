@@ -131,6 +131,11 @@ export default function GroupLeaguePredict() {
           <div className="space-y-5">
             <PredictedTableView league={league} order={prediction.order} />
             {locked && <p className="text-xs text-center text-charcoal-600 dark:text-charcoal-300">{t('compete.tablePredictionLocked')}</p>}
+            {league.key === 'champions-league' && (
+              <SambaButton variant="primary" className="w-full" onClick={() => navigate(`/compete/group/${groupId}/bracket/${league.key}`)}>
+                {t('leagues.continueToBracket')}
+              </SambaButton>
+            )}
             <div className="flex gap-2">
               {!locked && (
                 <SambaButton variant="outline" className="flex-1" onClick={handleEdit}>
