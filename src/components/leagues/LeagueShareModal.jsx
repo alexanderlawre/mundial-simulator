@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import LeagueShareCard from './LeagueShareCard'
 import SambaButton from '../common/SambaButton'
 import { captureNode, shareOrDownload } from '../../lib/shareImage'
@@ -8,23 +8,60 @@ import { useTranslation } from '../../lib/i18n'
 // far outside the viewport rather than display:none, since html2canvas
 // needs real layout/paint to capture from) so captures are
 // resolution-consistent regardless of the viewport size that triggered
-// them. Preview inside the modal is the same node, just visually scaled
-// down and wrapped in a scrollable frame to fit the card's portrait
-// "paper" aspect ratio.
+// them. As soon as the modal mounts, that off-screen node is captured
+// once into a real JPEG blob -- the *actual* exported file -- and shown
+// as a genuine <img> in the preview (rather than a scaled-down live copy
+// of the DOM). Real <img> elements support the browser's native drag
+// gesture, so on desktop the user can literally drag the picture straight
+// onto their Desktop/Finder to save it, in addition to the explicit
+// Download button (still needed for the mobile share-sheet path, and as a
+// fallback anywhere drag-out isn't available).
 export default function LeagueShareModal({ league, order, clubs, nation, onClose }) {
   const { t } = useTranslation()
-  const [busy, setBusy] = useState(false)
+  const [busy, setBusy] = useState(true)
+  const [blob, setBlob] = useState(null)
+  const [imageUrl, setImageUrl] = useState(null)
   const cardRef = useRef(null)
+  const filename = `mundial-${league.key}-table.jpg`
 
-  async function handleExport() {
-    if (!cardRef.current || busy) return
-    setBusy(true)
-    try {
-      const blob = await captureNode(cardRef.current, league.colors.from)
-      await shareOrDownload(blob, `mundial-${league.key}-table.jpg`)
-    } finally {
+  useEffect(() => {
+    let cancelled = false
+    let url = null
+    async function generate() {
+      if (!cardRef.current) return
+      setBusy(true)
+      const b = await captureNode(cardRef.current, league.colors.from)
+      if (cancelled) return
+      if (b) {
+        url = URL.createObjectURL(b)
+        setBlob(b)
+        setImageUrl(url)
+      }
       setBusy(false)
     }
+    generate()
+    return () => {
+      cancelled = true
+      if (url) URL.revokeObjectURL(url)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [league.key])
+
+  async function handleDownload() {
+    if (!blob) return
+    await shareOrDownload(blob, filename)
+  }
+
+  // The 'DownloadURL' drag data format is what Gmail/Google Photos/etc use
+  // to let a plain <img> be dragged straight out to the OS as a saved file
+  // -- format is "mimeType:filename:url" and Chromium-based browsers turn
+  // that into an actual file drop wherever the user releases it (Finder,
+  // desktop, another app's drop zone). Safari/Firefox fall back to their
+  // own default image-drag behavior, which still saves a file, just
+  // without our chosen filename.
+  function handleDragStart(e) {
+    if (!imageUrl) return
+    e.dataTransfer.setData('DownloadURL', `image/jpeg:${filename}:${imageUrl}`)
   }
 
   return (
@@ -45,17 +82,31 @@ export default function LeagueShareModal({ league, order, clubs, nation, onClose
             </button>
           </div>
 
-          <div className="rounded-2xl overflow-hidden border border-charcoal-900/10 dark:border-white/10 max-h-[60vh] overflow-y-auto flex justify-center bg-charcoal-900/5 dark:bg-black/20">
-            <div className="origin-top" style={{ transform: 'scale(0.5)', width: 720, height: 'fit-content', margin: '-8px 0' }}>
-              <LeagueShareCard league={league} nation={nation} clubs={clubs} order={order} />
-            </div>
+          <div className="rounded-2xl overflow-hidden border border-charcoal-900/10 dark:border-white/10 max-h-[60vh] overflow-y-auto flex justify-center items-center p-3 bg-charcoal-900/5 dark:bg-black/20">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={t('leagues.shareModalTitle')}
+                draggable="true"
+                onDragStart={handleDragStart}
+                className="max-w-full h-auto rounded-xl shadow-depth cursor-grab active:cursor-grabbing select-none"
+              />
+            ) : (
+              <p className="py-16 text-sm text-charcoal-600 dark:text-charcoal-300">{t('leagues.loading')}</p>
+            )}
           </div>
+
+          {imageUrl && (
+            <p className="text-xs text-center text-charcoal-600 dark:text-charcoal-300">
+              {t('leagues.shareDragHint')}
+            </p>
+          )}
 
           <div className="flex gap-2">
             <SambaButton variant="outline" className="flex-1" onClick={onClose}>
               {t('leagues.close', null, 'Close')}
             </SambaButton>
-            <SambaButton variant="gold" className="flex-1" onClick={handleExport} disabled={busy}>
+            <SambaButton variant="gold" className="flex-1" onClick={handleDownload} disabled={busy || !blob}>
               {t('leagues.downloadImage')}
             </SambaButton>
           </div>
