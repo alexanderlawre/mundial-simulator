@@ -51,7 +51,7 @@ function LightFlag({ nation, size = 40 }) {
 // (predictions only carry position, never simulated match stats).
 function ColumnHeader({ t }) {
   return (
-    <div className="flex items-center gap-3 px-3 pb-2 border-b border-white/15">
+    <div className="flex items-center gap-3.5 px-3 pb-3 border-b border-white/15">
       <span className="w-7 text-center text-[10px] font-bold uppercase tracking-[0.15em] text-white/60 shrink-0">
         {t('leagues.tableColPos')}
       </span>
@@ -74,7 +74,7 @@ function ColumnHeader({ t }) {
 function Row({ rank, club, accent, zoneColor, zebra }) {
   return (
     <div
-      className={`min-h-[46px] flex items-center gap-3 px-3 py-1.5 border-b border-white/10 border-l-4 ${zebra ? 'bg-white/[0.04]' : ''}`}
+      className={`min-h-[58px] flex items-center gap-3.5 px-3 py-2.5 border-b border-white/10 border-l-4 ${zebra ? 'bg-white/[0.04]' : ''}`}
       style={{ borderLeftColor: zoneColor || 'transparent' }}
     >
       <span className="w-7 text-center font-display font-extrabold text-sm text-white/70 tabular-nums shrink-0">
@@ -95,7 +95,7 @@ function Legend({ league, t }) {
   const present = ZONE_LABEL_ORDER.filter(([key]) => league.zones.some((z) => z.key === key))
   if (!present.length) return null
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-1.5 px-1 pb-3">
+    <div className="flex flex-wrap gap-x-4 gap-y-2 px-1 pb-4">
       {present.map(([key, labelKey]) => {
         const z = league.zones.find((zz) => zz.key === key)
         return (
@@ -151,7 +151,7 @@ export default function LeagueShareCard({ league, nation, clubs, order }) {
       <div className="flex flex-col px-6">
         <Legend league={league} t={t} />
         <ColumnHeader t={t} />
-        <div className="flex flex-col pb-2">
+        <div className="flex flex-col pb-3">
           {rows.map(({ rank, club, zoneColor }, i) => club && (
             <Row key={rank} rank={rank} club={club} accent={accent} zoneColor={zoneColor} zebra={i % 2 === 1} />
           ))}

@@ -23,6 +23,22 @@ export async function waitForImages(node) {
   )
 }
 
+// Awaits the page's web fonts finishing load before capture. Without this,
+// html2canvas can paint a card while the display font (Poppins/Inter) is
+// still swapping in from its fallback, baking a ghosted/doubled-looking
+// glyph outline into the exported JPEG. `document.fonts.ready` resolves as
+// soon as all currently-requested fonts have settled -- guarded with a
+// short timeout since it can theoretically hang on some engines, and a
+// missing/undefined `document.fonts` (very old browsers) is skipped
+// entirely rather than throwing.
+async function waitForFonts() {
+  if (!document.fonts || !document.fonts.ready) return
+  await Promise.race([
+    document.fonts.ready,
+    new Promise((resolve) => setTimeout(resolve, 1500)),
+  ])
+}
+
 // scale: 3 (not 2) -- extra resolution headroom for a crisp result even
 // after share destinations (iMessage, WhatsApp, Instagram, etc.) apply
 // their own re-compression on top of ours. Exported directly as a
@@ -36,7 +52,7 @@ export async function waitForImages(node) {
 // card's brand gradient) can pass a matching color so those corner pixels
 // blend seamlessly instead of showing a mismatched beige ring.
 export async function captureNode(node, backgroundColor = '#F4EFE6') {
-  await waitForImages(node)
+  await Promise.all([waitForImages(node), waitForFonts()])
   const canvas = await html2canvas(node, { useCORS: true, backgroundColor, scale: 3 })
   return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95))
 }
