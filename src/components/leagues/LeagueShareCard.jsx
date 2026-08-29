@@ -63,18 +63,22 @@ function ColumnHeader({ t }) {
   )
 }
 
-// One numbered row in a continuous table (not a separate card) -- hairline
-// bottom divider + faint zebra banding on odd rows for legibility against
-// the full-bleed gradient background, mirroring how the reference
-// broadcast-style standings graphic reads. The left accent bar is the
-// club's real qualification zone color (Champions League / Europa /
-// Conference / relegation playoff / relegation) -- the one "extra column"
-// worth of information the app can show honestly, since no fabricated
-// match stats (MP/W/D/L/GF/GA/GD/Pts) exist for a position-only prediction.
-function Row({ rank, club, accent, zoneColor, zebra }) {
+// One numbered row in a continuous table (not a separate card) -- a plain,
+// flat row with just a hairline bottom divider, no zebra banding. A
+// diagonal two-hue gradient card background plus alternating translucent
+// stripes plus per-badge drop shadows all fighting for attention was what
+// made the previous version read as noisy/muddy rather than a clean
+// broadcast-style graphic -- every row here now sits on the exact same flat
+// color, so only real signal (rank, crest, name, zone color) breaks up the
+// row, not decoration. The left accent bar is the club's real qualification
+// zone color (Champions League / Europa / Conference / relegation playoff /
+// relegation) -- the one "extra column" worth of information the app can
+// show honestly, since no fabricated match stats (MP/W/D/L/GF/GA/GD/Pts)
+// exist for a position-only prediction.
+function Row({ rank, club, accent, zoneColor }) {
   return (
     <div
-      className={`min-h-[58px] flex items-center gap-3.5 px-3 py-2.5 border-b border-white/10 border-l-4 ${zebra ? 'bg-white/[0.04]' : ''}`}
+      className="min-h-[58px] flex items-center gap-3.5 px-3 py-2.5 border-b border-white/10 border-l-4"
       style={{ borderLeftColor: zoneColor || 'transparent' }}
     >
       <span className="w-7 text-center font-display font-extrabold text-sm text-white/70 tabular-nums shrink-0">
@@ -118,13 +122,18 @@ function Legend({ league, t }) {
 // before; letting the card grow instead keeps every row at a fixed,
 // legible size with crests, names, and positions always in order and never
 // overlapping.
-// The card's background is the league's own brand gradient applied
-// full-bleed (header through footer), and the table body reads as one
-// continuous graphic (header row + hairline-divided, zebra-banded rows)
-// rather than stacked white pill cards -- closer to a real broadcast
-// standings table. Never uses any `dark:`-prefixed class anywhere in this
-// file, so the exported image is always a consistent, legible poster no
-// matter the app's current theme.
+// The card's background is a single flat fill in the league's own primary
+// brand color (`colors.from`), applied full-bleed header through footer --
+// deliberately NOT a two-hue diagonal gradient. A couple of leagues here
+// have a `from`/`to` pair that are very different hues (e.g. Brasileirão's
+// green-to-yellow), and stretching that across a tall 20+ row card reads as
+// a noisy, unevenly-lit background that fights with the badges/text sitting
+// on top of it rather than a clean, print-like broadcast graphic -- exactly
+// what a flat fill (like the reference standings graphic) avoids. The table
+// body reads as one continuous graphic (header row + hairline-divided
+// rows, no zebra banding) rather than stacked white pill cards. Never uses
+// any `dark:`-prefixed class anywhere in this file, so the exported image
+// is always a consistent, legible poster no matter the app's current theme.
 export default function LeagueShareCard({ league, nation, clubs, order }) {
   const { t } = useTranslation()
   const accent = league.colors.accent
@@ -136,7 +145,7 @@ export default function LeagueShareCard({ league, nation, clubs, order }) {
   return (
     <div
       className="w-[720px] rounded-3xl overflow-hidden shadow-depth-lg font-sans flex flex-col"
-      style={{ background: `linear-gradient(160deg, ${league.colors.from}, ${league.colors.to})` }}
+      style={{ backgroundColor: league.colors.from }}
     >
       <div className="p-7 shrink-0">
         <div className="flex items-center gap-3">
@@ -152,8 +161,8 @@ export default function LeagueShareCard({ league, nation, clubs, order }) {
         <Legend league={league} t={t} />
         <ColumnHeader t={t} />
         <div className="flex flex-col pb-3">
-          {rows.map(({ rank, club, zoneColor }, i) => club && (
-            <Row key={rank} rank={rank} club={club} accent={accent} zoneColor={zoneColor} zebra={i % 2 === 1} />
+          {rows.map(({ rank, club, zoneColor }) => club && (
+            <Row key={rank} rank={rank} club={club} accent={accent} zoneColor={zoneColor} />
           ))}
         </div>
       </div>
