@@ -29,9 +29,15 @@ export async function waitForImages(node) {
 // structured JPEG (quality 0.95) rather than PNG -- these cards are always
 // an opaque, flat "poster" (no transparency needed), and JPEG is the
 // universally expected format for downloading/sharing a photo-like image.
-export async function captureNode(node) {
+// `backgroundColor` only shows through the handful of anti-aliased pixels
+// just outside the card's own rounded corners -- defaults to the original
+// beige "paper" tone (still used by WorldCupShareCard's flat beige card),
+// but callers whose card is a full-bleed color (like the league table
+// card's brand gradient) can pass a matching color so those corner pixels
+// blend seamlessly instead of showing a mismatched beige ring.
+export async function captureNode(node, backgroundColor = '#F4EFE6') {
   await waitForImages(node)
-  const canvas = await html2canvas(node, { useCORS: true, backgroundColor: '#F4EFE6', scale: 3 })
+  const canvas = await html2canvas(node, { useCORS: true, backgroundColor, scale: 3 })
   return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95))
 }
 

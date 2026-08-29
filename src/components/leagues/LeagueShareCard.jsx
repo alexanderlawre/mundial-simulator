@@ -31,7 +31,7 @@ function LightFlag({ nation, size = 40 }) {
   const iso = (nation.iso2 || '').toLowerCase()
   return (
     <span
-      className="inline-flex items-center justify-center rounded-full bg-white border border-charcoal-900/10 overflow-hidden shrink-0"
+      className="inline-flex items-center justify-center rounded-full bg-white border border-white/40 overflow-hidden shrink-0"
       style={{ width: size, height: size }}
     >
       {Custom ? (
@@ -39,35 +39,49 @@ function LightFlag({ nation, size = 40 }) {
       ) : iso ? (
         <span className={`fi fis fi-${iso} block !w-full !h-full bg-cover bg-center`} />
       ) : (
-        <span className="w-full h-full bg-charcoal-100" />
+        <span className="w-full h-full bg-white/20" />
       )}
     </span>
   )
 }
 
-// One numbered row, light-only, badge + name. Fixed, generous min-height
-// (rather than a flex-1 equal-share of a fixed total page height) so a
-// club's crest and name always render at their real, legible size no
-// matter how many clubs the league has -- the card grows taller instead of
-// squeezing every row shorter than its own content, which is what used to
-// cause crests/text to overflow their row and visually overlap the row
-// below on 18-20 club leagues.
-// Mirrors PredictedTableRow (PredictedTableView.jsx) exactly -- plain white
-// row, left border is the club's real qualification zone color (Champions
-// League / Europa / Conference / relegation playoff / relegation) -- so the
-// exported "poster" matches what's actually shown on the prediction page,
-// with no extra gold/silver/bronze podium styling that doesn't exist there.
-function Row({ rank, club, accent, zoneColor }) {
+// Uppercase, tracked-out header row above the table body -- POS / CLUB --
+// giving the graphic real table structure (like a broadcast standings
+// graphic) without inventing any numeric columns we have no data for
+// (predictions only carry position, never simulated match stats).
+function ColumnHeader({ t }) {
+  return (
+    <div className="flex items-center gap-3 px-3 pb-2 border-b border-white/15">
+      <span className="w-7 text-center text-[10px] font-bold uppercase tracking-[0.15em] text-white/60 shrink-0">
+        {t('leagues.tableColPos')}
+      </span>
+      <span className="w-9 shrink-0" aria-hidden="true" />
+      <span className="flex-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/60">
+        {t('leagues.tableColClub')}
+      </span>
+    </div>
+  )
+}
+
+// One numbered row in a continuous table (not a separate card) -- hairline
+// bottom divider + faint zebra banding on odd rows for legibility against
+// the full-bleed gradient background, mirroring how the reference
+// broadcast-style standings graphic reads. The left accent bar is the
+// club's real qualification zone color (Champions League / Europa /
+// Conference / relegation playoff / relegation) -- the one "extra column"
+// worth of information the app can show honestly, since no fabricated
+// match stats (MP/W/D/L/GF/GA/GD/Pts) exist for a position-only prediction.
+function Row({ rank, club, accent, zoneColor, zebra }) {
   return (
     <div
-      className="min-h-[52px] flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-charcoal-900/10 border-l-4"
+      className={`min-h-[46px] flex items-center gap-3 px-3 py-1.5 border-b border-white/10 border-l-4 ${zebra ? 'bg-white/[0.04]' : ''}`}
       style={{ borderLeftColor: zoneColor || 'transparent' }}
     >
-      <span className="w-7 text-center font-display font-extrabold text-sm text-charcoal-900 tabular-nums shrink-0">
+      <span className="w-7 text-center font-display font-extrabold text-sm text-white/70 tabular-nums shrink-0">
         {rank}
       </span>
       <ClubBadge club={club} size="sm" accent={accent} />
-      <span className="flex-1 min-w-0 truncate font-display font-semibold text-charcoal-900 text-sm">{club.name}</span>
+      <span className="flex-1 min-w-0 truncate font-display font-semibold text-white text-sm">{club.name}</span>
     </div>
   )
 }
@@ -85,7 +99,7 @@ function Legend({ league, t }) {
       {present.map(([key, labelKey]) => {
         const z = league.zones.find((zz) => zz.key === key)
         return (
-          <span key={key} className="flex items-center gap-1.5 text-xs text-charcoal-600">
+          <span key={key} className="flex items-center gap-1.5 text-xs text-white/70">
             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: z.color }} />
             {t(labelKey)}
           </span>
@@ -103,14 +117,14 @@ function Legend({ league, t }) {
 // height is exactly what caused crests/names to compress and overlap
 // before; letting the card grow instead keeps every row at a fixed,
 // legible size with crests, names, and positions always in order and never
-// overlapping. Deliberately mirrors the real on-page predicted-table UI
-// (PredictedTableView.jsx + the ZoneLegend/header in LeaguePredict.jsx)
-// exactly -- same club-count subtitle, same zone legend, same plain
-// zone-color-bordered rows with no extra podium styling -- so the exported
-// image always matches what the user actually sees in the app. Never uses
-// any `dark:`-prefixed class anywhere in this file, so the exported image
-// is always a consistent, legible light "poster" no matter the app's
-// current theme.
+// overlapping.
+// The card's background is the league's own brand gradient applied
+// full-bleed (header through footer), and the table body reads as one
+// continuous graphic (header row + hairline-divided, zebra-banded rows)
+// rather than stacked white pill cards -- closer to a real broadcast
+// standings table. Never uses any `dark:`-prefixed class anywhere in this
+// file, so the exported image is always a consistent, legible poster no
+// matter the app's current theme.
 export default function LeagueShareCard({ league, nation, clubs, order }) {
   const { t } = useTranslation()
   const accent = league.colors.accent
@@ -120,32 +134,33 @@ export default function LeagueShareCard({ league, nation, clubs, order }) {
   })
 
   return (
-    <div className="w-[720px] bg-[#F4EFE6] rounded-3xl overflow-hidden shadow-depth-lg font-sans flex flex-col">
-      <div
-        className="p-7 text-white shrink-0"
-        style={{ background: `linear-gradient(135deg, ${league.colors.from}, ${league.colors.to})` }}
-      >
+    <div
+      className="w-[720px] rounded-3xl overflow-hidden shadow-depth-lg font-sans flex flex-col"
+      style={{ background: `linear-gradient(160deg, ${league.colors.from}, ${league.colors.to})` }}
+    >
+      <div className="p-7 shrink-0">
         <div className="flex items-center gap-3">
           <LightFlag nation={nation} size={52} />
           <div>
-            <p className="font-display text-3xl font-extrabold leading-tight">{league.name}</p>
+            <p className="font-display text-3xl font-extrabold leading-tight text-white">{league.name}</p>
             <p className="text-white/80 text-xs font-semibold">{t('leagues.clubCount', { count: league.clubs.length })}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col px-6 pt-4">
+      <div className="flex flex-col px-6">
         <Legend league={league} t={t} />
-        <div className="flex flex-col gap-1.5 pb-2">
-          {rows.map(({ rank, club, zoneColor }) => club && (
-            <Row key={rank} rank={rank} club={club} accent={accent} zoneColor={zoneColor} />
+        <ColumnHeader t={t} />
+        <div className="flex flex-col pb-2">
+          {rows.map(({ rank, club, zoneColor }, i) => club && (
+            <Row key={rank} rank={rank} club={club} accent={accent} zoneColor={zoneColor} zebra={i % 2 === 1} />
           ))}
         </div>
       </div>
 
-      <div className="px-6 pb-6 pt-2 flex flex-col items-center gap-1.5 shrink-0">
+      <div className="px-6 pb-6 pt-4 flex flex-col items-center gap-1.5 shrink-0">
         <Logo className="h-8 w-auto" />
-        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-charcoal-600/50">MUNDIAL</p>
+        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/50">MUNDIAL</p>
       </div>
     </div>
   )
