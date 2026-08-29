@@ -51,12 +51,12 @@ function LightFlag({ nation, size = 40 }) {
 // (predictions only carry position, never simulated match stats).
 function ColumnHeader({ t }) {
   return (
-    <div className="flex items-center gap-3.5 px-3 pb-3 border-b border-white/15">
-      <span className="w-7 text-center text-[10px] font-bold uppercase tracking-[0.15em] text-white/60 shrink-0">
+    <div className="flex items-center gap-4 px-4 pb-3 border-b border-white/15">
+      <span className="w-9 text-center text-xs font-bold uppercase tracking-[0.15em] text-white/60 shrink-0">
         {t('leagues.tableColPos')}
       </span>
-      <span className="w-9 shrink-0" aria-hidden="true" />
-      <span className="flex-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/60">
+      <span className="w-12 shrink-0" aria-hidden="true" />
+      <span className="flex-1 text-xs font-bold uppercase tracking-[0.15em] text-white/60">
         {t('leagues.tableColClub')}
       </span>
     </div>
@@ -78,14 +78,14 @@ function ColumnHeader({ t }) {
 function Row({ rank, club, accent, zoneColor }) {
   return (
     <div
-      className="min-h-[58px] flex items-center gap-3.5 px-3 py-2.5 border-b border-white/10 border-l-4"
+      className="min-h-[68px] flex items-center gap-4 px-4 py-3 border-b border-white/10 border-l-4"
       style={{ borderLeftColor: zoneColor || 'transparent' }}
     >
-      <span className="w-7 text-center font-display font-extrabold text-sm text-white/70 tabular-nums shrink-0">
+      <span className="w-9 text-center font-display font-extrabold text-base text-white/70 tabular-nums shrink-0">
         {rank}
       </span>
-      <ClubBadge club={club} size="sm" accent={accent} />
-      <span className="flex-1 min-w-0 truncate font-display font-semibold text-white text-sm">{club.name}</span>
+      <ClubBadge club={club} size="md" accent={accent} />
+      <span className="flex-1 min-w-0 truncate font-display font-bold text-white text-base">{club.name}</span>
     </div>
   )
 }
@@ -99,12 +99,12 @@ function Legend({ league, t }) {
   const present = ZONE_LABEL_ORDER.filter(([key]) => league.zones.some((z) => z.key === key))
   if (!present.length) return null
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-2 px-1 pb-4">
+    <div className="flex flex-wrap gap-x-5 gap-y-2 px-1 pb-4">
       {present.map(([key, labelKey]) => {
         const z = league.zones.find((zz) => zz.key === key)
         return (
-          <span key={key} className="flex items-center gap-1.5 text-xs text-white/70">
-            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: z.color }} />
+          <span key={key} className="flex items-center gap-2 text-sm text-white/70">
+            <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: z.color }} />
             {t(labelKey)}
           </span>
         )
@@ -115,13 +115,20 @@ function Legend({ league, t }) {
 
 // Portrait "paper" share card rendered off-screen by LeagueShareModal.jsx
 // and captured to a structured JPEG via shareImage.js. Fixed WIDTH only
-// (720px) -- height is intentionally natural/auto, growing with however
-// many rows the league has, rather than forced into a fixed aspect ratio.
-// Squeezing every league (18 clubs, 20 clubs, ...) into the same total
-// height is exactly what caused crests/names to compress and overlap
-// before; letting the card grow instead keeps every row at a fixed,
-// legible size with crests, names, and positions always in order and never
-// overlapping.
+// (880px, wide enough that a standard 18-20 club league lands close to a
+// letter-page portrait proportion) -- height is intentionally natural/auto,
+// growing with however many rows the league has, rather than forced into a
+// fixed aspect ratio. Squeezing every league (18 clubs, 20 clubs, ..., 36
+// for Champions League) into the same total height is exactly what caused
+// crests/names to compress, overlap, and truncate before; letting the card
+// grow instead keeps every row at a fixed, legible size (48px crest, 16px
+// name) with crests, names, and positions always in order, never
+// overlapping or clipped. A 36-club league will run taller than a single
+// printed page -- there's no width/row-size combination that fits both a
+// legible 20-row Premier League table AND a legible 36-row Champions
+// League table onto one identical letter-shaped rectangle, so legibility
+// (nothing cramped or cut off) wins over hitting an exact 8.5x11 ratio for
+// every league.
 // The card's background is a single flat fill in the league's own primary
 // brand color (`colors.from`), applied full-bleed header through footer --
 // deliberately NOT a two-hue diagonal gradient. A couple of leagues here
@@ -144,20 +151,20 @@ export default function LeagueShareCard({ league, nation, clubs, order }) {
 
   return (
     <div
-      className="w-[720px] rounded-3xl overflow-hidden shadow-depth-lg font-sans flex flex-col"
+      className="w-[880px] rounded-3xl overflow-hidden shadow-depth-lg font-sans flex flex-col"
       style={{ backgroundColor: league.colors.from }}
     >
-      <div className="p-7 shrink-0">
-        <div className="flex items-center gap-3">
-          <LightFlag nation={nation} size={52} />
+      <div className="p-8 shrink-0">
+        <div className="flex items-center gap-4">
+          <LightFlag nation={nation} size={60} />
           <div>
-            <p className="font-display text-3xl font-extrabold leading-tight text-white">{league.name}</p>
-            <p className="text-white/80 text-xs font-semibold">{t('leagues.clubCount', { count: league.clubs.length })}</p>
+            <p className="font-display text-4xl font-extrabold leading-tight text-white">{league.name}</p>
+            <p className="text-white/80 text-sm font-semibold">{t('leagues.clubCount', { count: league.clubs.length })}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col px-6">
+      <div className="flex flex-col px-7">
         <Legend league={league} t={t} />
         <ColumnHeader t={t} />
         <div className="flex flex-col pb-3">
@@ -167,9 +174,9 @@ export default function LeagueShareCard({ league, nation, clubs, order }) {
         </div>
       </div>
 
-      <div className="px-6 pb-6 pt-4 flex flex-col items-center gap-1.5 shrink-0">
-        <Logo className="h-8 w-auto" />
-        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/50">MUNDIAL</p>
+      <div className="px-7 pb-7 pt-5 flex flex-col items-center gap-2 shrink-0">
+        <Logo className="h-9 w-auto" />
+        <p className="text-xs uppercase tracking-[0.2em] font-bold text-white/50">MUNDIAL</p>
       </div>
     </div>
   )
