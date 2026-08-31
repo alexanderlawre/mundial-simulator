@@ -23,7 +23,7 @@ export default function LanguageSelector() {
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-9 z-20 w-40 rounded-xl bg-white dark:bg-night-card shadow-depth-lg border border-charcoal-900/10 dark:border-white/10 overflow-hidden py-1">
+          <div className="absolute right-0 top-9 z-20 w-44 max-h-72 overflow-y-auto rounded-xl bg-white dark:bg-night-card shadow-depth-lg border border-charcoal-900/10 dark:border-white/10 py-1">
             {LANGUAGES.map((l) => (
               <button
                 key={l.code}
