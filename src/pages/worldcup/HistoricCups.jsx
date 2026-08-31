@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { HISTORIC_WORLD_CUPS } from '../../data/historicWorldCups'
 import AppBackground from '../../components/common/AppBackground'
+import CountryFlag from '../../components/common/CountryFlag'
 import NavBar from '../../components/common/NavBar'
 import { useTranslation } from '../../lib/i18n'
+import { buildTeam } from '../../lib/tournamentEngine'
 
 export default function HistoricCups() {
   const navigate = useNavigate()
@@ -26,9 +28,10 @@ export default function HistoricCups() {
                 <p className="text-charcoal-600/70 dark:text-charcoal-300/70 text-xs mt-0.5 truncate">{t('play.teamsCountLabel', { count: cup.teamCount || Object.values(cup.groups || {}).flat().length })}</p>
               </div>
               {cup.winner && (
-                <p className="text-charcoal-600/70 dark:text-charcoal-300/70 text-xs shrink-0 text-right">
-                  {t('play.winnerPrefix')}<span className="font-semibold text-gold">{cup.winner}</span>
-                </p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <CountryFlag nation={buildTeam(cup.winner)} size="sm" />
+                  <span className="font-semibold text-gold text-sm">{cup.winner}</span>
+                </div>
               )}
             </button>
           ))}
