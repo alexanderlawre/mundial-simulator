@@ -24,7 +24,7 @@ export const INTERNATIONAL_TOURNAMENTS = [
   {
     key: 'copa-america',
     order: 3,
-    quotas: { CONMEBOL: 10, CONCACAF: 6 },
+    quotas: { CONMEBOL: 10, CONCACAF: 5, AFC: 1 },
     format: { advancePerGroup: 2, bestThirds: 0, has3rdPlace: true },
     colors: { from: '#5B9BD5', to: '#F2B705', accent: '#F2B705' }, // sky blue + gold
   },
