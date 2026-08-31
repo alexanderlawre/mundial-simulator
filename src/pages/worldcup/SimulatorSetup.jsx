@@ -186,7 +186,11 @@ export default function SimulatorSetup() {
         </div>
 
         <div className="space-y-6">
-          {CONFEDERATIONS.map((conf) => {
+          {/* Fixed-format tournaments show their confederations in the
+              quotas object's own key order (e.g. Copa América lists
+              CONMEBOL before its invited CONCACAF/AFC guests) rather than
+              the World Cup's fixed CONFEDERATIONS order. */}
+          {(tournamentConfig ? Object.keys(quotas) : CONFEDERATIONS).map((conf) => {
             // `|| 0` matters here: World Cup's quota objects always list every
             // confederation explicitly (even `OFC: 0`), but the fixed-format
             // international tournaments (e.g. Euro's `{ UEFA: 24 }`) only
