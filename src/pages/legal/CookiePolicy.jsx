@@ -50,7 +50,7 @@ export default function CookiePolicy() {
       </p>
 
       <h2>5. Contact</h2>
-      <p>Questions about this policy: <strong>[TODO: add a real contact email]</strong></p>
+      <p>Questions about this policy: <strong>lawrenceqa9@gmail.com</strong></p>
     </LegalLayout>
   )
 }

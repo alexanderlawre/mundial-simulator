@@ -94,7 +94,7 @@ export default function TermsOfService() {
       </p>
 
       <h2>11. Contact</h2>
-      <p>Questions about these Terms: <strong>[TODO: add a real contact email]</strong></p>
+      <p>Questions about these Terms: <strong>lawrenceqa9@gmail.com</strong></p>
     </LegalLayout>
   )
 }

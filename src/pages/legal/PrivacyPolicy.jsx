@@ -115,7 +115,7 @@ export default function PrivacyPolicy() {
       </p>
 
       <h2>10. Contact</h2>
-      <p>Questions or data requests: <strong>[TODO: add a real contact email]</strong></p>
+      <p>Questions or data requests: <strong>lawrenceqa9@gmail.com</strong></p>
     </LegalLayout>
   )
 }

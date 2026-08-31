@@ -27,12 +27,7 @@ export default function HistoricCups() {
                 <p className="text-charcoal-900 dark:text-sand text-sm font-semibold truncate">{cup.host}</p>
                 <p className="text-charcoal-600/70 dark:text-charcoal-300/70 text-xs mt-0.5 truncate">{t('play.teamsCountLabel', { count: cup.teamCount || Object.values(cup.groups || {}).flat().length })}</p>
               </div>
-              {cup.winner && (
-                <div className="flex items-center gap-2 shrink-0">
-                  <CountryFlag nation={buildTeam(cup.winner)} size="sm" />
-                  <span className="font-semibold text-gold text-sm">{cup.winner}</span>
-                </div>
-              )}
+              {cup.winner && <CountryFlag nation={buildTeam(cup.winner)} size="sm" className="shrink-0" />}
             </button>
           ))}
         </div>
