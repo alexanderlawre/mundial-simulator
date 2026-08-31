@@ -39,20 +39,20 @@ export default function Dashboard() {
   return (
     <AppBackground>
       <div className="max-w-4xl mx-auto px-4 py-10">
-        <div className="flex items-center gap-3 mb-8">
-          <Logo className="h-12 w-auto sm:h-14 shrink-0" />
-          <div className="min-w-0">
-            <h1 className="font-display font-bold text-2xl sm:text-3xl tracking-wide text-forest dark:text-mint truncate">MUNDIAL</h1>
-            <p className="text-charcoal-600 dark:text-charcoal-300 text-xs sm:text-sm font-medium truncate">
-              {profile ? t('dashboard.welcomeName', { name: profile.name }) : t('dashboard.welcomeGeneric')}
-            </p>
-            {supported && (
-              <p className="text-charcoal-600 dark:text-charcoal-300 text-xs sm:text-sm truncate flex items-center gap-1.5">
-                <CountryFlag nation={supported} size="xs" className="shrink-0" />
-                {t('dashboard.supporting', { name: tn(supported.name) })}
-              </p>
-            )}
+        <div className="flex flex-col items-center text-center mb-8">
+          <div className="flex items-center justify-center gap-2">
+            <Logo className="h-8 w-auto sm:h-10 shrink-0" />
+            <h1 className="font-display font-bold text-2xl sm:text-3xl tracking-wide text-forest dark:text-mint">MUNDIAL</h1>
           </div>
+          <p className="text-charcoal-600 dark:text-charcoal-300 text-xs sm:text-sm font-medium mt-2">
+            {profile ? t('dashboard.welcomeName', { name: profile.name }) : t('dashboard.welcomeGeneric')}
+          </p>
+          {supported && (
+            <p className="text-charcoal-600 dark:text-charcoal-300 text-xs sm:text-sm mt-1 flex items-center justify-center gap-1.5">
+              <CountryFlag nation={supported} size="xs" className="shrink-0" />
+              {t('dashboard.supporting', { name: tn(supported.name) })}
+            </p>
+          )}
         </div>
 
         <div className="grid gap-5">
@@ -60,10 +60,10 @@ export default function Dashboard() {
             <button
               key={mode.key}
               onClick={() => navigate(mode.path)}
-              className="text-left rounded-2xl bg-white dark:bg-night-card shadow-depth-lg overflow-hidden hover:-translate-y-1 active:scale-[0.99] transition-all"
+              className="rounded-2xl bg-white dark:bg-night-card shadow-depth-lg overflow-hidden hover:-translate-y-1 active:scale-[0.99] transition-all"
             >
               <div className={`h-2 ${mode.accent}`} />
-              <div className="p-6">
+              <div className="p-6 flex flex-col items-center text-center">
                 <h2 className="font-display text-xl font-bold text-charcoal-900 dark:text-sand">{t(mode.titleKey)}</h2>
                 <p className="text-charcoal-600 dark:text-charcoal-300 mt-1 text-sm">{t(mode.descKey)}</p>
               </div>

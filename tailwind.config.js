@@ -48,10 +48,15 @@ export default {
           '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
           '50%': { transform: 'translate(-5%, 5%) scale(1.06)' },
         },
+        'gradient-shift': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
       },
       animation: {
         float: 'float 22s ease-in-out infinite',
         'float-slow': 'float-slow 30s ease-in-out infinite',
+        'gradient-shift': 'gradient-shift 16s ease-in-out infinite',
       },
     },
   },

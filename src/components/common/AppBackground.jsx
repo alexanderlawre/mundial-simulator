@@ -18,6 +18,13 @@ function Blob({ className, color }) {
 export default function AppBackground({ children }) {
   return (
     <div className="relative min-h-screen w-full bg-sand dark:bg-night overflow-x-hidden flex flex-col transition-colors">
+      {/* Slowly panning gradient wash in the brand greens/darks, sitting
+          beneath the drifting blobs -- gives the whole background a sense
+          of continuous motion rather than static color, in both themes. */}
+      <div
+        className="pointer-events-none fixed inset-0 bg-[length:300%_300%] animate-gradient-shift bg-gradient-to-br from-mint/70 via-sand to-emerald/25 dark:from-forest dark:via-night dark:to-night-card"
+        aria-hidden="true"
+      />
       <Blob className="-top-24 -right-24 w-[32rem] h-[32rem] opacity-30 dark:opacity-20 animate-float" color="#12805C" />
       <Blob className="top-1/3 -left-32 w-[28rem] h-[28rem] opacity-25 dark:opacity-15 animate-float-slow" color="#D4AF37" />
       <Blob className="bottom-[-10rem] right-1/4 w-[26rem] h-[26rem] opacity-25 dark:opacity-15 animate-float" color="#0B3D2E" />
