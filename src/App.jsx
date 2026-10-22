@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Onboarding from './pages/auth/Onboarding'
 import Login from './pages/auth/Login'
@@ -26,6 +27,12 @@ import PrivacyPolicy from './pages/legal/PrivacyPolicy'
 import TermsOfService from './pages/legal/TermsOfService'
 import CookiePolicy from './pages/legal/CookiePolicy'
 import { LanguageProvider } from './lib/i18n'
+
+// The Champions League simulator ships a ~600-club dataset, so its pages load
+// on demand instead of weighing down the main bundle.
+const UclSetup = lazy(() => import('./pages/ucl/UclSetup'))
+const UclDraw = lazy(() => import('./pages/ucl/UclDraw'))
+const UclPlay = lazy(() => import('./pages/ucl/UclPlay'))
 import { useAuth } from './lib/AuthContext'
 
 // Supabase's client auto-detects a password-recovery token straight from
@@ -74,6 +81,9 @@ export default function App() {
         <Route path="/simulator/setup" element={<SimulatorSetup />} />
         <Route path="/simulator/draw" element={<GroupDraw />} />
         <Route path="/simulator/play" element={<SimulatorPlay />} />
+        <Route path="/ucl/setup" element={<Suspense fallback={null}><UclSetup /></Suspense>} />
+        <Route path="/ucl/draw" element={<Suspense fallback={null}><UclDraw /></Suspense>} />
+        <Route path="/ucl/play" element={<Suspense fallback={null}><UclPlay /></Suspense>} />
         <Route path="/historic" element={<HistoricCups />} />
         <Route path="/historic/:year" element={<HistoricPlay />} />
         <Route path="/leagues" element={<LeaguesHub />} />

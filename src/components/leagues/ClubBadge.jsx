@@ -33,7 +33,7 @@ function initials(name) {
 // to stay legible and on-brand.
 // crossOrigin="anonymous" is required for a clean html2canvas capture
 // later even though the badge hosts already send open CORS headers.
-export default function ClubBadge({ club, size = 'md', accent = '#12805C', className = '' }) {
+export default function ClubBadge({ club, size = 'md', accent = '#12805C', className = '', lazy = false }) {
   const [failed, setFailed] = useState(false)
   if (!club) return null
   const sizeClass = SIZES[size] || SIZES.md
@@ -46,6 +46,8 @@ export default function ClubBadge({ club, size = 'md', accent = '#12805C', class
           src={club.badgeUrl}
           alt={club.name}
           crossOrigin="anonymous"
+          loading={lazy ? 'lazy' : undefined}
+          decoding={lazy ? 'async' : undefined}
           className="w-[82%] h-[82%] object-contain drop-shadow-md"
           style={club.badgeScale ? { transform: `scale(${club.badgeScale})` } : undefined}
           onError={() => setFailed(true)}

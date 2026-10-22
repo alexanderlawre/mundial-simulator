@@ -9,6 +9,7 @@ import { useTranslation } from '../../lib/i18n'
 // two-mode hub -- Create Your Own vs Historic -- at /world-cup instead of a
 // single config entry here).
 const WORLD_CUP_COLORS = { from: '#0A1428', to: '#1E3A8A' }
+const CHAMPIONS_LEAGUE_COLORS = { from: '#06122E', to: '#16A5E3' }
 
 // Landing page for every simulate-able international tournament. World Cup
 // always leads, now routing to its own /world-cup hub (Create Your Own +
@@ -41,6 +42,13 @@ export default function InternationalTournamentsHub() {
         colors: cfg.colors,
         onClick: () => navigate('/simulator/setup', { state: { tournamentKey: cfg.key } }),
       })),
+    {
+      key: 'champions-league',
+      name: t('ucl.name'),
+      desc: t('ucl.desc'),
+      colors: CHAMPIONS_LEAGUE_COLORS,
+      onClick: () => navigate('/ucl/setup'),
+    },
   ]
 
   return (

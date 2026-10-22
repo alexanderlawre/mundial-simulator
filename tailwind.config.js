@@ -52,11 +52,37 @@ export default {
           '0%, 100%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
         },
+        'pop-in': {
+          '0%': { opacity: '0', transform: 'scale(0.6)' },
+          '60%': { opacity: '1', transform: 'scale(1.12)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        'slide-up': {
+          '0%': { opacity: '0', transform: 'translateY(14px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'confetti-fall': {
+          '0%': { transform: 'translateY(-10vh) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'translateY(110vh) rotate(720deg)', opacity: '0.9' },
+        },
+        'trophy-shine': {
+          '0%, 100%': { opacity: '0.15' },
+          '50%': { opacity: '0.55' },
+        },
+        'kickoff-pulse': {
+          '0%, 100%': { opacity: '0.45' },
+          '50%': { opacity: '1' },
+        },
       },
       animation: {
         float: 'float 22s ease-in-out infinite',
         'float-slow': 'float-slow 30s ease-in-out infinite',
         'gradient-shift': 'gradient-shift 16s ease-in-out infinite',
+        'pop-in': 'pop-in 0.45s ease-out both',
+        'slide-up': 'slide-up 0.4s ease-out both',
+        'confetti-fall': 'confetti-fall 4.5s linear infinite',
+        'trophy-shine': 'trophy-shine 2.4s ease-in-out infinite',
+        'kickoff-pulse': 'kickoff-pulse 0.9s ease-in-out infinite',
       },
     },
   },

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { NATION_NAME_TRANSLATIONS } from '../data/nationTranslations'
+import { UCL_STRINGS } from './i18nUcl'
 
 // Lightweight, dependency-free i18n: a flat-ish nested dictionary per
 // language, a React context + hook, and localStorage persistence. Scope is
@@ -5107,7 +5108,13 @@ const ur = {
   },
 }
 
-const DICTS = { en, es, pt, fr, de, nl, ru, tr, zh, ja, ko, hi, id, ar, ur }
+const BASE_DICTS = { en, es, pt, fr, de, nl, ru, tr, zh, ja, ko, hi, id, ar, ur }
+// The Champions League simulator's strings live in i18nUcl.js; merge them in
+// under `ucl`. Languages without a translation yet fall back to English via
+// t()'s per-key fallback.
+const DICTS = Object.fromEntries(
+  Object.entries(BASE_DICTS).map(([code, dict]) => [code, { ...dict, ucl: UCL_STRINGS[code] || {} }])
+)
 
 function getNested(dict, path) {
   return path.split('.').reduce((acc, k) => (acc && acc[k] != null ? acc[k] : null), dict)
