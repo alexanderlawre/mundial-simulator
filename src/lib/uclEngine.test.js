@@ -10,6 +10,9 @@ import {
   nextPlayableTieId,
   pathForClub,
   playTie,
+  playTieWithWinner,
+  simulateClubMatchWithOutcome,
+  buildManualMatch,
   simulateClubMatch,
   simulateQualifyingPlayoff,
   sortByCoefficient,
@@ -178,5 +181,44 @@ describe('match realism', () => {
     expect(homeWins / n).toBeLessThan(0.52)
     expect(draws / n).toBeGreaterThan(0.17)
     expect(draws / n).toBeLessThan(0.28)
+  })
+})
+
+describe('user-chosen results', () => {
+  const field = realisticField()
+  const strong = field[0]
+  const weak = field[field.length - 1]
+
+  it('produces a scoreline matching the picked outcome, even for an upset', () => {
+    const rng = createRng('outcome')
+    ;['home', 'draw', 'away'].forEach((outcome) => {
+      for (let i = 0; i < 20; i++) {
+        const r = simulateClubMatchWithOutcome(strong, weak, outcome, { rng })
+        const got = r.homeGoals > r.awayGoals ? 'home' : r.homeGoals < r.awayGoals ? 'away' : 'draw'
+        expect(got).toBe(outcome)
+        expect(r.homeScorers).toHaveLength(r.homeGoals)
+      }
+    })
+  })
+
+  it('lets the user pick either side of any tie and still returns a consistent result', () => {
+    const order = field.map((c) => c.key)
+    const clubByKey = Object.fromEntries(field.map((c) => [c.key, c]))
+    const rankByKey = Object.fromEntries(order.map((k, i) => [k, i + 1]))
+    const rng = createRng('winner')
+    const bracket = drawKnockoutBracket(order, { rng })
+    const tie = bracket.ties[bracket.playoffTieIds[0]]
+    ;[tie.a, tie.b].forEach((key) => {
+      const result = playTieWithWinner(tie, clubByKey, rankByKey, key, { rng })
+      expect(result.winner).toBe(key)
+    })
+    const finalTie = { id: 'final', round: 'final', a: strong.key, b: weak.key }
+    expect(playTieWithWinner(finalTie, clubByKey, rankByKey, weak.key, { rng }).winner).toBe(weak.key)
+  })
+
+  it('builds a manual match with matching scorer counts', () => {
+    const r = buildManualMatch(strong, weak, 3, 1)
+    expect(r.homeScorers).toHaveLength(3)
+    expect(r.awayScorers).toHaveLength(1)
   })
 })

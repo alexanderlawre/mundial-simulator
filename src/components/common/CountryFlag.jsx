@@ -1,11 +1,13 @@
 import { useTranslation } from '../../lib/i18n'
 
+// Flags are rounded rectangles in the real 4:3 flag-icons proportions (not
+// circles), so wide flags like Germany's or Canada's keep their true shape.
 const SIZES = {
-  xs: 'w-4 h-4 text-[8px]',
-  sm: 'w-6 h-6 text-sm',
-  md: 'w-9 h-9 text-lg',
-  lg: 'w-14 h-14 text-2xl',
-  xl: 'w-20 h-20 text-4xl',
+  xs: 'w-5 h-[15px] rounded-[4px]',
+  sm: 'w-7 h-[21px] rounded-md',
+  md: 'w-10 h-[30px] rounded-md',
+  lg: 'w-16 h-12 rounded-lg',
+  xl: 'w-24 h-[72px] rounded-xl',
 }
 
 export default function CountryFlag({ nation, size = 'md', className = '' }) {
@@ -18,14 +20,14 @@ export default function CountryFlag({ nation, size = 'md', className = '' }) {
 
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full bg-white dark:bg-night-card shadow-depth border border-charcoal-900/10 dark:border-white/10 overflow-hidden shrink-0 ${sizeClass} ${className}`}
+      className={`inline-flex items-center justify-center bg-white dark:bg-night-card shadow-depth border border-charcoal-900/10 dark:border-white/10 overflow-hidden shrink-0 ${sizeClass} ${className}`}
       title={displayName}
       aria-label={displayName}
     >
       {Custom ? (
         <Custom className="w-full h-full" />
       ) : iso ? (
-        <span className={`fi fis fi-${iso} block !w-full !h-full bg-cover bg-center`} />
+        <span className={`fi fi-${iso} block !w-full !h-full bg-cover bg-center`} />
       ) : (
         <span className="w-full h-full bg-charcoal-100" />
       )}

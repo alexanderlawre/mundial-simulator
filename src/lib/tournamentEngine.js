@@ -74,76 +74,83 @@ const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 // Pot-based, confederation-aware draw. `teams` are team objects (with
 // .rating and .confederation). Produces { A: [...], B: [...], ... }.
+//
+// Confederation rule (FIFA's): no group holds two teams from the same
+// confederation, except UEFA which may have up to two. Fields that can't
+// satisfy that by arithmetic -- e.g. all 24 Euro teams are UEFA, or Copa
+// América's 10 CONMEBOL teams in 4 groups -- get the tightest cap that is
+// still possible (the confederation's team count spread evenly over the
+// groups), so the draw always stays as balanced as the field allows.
 export function seedGroupDraw(teams, groupCount, seedKey = 'draw') {
   const rng = seededRng(seedKey)
   const sizes = groupSizes(teams.length, groupCount)
-  const groups = Array.from({ length: groupCount }, () => [])
-  const maxPerConf = (conf) => (conf === 'UEFA' ? 2 : 1)
+
+  const confCount = {}
+  teams.forEach((t) => {
+    confCount[t.confederation] = (confCount[t.confederation] || 0) + 1
+  })
+  const baseCap = (conf) => Math.max(conf === 'UEFA' ? 2 : 1, Math.ceil(confCount[conf] / groupCount))
 
   const sorted = [...teams].sort((a, b) => b.rating - a.rating)
-
-  // Split into pots of size groupCount (last pot may be short).
+  // Pots of size groupCount (last pot may be short), strongest first.
   const pots = []
   for (let i = 0; i < sorted.length; i += groupCount) {
     pots.push(sorted.slice(i, i + groupCount))
   }
 
-  pots.forEach((pot, potIndex) => {
-    // Shuffle within the pot for variety.
-    const shuffled = [...pot]
-    for (let i = shuffled.length - 1; i > 0; i--) {
+  const shuffle = (arr) => {
+    const a = [...arr]
+    for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(rng() * (i + 1))
-      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      ;[a[i], a[j]] = [a[j], a[i]]
     }
+    return a
+  }
 
-    // The top pot -- the best `groupCount` teams overall (top 12 for a
-    // 48-team/12-group draw, top 8 for 32-team/8-group) -- is placed with a
-    // strict one-per-group permutation rather than the random-with-fallback
-    // placement below. That placement loop only guarantees against a
-    // confederation-cap collision, not against two top-rated teams landing
-    // in the same group, so without this the strongest sides could still be
-    // drawn together. A permutation guarantees each of them lands in a
-    // distinct group, matching real World Cup top-seed placement.
-    if (potIndex === 0 && shuffled.length === groupCount) {
-      const order = Array.from({ length: groupCount }, (_, i) => i)
-      for (let i = order.length - 1; i > 0; i--) {
-        const j = Math.floor(rng() * (i + 1))
-        ;[order[i], order[j]] = [order[j], order[i]]
-      }
-      shuffled.forEach((team, i) => {
-        groups[order[i]].push(team)
-      })
-      return
-    }
+  // One randomized attempt: every pot places one team per group (distinct
+  // groups), backtracking inside the pot; a pot that can't be completed
+  // fails the attempt and the caller restarts with fresh shuffles.
+  function attempt(slack) {
+    const groups = Array.from({ length: groupCount }, () => [])
+    const cap = (conf) => baseCap(conf) + slack
+    const confIn = (gi, conf) => groups[gi].filter((t) => t.confederation === conf).length
 
-    shuffled.forEach((team) => {
-      // Candidate groups: not yet full, in random order.
-      const order = Array.from({ length: groupCount }, (_, i) => i)
-      for (let i = order.length - 1; i > 0; i--) {
-        const j = Math.floor(rng() * (i + 1))
-        ;[order[i], order[j]] = [order[j], order[i]]
-      }
-      let placed = false
-      for (const gi of order) {
-        if (groups[gi].length >= sizes[gi]) continue
-        const confCount = groups[gi].filter((t) => t.confederation === team.confederation).length
-        if (confCount >= maxPerConf(team.confederation)) continue
-        groups[gi].push(team)
-        placed = true
-        break
-      }
-      if (!placed) {
-        // Fallback: first group with room, ignoring confederation cap.
-        for (const gi of order) {
-          if (groups[gi].length < sizes[gi]) {
-            groups[gi].push(team)
-            placed = true
-            break
-          }
+    for (const pot of pots) {
+      // Most-constrained first: bigger confederations (fewest legal groups)
+      // get placed before the flexible ones.
+      const order = shuffle(pot).sort((a, b) => confCount[b.confederation] - confCount[a.confederation])
+      const used = new Set()
+      let budget = 4000
+      const place = (i) => {
+        if (i === order.length) return true
+        if (budget-- <= 0) return false
+        const team = order[i]
+        const options = shuffle(Array.from({ length: groupCount }, (_, gi) => gi)).filter(
+          (gi) => !used.has(gi) && groups[gi].length < sizes[gi] && confIn(gi, team.confederation) < cap(team.confederation)
+        )
+        for (const gi of options) {
+          used.add(gi)
+          groups[gi].push(team)
+          if (place(i + 1)) return true
+          groups[gi].pop()
+          used.delete(gi)
         }
+        return false
       }
-    })
-  })
+      if (!place(0)) return null
+    }
+    return groups
+  }
+
+  let groups = null
+  for (let slack = 0; slack < 6 && !groups; slack++) {
+    for (let tries = 0; tries < 120 && !groups; tries++) groups = attempt(slack)
+  }
+  if (!groups) {
+    // Degenerate input: plain snake distribution so a draw always exists.
+    groups = Array.from({ length: groupCount }, () => [])
+    sorted.forEach((team, i) => groups[i % groupCount].push(team))
+  }
 
   const result = {}
   groups.forEach((g, i) => {

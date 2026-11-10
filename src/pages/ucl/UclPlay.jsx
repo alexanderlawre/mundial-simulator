@@ -14,9 +14,12 @@ import {
   applyTieResult,
   computeLeagueTable,
   drawKnockoutBracket,
+  buildManualMatch,
   nextPlayableTieId,
   playTie,
+  playTieWithWinner,
   simulateClubMatch,
+  simulateClubMatchWithOutcome,
 } from '../../lib/uclEngine'
 import { useTranslation } from '../../lib/i18n'
 
@@ -56,33 +59,93 @@ function ResultCard({ home, away, result, title }) {
   )
 }
 
-function FixtureRow({ f, result, clubByKey, onPlay, highlight }) {
+function ScoreInput({ value, onChange, label }) {
+  return (
+    <input
+      type="number"
+      min="0"
+      max="20"
+      inputMode="numeric"
+      aria-label={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-12 text-center rounded-lg border border-charcoal-900/15 dark:border-white/15 bg-white dark:bg-night-card py-1 text-sm font-display font-bold tabular-nums text-charcoal-900 dark:text-sand"
+    />
+  )
+}
+
+// One fixture. Unplayed rows offer Play (simulate) and Set (choose the
+// outcome or type a score); played rows can be re-edited by tapping the score.
+function FixtureRow({ f, result, clubByKey, onPlay, onOutcome, onScore, editing, onToggleEdit, highlight }) {
   const { t } = useTranslation()
   const home = clubByKey[f.home]
   const away = clubByKey[f.away]
+  const [hg, setHg] = useState(result ? String(result.homeGoals) : '')
+  const [ag, setAg] = useState(result ? String(result.awayGoals) : '')
+  const valid = hg !== '' && ag !== '' && Number(hg) >= 0 && Number(ag) >= 0
   return (
-    <div className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 py-1.5 px-2 rounded-lg ${highlight ? 'bg-gold/20' : ''}`}>
-      <span className="flex items-center gap-1.5 justify-end min-w-0">
-        <span className={`truncate text-xs sm:text-sm text-right ${result && result.homeGoals > result.awayGoals ? 'font-bold' : ''} text-charcoal-900 dark:text-sand`}>{home.name}</span>
-        <ClubBadge club={home} size="xs" lazy />
-      </span>
-      {result ? (
-        <span className="min-w-[3.25rem] text-center font-display font-bold tabular-nums text-sm text-charcoal-900 dark:text-sand">
-          {result.homeGoals}&ndash;{result.awayGoals}
+    <div className={`rounded-lg ${highlight ? 'bg-gold/20' : ''}`}>
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 py-1.5 px-2">
+        <span className="flex items-center gap-1.5 justify-end min-w-0">
+          <span className={`truncate text-xs sm:text-sm text-right ${result && result.homeGoals > result.awayGoals ? 'font-bold' : ''} text-charcoal-900 dark:text-sand`}>{home.name}</span>
+          <ClubBadge club={home} size="xs" lazy />
         </span>
-      ) : (
-        <button
-          type="button"
-          onClick={() => onPlay(f)}
-          className="min-w-[3.25rem] px-2 py-0.5 rounded-md bg-mint text-emerald text-[11px] font-display font-semibold hover:bg-mint/80"
-        >
-          {t('ucl.playMatch')}
-        </button>
+        {result ? (
+          <button
+            type="button"
+            onClick={() => onToggleEdit(f.id)}
+            title={t('ucl.editResult')}
+            className="min-w-[3.25rem] text-center font-display font-bold tabular-nums text-sm text-charcoal-900 dark:text-sand rounded-md hover:bg-sand dark:hover:bg-night"
+          >
+            {result.homeGoals}&ndash;{result.awayGoals}
+          </button>
+        ) : (
+          <span className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => onPlay(f)}
+              className="px-2 py-0.5 rounded-md bg-mint text-emerald text-[11px] font-display font-semibold hover:bg-mint/80"
+            >
+              {t('ucl.playMatch')}
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleEdit(f.id)}
+              className="px-2 py-0.5 rounded-md border border-charcoal-900/15 dark:border-white/15 text-charcoal-900 dark:text-sand text-[11px] font-display font-semibold hover:bg-sand dark:hover:bg-night"
+            >
+              {t('ucl.setResult')}
+            </button>
+          </span>
+        )}
+        <span className="flex items-center gap-1.5 min-w-0">
+          <ClubBadge club={away} size="xs" lazy />
+          <span className={`truncate text-xs sm:text-sm ${result && result.awayGoals > result.homeGoals ? 'font-bold' : ''} text-charcoal-900 dark:text-sand`}>{away.name}</span>
+        </span>
+      </div>
+      {editing && (
+        <div className="mx-2 mb-2 rounded-lg bg-sand/70 dark:bg-night/70 p-2 space-y-2 animate-slide-up">
+          <div className="flex flex-wrap justify-center gap-1.5">
+            <button type="button" onClick={() => onOutcome(f, 'home')} className="px-2.5 py-1 rounded-lg bg-mint text-emerald text-xs font-display font-semibold hover:bg-mint/80">{t('ucl.homeWin')}</button>
+            <button type="button" onClick={() => onOutcome(f, 'draw')} className="px-2.5 py-1 rounded-lg bg-mint text-emerald text-xs font-display font-semibold hover:bg-mint/80">{t('compete.draw')}</button>
+            <button type="button" onClick={() => onOutcome(f, 'away')} className="px-2.5 py-1 rounded-lg bg-mint text-emerald text-xs font-display font-semibold hover:bg-mint/80">{t('ucl.awayWin')}</button>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="text-[11px] text-charcoal-600 dark:text-charcoal-300">{t('ucl.exactScore')}</span>
+            <ScoreInput value={hg} onChange={setHg} label={home.name} />
+            <span className="text-charcoal-600 dark:text-charcoal-300">&ndash;</span>
+            <ScoreInput value={ag} onChange={setAg} label={away.name} />
+            <button
+              type="button"
+              disabled={!valid}
+              onClick={() => onScore(f, Number(hg), Number(ag))}
+              className="px-3 py-1 rounded-lg bg-emerald text-white text-xs font-display font-semibold disabled:opacity-40"
+            >
+              {t('ucl.saveResult')}
+            </button>
+            <button type="button" onClick={() => onToggleEdit(null)} className="px-2 py-1 text-xs text-charcoal-600 dark:text-charcoal-300 hover:underline">{t('play.cancel')}</button>
+          </div>
+        </div>
       )}
-      <span className="flex items-center gap-1.5 min-w-0">
-        <ClubBadge club={away} size="xs" lazy />
-        <span className={`truncate text-xs sm:text-sm ${result && result.awayGoals > result.homeGoals ? 'font-bold' : ''} text-charcoal-900 dark:text-sand`}>{away.name}</span>
-      </span>
     </div>
   )
 }
@@ -107,6 +170,7 @@ export default function UclPlay() {
   const [latest, setLatest] = useState(null)
   const [dayTab, setDayTab] = useState(null)
   const [selectedClub, setSelectedClub] = useState(null)
+  const [editingId, setEditingId] = useState(null)
 
   const [bracket, setBracket] = useState(null)
   const [drawnTieIds, setDrawnTieIds] = useState(() => new Set())
@@ -155,6 +219,28 @@ export default function UclPlay() {
   const playMatchday = () => nextFixture && playFixtures(fixtures.filter((f) => f.matchday === nextFixture.matchday && !results[f.id]))
   const playAll = () => playFixtures(fixtures.filter((f) => !results[f.id]))
 
+  // User-chosen results: pick the outcome (a matching scoreline is generated)
+  // or type an exact score. Either replaces any earlier result for the fixture.
+  function setFixtureResult(f, result) {
+    setResults((prev) => ({ ...prev, [f.id]: result }))
+    setLatest({ f, result })
+    setEditingId(null)
+  }
+  function chooseOutcome(f, outcome) {
+    setFixtureResult(f, simulateClubMatchWithOutcome(clubByKey[f.home], clubByKey[f.away], outcome))
+  }
+  function enterScore(f, hg, ag) {
+    setFixtureResult(f, buildManualMatch(clubByKey[f.home], clubByKey[f.away], hg, ag))
+  }
+  const toggleEdit = (id) => setEditingId((cur) => (cur === id ? null : id))
+  const fixtureProps = {
+    clubByKey,
+    onPlay: (x) => playFixtures([x]),
+    onOutcome: chooseOutcome,
+    onScore: enterScore,
+    onToggleEdit: toggleEdit,
+  }
+
   // ---- knockout draw ----
   function startKnockoutDraw() {
     const order = table.map((r) => r.key)
@@ -198,6 +284,12 @@ export default function UclPlay() {
   function startSimulation(tieId) {
     if (sim) return
     const result = playTie(bracket.ties[tieId], clubByKey, rankByKey)
+    setSim({ tieId, result })
+  }
+
+  function pickWinner(tieId, winnerKey) {
+    if (sim) return
+    const result = playTieWithWinner(bracket.ties[tieId], clubByKey, rankByKey, winnerKey)
     setSim({ tieId, result })
   }
 
@@ -285,7 +377,10 @@ export default function UclPlay() {
             </div>
           )}
 
-          <p className="text-xs text-charcoal-600 dark:text-charcoal-300">{t('ucl.tapClubForPath')}</p>
+          <p className="text-xs text-charcoal-600 dark:text-charcoal-300">
+            {t('ucl.tapClubForPath')}
+            {!inDraw && ` ${t('ucl.knockoutPickHint')}`}
+          </p>
 
           <div className={`${card} p-3 sm:p-4`}>
             <UclBracketView
@@ -297,6 +392,7 @@ export default function UclPlay() {
               nextTieId={nextTieId}
               busyTieId={sim?.tieId || null}
               onSimulate={inDraw ? undefined : startSimulation}
+              onPickWinner={inDraw ? undefined : pickWinner}
             />
           </div>
 
@@ -337,6 +433,8 @@ export default function UclPlay() {
           subtitle={`${t('ucl.matchdayOf', { current: currentDay, total: totalMatchdays })} · ${t('ucl.matchesPlayed', { played: playedCount, total: fixtures.length })}`}
           onBack={() => navigate('/ucl/draw', { state: { clubKeys } })}
         />
+
+        <p className="text-xs text-charcoal-600 dark:text-charcoal-300">{t('ucl.leagueEditHint')}</p>
 
         {!leagueDone ? (
           <div className="flex flex-wrap gap-2">
@@ -388,7 +486,7 @@ export default function UclPlay() {
                 {clubFixtures.map((f) => (
                   <div key={f.id}>
                     <p className="text-[10px] uppercase tracking-wide text-charcoal-600 dark:text-charcoal-300 px-2 pt-1">{t('ucl.matchdayN', { number: f.matchday })}</p>
-                    <FixtureRow f={f} result={results[f.id]} clubByKey={clubByKey} onPlay={(x) => playFixtures([x])} highlight={f.home === selectedClub || f.away === selectedClub} />
+                    <FixtureRow key={`${f.id}-${results[f.id] ? `${results[f.id].homeGoals}-${results[f.id].awayGoals}` : 'p'}`} f={f} result={results[f.id]} {...fixtureProps} editing={editingId === f.id} highlight={f.home === selectedClub || f.away === selectedClub} />
                   </div>
                 ))}
               </>
@@ -410,7 +508,7 @@ export default function UclPlay() {
                 </div>
                 <p className="text-[11px] uppercase tracking-wide font-semibold text-charcoal-600 dark:text-charcoal-300 px-2 mb-1">{t('ucl.matchdayN', { number: activeDay })}</p>
                 {dayFixtures.map((f) => (
-                  <FixtureRow key={f.id} f={f} result={results[f.id]} clubByKey={clubByKey} onPlay={(x) => playFixtures([x])} />
+                  <FixtureRow key={`${f.id}-${results[f.id] ? `${results[f.id].homeGoals}-${results[f.id].awayGoals}` : 'p'}`} f={f} result={results[f.id]} {...fixtureProps} editing={editingId === f.id} />
                 ))}
               </>
             )}

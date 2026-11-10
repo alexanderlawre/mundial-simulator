@@ -206,6 +206,77 @@ export function playTie(tie, clubByKey, rankByKey, { rng = Math.random } = {}) {
   return aIsBetter ? simulateTwoLeggedTie(b, a, { rng }) : simulateTwoLeggedTie(a, b, { rng })
 }
 
+// ------------------------------------------------ user-chosen results ----
+
+const OUTCOME_OF = (hg, ag) => (hg > ag ? 'home' : hg < ag ? 'away' : 'draw')
+const MAX_TRIES = 6000
+
+// A plausible scoreline for a match whose outcome ('home' | 'draw' | 'away')
+// the user picked: resample the real match model until it agrees, so a forced
+// upset still looks like one (usually 1-0 or 2-1) rather than an arbitrary
+// number. Falls back to a narrow win/draw if the odds are astronomically thin.
+export function simulateClubMatchWithOutcome(home, away, outcome, { neutral = false, rng = Math.random } = {}) {
+  for (let i = 0; i < MAX_TRIES; i++) {
+    const r = simulateClubMatch(home, away, { neutral, rng })
+    if (OUTCOME_OF(r.homeGoals, r.awayGoals) === outcome) return r
+  }
+  const hg = outcome === 'home' ? 1 : outcome === 'draw' ? 1 : 0
+  const ag = outcome === 'away' ? 1 : outcome === 'draw' ? 1 : 0
+  return {
+    homeGoals: hg,
+    awayGoals: ag,
+    homeScorers: scorersFor(home, hg, rng),
+    awayScorers: scorersFor(away, ag, rng),
+  }
+}
+
+// A result for a score the user typed in.
+export function buildManualMatch(home, away, homeGoals, awayGoals, { rng = Math.random } = {}) {
+  return {
+    homeGoals,
+    awayGoals,
+    homeScorers: scorersFor(home, homeGoals, rng),
+    awayScorers: scorersFor(away, awayGoals, rng),
+  }
+}
+
+function forcedTie(first, second, winnerKey, rng) {
+  const firstWins = winnerKey === first.key
+  const leg1 = buildManualMatch(first, second, firstWins ? 1 : 0, firstWins ? 0 : 1, { rng })
+  const leg2 = buildManualMatch(second, first, firstWins ? 0 : 1, firstWins ? 1 : 0, { rng })
+  return {
+    kind: 'two-leg',
+    teamA: first.key,
+    teamB: second.key,
+    leg1,
+    leg2,
+    et: null,
+    aggA: leg1.homeGoals + leg2.awayGoals,
+    aggB: leg1.awayGoals + leg2.homeGoals,
+    pens: null,
+    winner: winnerKey,
+  }
+}
+
+// Knockout tie decided by the user: simulates the tie (same leg hosts and
+// rules as playTie) until the chosen club comes through, so the legs,
+// aggregate, extra time and penalties all stay consistent with that winner.
+export function playTieWithWinner(tie, clubByKey, rankByKey, winnerKey, { rng = Math.random } = {}) {
+  for (let i = 0; i < MAX_TRIES; i++) {
+    const r = playTie(tie, clubByKey, rankByKey, { rng })
+    if (r.winner === winnerKey) return r
+  }
+  const a = clubByKey[tie.a]
+  const b = clubByKey[tie.b]
+  if (tie.round === 'final') {
+    const aWins = winnerKey === a.key
+    const match = buildManualMatch(a, b, aWins ? 1 : 0, aWins ? 0 : 1, { rng })
+    return { kind: 'final', teamA: a.key, teamB: b.key, match, et: null, goalsA: match.homeGoals, goalsB: match.awayGoals, pens: null, winner: winnerKey }
+  }
+  const aIsBetter = rankByKey[tie.a] < rankByKey[tie.b]
+  return aIsBetter ? forcedTie(b, a, winnerKey, rng) : forcedTie(a, b, winnerKey, rng)
+}
+
 // ---------------------------------------------------------- pots / draw ----
 
 export function sortByCoefficient(clubs) {

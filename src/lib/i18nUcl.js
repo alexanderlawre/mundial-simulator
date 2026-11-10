@@ -82,6 +82,16 @@ const en = {
   viewBracket: 'View Bracket',
   playAgain: 'Play Again',
   noTournament: 'No tournament in progress. Please start from setup.',
+  setResult: 'Set result',
+  editResult: 'Edit result',
+  homeWin: 'Home win',
+  awayWin: 'Away win',
+  exactScore: 'Or enter an exact score:',
+  saveResult: 'Save',
+  chooseWinner: 'Choose Winner',
+  whoAdvances: 'Who advances?',
+  leagueEditHint: 'Tip: tap “Set result” on any fixture to pick the outcome or enter the score yourself.',
+  knockoutPickHint: 'You can also choose who wins a tie and a matching scoreline is generated.',
 }
 
 const es = {
@@ -164,6 +174,16 @@ const es = {
   viewBracket: 'Ver cuadro',
   playAgain: 'Jugar de nuevo',
   noTournament: 'No hay ningún torneo en curso. Empieza desde la configuración.',
+  setResult: 'Definir resultado',
+  editResult: 'Editar resultado',
+  homeWin: 'Victoria local',
+  awayWin: 'Victoria visitante',
+  exactScore: 'O introduce un marcador exacto:',
+  saveResult: 'Guardar',
+  chooseWinner: 'Elegir ganador',
+  whoAdvances: '¿Quién avanza?',
+  leagueEditHint: 'Consejo: toca «Definir resultado» en cualquier partido para elegir el desenlace o introducir el marcador tú mismo.',
+  knockoutPickHint: 'También puedes elegir quién gana una eliminatoria y se genera un marcador acorde.',
 }
 
 const pt = {
@@ -246,6 +266,16 @@ const pt = {
   viewBracket: 'Ver chaveamento',
   playAgain: 'Jogar novamente',
   noTournament: 'Nenhum torneio em andamento. Comece pela configuração.',
+  setResult: 'Definir resultado',
+  editResult: 'Editar resultado',
+  homeWin: 'Vitória da casa',
+  awayWin: 'Vitória do visitante',
+  exactScore: 'Ou insira um placar exato:',
+  saveResult: 'Salvar',
+  chooseWinner: 'Escolher vencedor',
+  whoAdvances: 'Quem avança?',
+  leagueEditHint: 'Dica: toque em “Definir resultado” em qualquer jogo para escolher o resultado ou inserir o placar você mesmo.',
+  knockoutPickHint: 'Você também pode escolher quem vence um confronto e um placar compatível é gerado.',
 }
 
 const fr = {
@@ -328,6 +358,16 @@ const fr = {
   viewBracket: 'Voir le tableau',
   playAgain: 'Rejouer',
   noTournament: 'Aucun tournoi en cours. Commencez par la configuration.',
+  setResult: 'Définir le résultat',
+  editResult: 'Modifier le résultat',
+  homeWin: 'Victoire à domicile',
+  awayWin: 'Victoire à l\'extérieur',
+  exactScore: 'Ou saisissez un score exact :',
+  saveResult: 'Enregistrer',
+  chooseWinner: 'Choisir le vainqueur',
+  whoAdvances: 'Qui se qualifie ?',
+  leagueEditHint: 'Astuce : touchez « Définir le résultat » sur n\'importe quel match pour choisir l\'issue ou saisir vous-même le score.',
+  knockoutPickHint: 'Vous pouvez aussi choisir qui remporte une confrontation, et un score cohérent est généré.',
 }
 
 const de = {
@@ -410,6 +450,16 @@ const de = {
   viewBracket: 'Turnierbaum ansehen',
   playAgain: 'Nochmal spielen',
   noTournament: 'Kein Turnier läuft. Bitte starte im Setup.',
+  setResult: 'Ergebnis festlegen',
+  editResult: 'Ergebnis bearbeiten',
+  homeWin: 'Heimsieg',
+  awayWin: 'Auswärtssieg',
+  exactScore: 'Oder gib ein genaues Ergebnis ein:',
+  saveResult: 'Speichern',
+  chooseWinner: 'Sieger wählen',
+  whoAdvances: 'Wer kommt weiter?',
+  leagueEditHint: 'Tipp: Tippe bei einer Partie auf „Ergebnis festlegen“, um den Ausgang zu wählen oder das Ergebnis selbst einzugeben.',
+  knockoutPickHint: 'Du kannst auch wählen, wer eine Runde gewinnt, und ein passendes Ergebnis wird erzeugt.',
 }
 
 const nl = {
@@ -492,6 +542,16 @@ const nl = {
   viewBracket: 'Bekijk schema',
   playAgain: 'Opnieuw spelen',
   noTournament: 'Geen toernooi bezig. Begin vanuit de setup.',
+  setResult: 'Resultaat instellen',
+  editResult: 'Resultaat bewerken',
+  homeWin: 'Thuiswinst',
+  awayWin: 'Uitwinst',
+  exactScore: 'Of voer een exacte uitslag in:',
+  saveResult: 'Opslaan',
+  chooseWinner: 'Winnaar kiezen',
+  whoAdvances: 'Wie gaat door?',
+  leagueEditHint: 'Tip: tik op “Resultaat instellen” bij een wedstrijd om de uitkomst te kiezen of zelf de uitslag in te voeren.',
+  knockoutPickHint: 'Je kunt ook kiezen wie een confrontatie wint, waarna een passende uitslag wordt gegenereerd.',
 }
 
 const tr = {
@@ -574,6 +634,16 @@ const tr = {
   viewBracket: 'Braketi Gör',
   playAgain: 'Tekrar Oyna',
   noTournament: 'Devam eden turnuva yok. Lütfen kurulumdan başla.',
+  setResult: 'Sonucu belirle',
+  editResult: 'Sonucu düzenle',
+  homeWin: 'Ev sahibi galibiyeti',
+  awayWin: 'Deplasman galibiyeti',
+  exactScore: 'Veya tam skoru girin:',
+  saveResult: 'Kaydet',
+  chooseWinner: 'Kazananı seç',
+  whoAdvances: 'Kim tur atlar?',
+  leagueEditHint: 'İpucu: Sonucu seçmek veya skoru kendiniz girmek için herhangi bir maçta “Sonucu belirle”ye dokunun.',
+  knockoutPickHint: 'Ayrıca bir eşleşmeyi kimin kazanacağını seçebilirsiniz; buna uygun bir skor oluşturulur.',
 }
 
 const ru = {
@@ -656,6 +726,16 @@ const ru = {
   viewBracket: 'Смотреть сетку',
   playAgain: 'Играть снова',
   noTournament: 'Нет текущего турнира. Начните с настройки.',
+  setResult: 'Задать результат',
+  editResult: 'Изменить результат',
+  homeWin: 'Победа хозяев',
+  awayWin: 'Победа гостей',
+  exactScore: 'Или введите точный счёт:',
+  saveResult: 'Сохранить',
+  chooseWinner: 'Выбрать победителя',
+  whoAdvances: 'Кто проходит дальше?',
+  leagueEditHint: 'Совет: нажмите «Задать результат» у любого матча, чтобы выбрать исход или ввести счёт самостоятельно.',
+  knockoutPickHint: 'Также можно выбрать победителя пары, и будет сгенерирован подходящий счёт.',
 }
 
 const id = {
@@ -738,6 +818,16 @@ const id = {
   viewBracket: 'Lihat Bagan',
   playAgain: 'Main Lagi',
   noTournament: 'Tidak ada turnamen yang berlangsung. Silakan mulai dari pengaturan.',
+  setResult: 'Atur hasil',
+  editResult: 'Ubah hasil',
+  homeWin: 'Kandang menang',
+  awayWin: 'Tandang menang',
+  exactScore: 'Atau masukkan skor pasti:',
+  saveResult: 'Simpan',
+  chooseWinner: 'Pilih pemenang',
+  whoAdvances: 'Siapa yang lolos?',
+  leagueEditHint: 'Tips: ketuk “Atur hasil” pada pertandingan mana pun untuk memilih hasilnya atau memasukkan skor sendiri.',
+  knockoutPickHint: 'Anda juga bisa memilih pemenang sebuah laga, lalu skor yang sesuai akan dibuat otomatis.',
 }
 
 const hi = {
@@ -820,6 +910,16 @@ const hi = {
   viewBracket: 'ब्रैकेट देखें',
   playAgain: 'फिर से खेलें',
   noTournament: 'कोई टूर्नामेंट जारी नहीं है। कृपया सेटअप से शुरू करें।',
+  setResult: 'परिणाम सेट करें',
+  editResult: 'परिणाम संपादित करें',
+  homeWin: 'घरेलू टीम की जीत',
+  awayWin: 'मेहमान टीम की जीत',
+  exactScore: 'या सटीक स्कोर दर्ज करें:',
+  saveResult: 'सहेजें',
+  chooseWinner: 'विजेता चुनें',
+  whoAdvances: 'कौन आगे बढ़ेगा?',
+  leagueEditHint: 'सुझाव: नतीजा चुनने या स्कोर खुद दर्ज करने के लिए किसी भी मैच पर “परिणाम सेट करें” पर टैप करें।',
+  knockoutPickHint: 'आप यह भी चुन सकते हैं कि मुकाबला कौन जीतेगा, और उसके अनुरूप स्कोर बना दिया जाएगा।',
 }
 
 const zh = {
@@ -902,6 +1002,16 @@ const zh = {
   viewBracket: '查看对阵图',
   playAgain: '再玩一次',
   noTournament: '当前没有进行中的赛事，请从设置开始。',
+  setResult: '设置结果',
+  editResult: '编辑结果',
+  homeWin: '主队获胜',
+  awayWin: '客队获胜',
+  exactScore: '或输入确切比分：',
+  saveResult: '保存',
+  chooseWinner: '选择胜者',
+  whoAdvances: '谁晋级？',
+  leagueEditHint: '提示：点击任意比赛的“设置结果”，即可选择结果或自行输入比分。',
+  knockoutPickHint: '你也可以选择对阵的获胜方，系统会生成相符的比分。',
 }
 
 const ja = {
@@ -984,6 +1094,16 @@ const ja = {
   viewBracket: 'トーナメント表を見る',
   playAgain: 'もう一度プレー',
   noTournament: '進行中のトーナメントはありません。セットアップから始めてください。',
+  setResult: '結果を設定',
+  editResult: '結果を編集',
+  homeWin: 'ホーム勝利',
+  awayWin: 'アウェイ勝利',
+  exactScore: 'または正確なスコアを入力：',
+  saveResult: '保存',
+  chooseWinner: '勝者を選択',
+  whoAdvances: '勝ち上がるのは？',
+  leagueEditHint: 'ヒント：試合の「結果を設定」をタップすると、結果を選ぶかスコアを自分で入力できます。',
+  knockoutPickHint: '対戦の勝者を選ぶこともでき、それに合ったスコアが自動生成されます。',
 }
 
 const ko = {
@@ -1066,6 +1186,16 @@ const ko = {
   viewBracket: '대진표 보기',
   playAgain: '다시 플레이',
   noTournament: '진행 중인 토너먼트가 없습니다. 설정에서 시작해 주세요.',
+  setResult: '결과 설정',
+  editResult: '결과 편집',
+  homeWin: '홈 승리',
+  awayWin: '원정 승리',
+  exactScore: '또는 정확한 스코어 입력:',
+  saveResult: '저장',
+  chooseWinner: '승자 선택',
+  whoAdvances: '누가 진출할까요?',
+  leagueEditHint: '팁: 경기에서 “결과 설정”을 탭하면 결과를 고르거나 스코어를 직접 입력할 수 있습니다.',
+  knockoutPickHint: '대진의 승자를 선택할 수도 있으며, 이에 맞는 스코어가 생성됩니다.',
 }
 
 const ar = {
@@ -1148,6 +1278,16 @@ const ar = {
   viewBracket: 'عرض الجدول',
   playAgain: 'العب مجدداً',
   noTournament: 'لا توجد بطولة قيد التقدم. يرجى البدء من الإعداد.',
+  setResult: 'تحديد النتيجة',
+  editResult: 'تعديل النتيجة',
+  homeWin: 'فوز المضيف',
+  awayWin: 'فوز الضيف',
+  exactScore: 'أو أدخل نتيجة دقيقة:',
+  saveResult: 'حفظ',
+  chooseWinner: 'اختر الفائز',
+  whoAdvances: 'من يتأهل؟',
+  leagueEditHint: 'نصيحة: اضغط على «تحديد النتيجة» في أي مباراة لاختيار النتيجة أو إدخال النتيجة بنفسك.',
+  knockoutPickHint: 'يمكنك أيضًا اختيار الفائز في المواجهة وسيتم إنشاء نتيجة مطابقة.',
 }
 
 const ur = {
@@ -1230,6 +1370,16 @@ const ur = {
   viewBracket: 'برکٹ دیکھیں',
   playAgain: 'دوبارہ کھیلیں',
   noTournament: 'کوئی ٹورنامنٹ جاری نہیں۔ براہِ کرم سیٹ اپ سے شروع کریں۔',
+  setResult: 'نتیجہ طے کریں',
+  editResult: 'نتیجہ میں ترمیم کریں',
+  homeWin: 'میزبان کی جیت',
+  awayWin: 'مہمان کی جیت',
+  exactScore: 'یا درست اسکور درج کریں:',
+  saveResult: 'محفوظ کریں',
+  chooseWinner: 'فاتح منتخب کریں',
+  whoAdvances: 'کون آگے بڑھے گا؟',
+  leagueEditHint: 'مشورہ: کسی بھی میچ پر “نتیجہ طے کریں” پر ٹیپ کریں تاکہ نتیجہ چنیں یا اسکور خود درج کریں۔',
+  knockoutPickHint: 'آپ یہ بھی چن سکتے ہیں کہ مقابلہ کون جیتے گا، اور اس کے مطابق اسکور بن جائے گا۔',
 }
 
 export const UCL_STRINGS = { en, es, pt, fr, de, nl, tr, ru, id, hi, zh, ja, ko, ar, ur }

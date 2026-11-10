@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import ClubBadge from '../leagues/ClubBadge'
 import { useTranslation } from '../../lib/i18n'
 import { KO_ROUND_LABEL_KEY, pathForClub, tieIsReady } from '../../lib/uclEngine'
@@ -80,8 +81,10 @@ export default function UclBracketView({
   nextTieId = null,
   busyTieId = null,
   onSimulate,
+  onPickWinner,
 }) {
   const { t } = useTranslation()
+  const [choosingId, setChoosingId] = useState(null)
   const pathIds = selectedClub ? new Set(pathForClub(bracket, selectedClub)) : null
 
   // R16 slot index -> the play-off tie that feeds it.
@@ -134,18 +137,51 @@ export default function UclBracketView({
             {pens ? t('ucl.penaltyShootout', { a: pens.penA, b: pens.penB }) : ''}
           </p>
         )}
-        {ready && (
-          <button
-            type="button"
-            onClick={() => onSimulate(id)}
-            className={`w-full py-1.5 text-xs font-display font-semibold transition-colors ${
-              isNext
-                ? 'bg-gradient-to-r from-gold to-gold-light text-charcoal-900'
-                : 'bg-mint text-emerald hover:bg-mint/80'
-            }`}
-          >
-            {tie.round === 'final' ? t('ucl.simulateFinal') : t('ucl.simulateTie')}
-          </button>
+        {ready && choosingId === id && onPickWinner && (
+          <div className="p-1.5 space-y-1 bg-charcoal-900/5 dark:bg-white/5">
+            <p className="text-[10px] uppercase tracking-wide font-semibold text-charcoal-600 dark:text-charcoal-300 text-center">{t('ucl.whoAdvances')}</p>
+            {[a, b].map((club) => (
+              <button
+                key={club.key}
+                type="button"
+                onClick={() => {
+                  setChoosingId(null)
+                  onPickWinner(id, club.key)
+                }}
+                className="w-full flex items-center gap-1.5 px-2 py-1 rounded-lg bg-mint text-emerald text-xs font-display font-semibold hover:bg-mint/80"
+              >
+                <ClubBadge club={club} size="xs" />
+                <span className="truncate">{club.name}</span>
+              </button>
+            ))}
+            <button type="button" onClick={() => setChoosingId(null)} className="w-full text-[11px] text-charcoal-600 dark:text-charcoal-300 hover:underline">
+              {t('play.cancel')}
+            </button>
+          </div>
+        )}
+        {ready && choosingId !== id && (
+          <div className="flex">
+            <button
+              type="button"
+              onClick={() => onSimulate(id)}
+              className={`flex-1 py-1.5 text-xs font-display font-semibold transition-colors ${
+                isNext
+                  ? 'bg-gradient-to-r from-gold to-gold-light text-charcoal-900'
+                  : 'bg-mint text-emerald hover:bg-mint/80'
+              }`}
+            >
+              {tie.round === 'final' ? t('ucl.simulateFinal') : t('ucl.simulateTie')}
+            </button>
+            {onPickWinner && (
+              <button
+                type="button"
+                onClick={() => setChoosingId(id)}
+                className="px-2.5 py-1.5 text-xs font-display font-semibold border-l border-charcoal-900/10 dark:border-white/10 bg-white dark:bg-night-card text-charcoal-900 dark:text-sand hover:bg-sand dark:hover:bg-night"
+              >
+                {t('ucl.chooseWinner')}
+              </button>
+            )}
+          </div>
         )}
       </div>
     )

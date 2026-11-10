@@ -13,13 +13,13 @@ function LightFlag({ team, size = 40 }) {
   const iso = (team.iso2 || '').toLowerCase()
   return (
     <span
-      className="inline-flex items-center justify-center rounded-full bg-white border border-charcoal-900/10 overflow-hidden shrink-0"
-      style={{ width: size, height: size }}
+      className="inline-flex items-center justify-center rounded-md bg-white border border-charcoal-900/10 overflow-hidden shrink-0"
+      style={{ width: size, height: Math.round(size * 0.75) }}
     >
       {Custom ? (
         <Custom className="w-full h-full" />
       ) : iso ? (
-        <span className={`fi fis fi-${iso} block !w-full !h-full bg-cover bg-center`} />
+        <span className={`fi fi-${iso} block !w-full !h-full bg-cover bg-center`} />
       ) : (
         <span className="w-full h-full bg-charcoal-100" />
       )}

@@ -16,9 +16,9 @@ export default function LanguageSelector() {
         onClick={() => setOpen((v) => !v)}
         aria-label={t('common.changeLanguage')}
         aria-expanded={open}
-        className="w-7 h-7 rounded-full bg-white dark:bg-night-card shadow-depth border border-charcoal-900/10 dark:border-white/10 flex items-center justify-center overflow-hidden hover:bg-sand dark:hover:bg-night active:scale-95 transition-all"
+        className="w-9 h-7 rounded-lg bg-white dark:bg-night-card shadow-depth border border-charcoal-900/10 dark:border-white/10 flex items-center justify-center overflow-hidden hover:bg-sand dark:hover:bg-night active:scale-95 transition-all"
       >
-        <span className={`fi fis fi-${current.flagIso2} block !w-full !h-full bg-cover bg-center`} />
+        <span className={`fi fi-${current.flagIso2} block !w-full !h-full bg-cover bg-center`} />
       </button>
       {open && (
         <>
@@ -31,8 +31,8 @@ export default function LanguageSelector() {
                 className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-sand dark:hover:bg-night transition-colors
                   ${l.code === language ? 'font-semibold text-forest dark:text-mint' : 'text-charcoal-900 dark:text-sand'}`}
               >
-                <span className="w-5 h-5 rounded-full overflow-hidden inline-block shrink-0">
-                  <span className={`fi fis fi-${l.flagIso2} block !w-full !h-full bg-cover bg-center`} />
+                <span className="w-6 h-[18px] rounded overflow-hidden inline-block shrink-0">
+                  <span className={`fi fi-${l.flagIso2} block !w-full !h-full bg-cover bg-center`} />
                 </span>
                 {l.label}
               </button>
