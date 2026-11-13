@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { nationsByConfederation, CONFEDERATIONS } from '../../data/nations'
-import { getQuotas, totalFromQuotas, PLAYOFF_PATHS, PLAYOFF_TEAM_COUNTS } from '../../data/confederationQuotas'
+import { getQuotas, totalFromQuotas, getPlayoffPaths, PLAYOFF_TEAM_COUNTS } from '../../data/confederationQuotas'
 import { getTournamentConfig, tournamentI18nPrefix } from '../../data/internationalTournaments'
 import { getRating } from '../../data/ratings'
 import { simulateFullQualifying, simulateQualifyingForConfederation } from '../../lib/qualifying'
@@ -40,14 +40,23 @@ export default function SimulatorSetup() {
   // mini-knockouts decide the last 2 slots beyond the direct quota picks.
   // None of the fixed-format international tournaments have one.
   const hasPlayoff = !tournamentConfig && PLAYOFF_TEAM_COUNTS.includes(teamCount)
-  const [playoffEntrants, setPlayoffEntrants] = useState(() => PLAYOFF_PATHS.map((p) => p.legs.map(() => null)))
-  const [playoffResults, setPlayoffResults] = useState(() => PLAYOFF_PATHS.map(() => null))
+  const PLAYOFF_PATHS = hasPlayoff ? getPlayoffPaths(teamCount) : []
+  // Sized for the largest format (2 paths); the active format only reads
+  // the first PLAYOFF_PATHS.length entries, and chooseTeamCount() clears them.
+  const [playoffEntrants, setPlayoffEntrants] = useState(() => [0, 1].map(() => [null, null, null]))
+  const [playoffResults, setPlayoffResults] = useState(() => [null, null])
 
   const playoffUsedNames = useMemo(() => {
     const names = new Set(pickedFlat.map((t) => t.name))
     playoffEntrants.forEach((legs) => legs.forEach((n) => { if (n) names.add(n) }))
     return names
   }, [pickedFlat, playoffEntrants])
+
+  function chooseTeamCount(n) {
+    setPlayoffEntrants([0, 1].map(() => [null, null, null]))
+    setPlayoffResults([null, null])
+    setTeamCount(n)
+  }
 
   function setPlayoffEntrant(pathIdx, legIdx, name) {
     setPlayoffEntrants((prev) => {
@@ -73,7 +82,7 @@ export default function SimulatorSetup() {
       })
     })
     setPlayoffEntrants(next)
-    setPlayoffResults(PLAYOFF_PATHS.map(() => null))
+    setPlayoffResults([null, null])
   }
 
   function simulatePlayoffPath(pathIdx) {
@@ -117,12 +126,12 @@ export default function SimulatorSetup() {
   const totalNeeded = quotas ? totalFromQuotas(quotas) : 0
   const totalPicked = pickedFlat.length
   const directPicksDone = (tournamentConfig || teamCount) && totalPicked === totalNeeded
-  const playoffDone = hasPlayoff ? playoffResults.every((r) => r) : true
+  const playoffDone = hasPlayoff ? PLAYOFF_PATHS.every((_, i) => playoffResults[i]) : true
   const readyToDraw = directPicksDone && playoffDone
 
   function goToDraw() {
     const directNames = pickedFlat.map((t) => t.name)
-    const playoffWinnerNames = hasPlayoff ? playoffResults.map((r) => r.winner) : []
+    const playoffWinnerNames = hasPlayoff ? PLAYOFF_PATHS.map((_, i) => playoffResults[i].winner) : []
     const effectiveTeamCount = tournamentConfig ? totalFromQuotas(quotas) : teamCount
     navigate('/simulator/draw', {
       state: { teamCount: effectiveTeamCount, teamNames: [...directNames, ...playoffWinnerNames], tournamentKey },
@@ -142,7 +151,7 @@ export default function SimulatorSetup() {
             {[32, 48, 64].map((n) => (
               <button
                 key={n}
-                onClick={() => setTeamCount(n)}
+                onClick={() => chooseTeamCount(n)}
                 className="rounded-2xl bg-white dark:bg-night-card shadow-depth-lg p-8 hover:-translate-y-1 transition-all"
               >
                 <p className="font-display text-4xl font-extrabold text-emerald">{n}</p>
@@ -244,7 +253,7 @@ export default function SimulatorSetup() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <h2 className="font-display font-semibold text-charcoal-900 dark:text-sand">{t('play.playoffTitle')}</h2>
-                <p className="text-charcoal-600 dark:text-charcoal-300 text-sm">{t('play.playoffDesc')}</p>
+                <p className="text-charcoal-600 dark:text-charcoal-300 text-sm">{PLAYOFF_PATHS.length === 1 ? t('play.playoffDescSingle') : t('play.playoffDesc')}</p>
               </div>
               <SambaButton variant="secondary" size="sm" onClick={autoFillPlayoffEntrants}>{t('play.autoFillEntrants')}</SambaButton>
             </div>
@@ -317,8 +326,8 @@ export default function SimulatorSetup() {
         <div className="sticky bottom-4 mt-6 flex justify-center">
           <SambaButton variant="primary" size="lg" disabled={!readyToDraw} onClick={goToDraw}>
             {hasPlayoff && directPicksDone && !playoffDone
-              ? t('play.simulateBothPlayoffPaths')
-              : t('play.continueToDraw', { done: totalPicked + (hasPlayoff ? playoffResults.filter(Boolean).length : 0), total: totalNeeded + (hasPlayoff ? 2 : 0) })}
+              ? PLAYOFF_PATHS.length === 1 ? t('play.simulatePlayoffPathToContinue') : t('play.simulateBothPlayoffPaths')
+              : t('play.continueToDraw', { done: totalPicked + (hasPlayoff ? PLAYOFF_PATHS.filter((_, i) => playoffResults[i]).length : 0), total: totalNeeded + PLAYOFF_PATHS.length })}
           </SambaButton>
         </div>
       </div>

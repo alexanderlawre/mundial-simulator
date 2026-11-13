@@ -11,7 +11,7 @@ export const QUOTAS_48 = {
 export const QUOTAS_32 = {
   UEFA: 13,
   CAF: 5,
-  AFC: 5,
+  AFC: 4,
   CONMEBOL: 5,
   CONCACAF: 4,
   OFC: 0,
@@ -41,9 +41,20 @@ export const PLAYOFF_PATHS = [
   { id: 'path2', legs: ['CONMEBOL', 'CONCACAF', 'AFC'] },
 ]
 
-// Team counts whose last 2 slots are decided by PLAYOFF_PATHS rather than
-// being pure direct-quota picks.
-export const PLAYOFF_TEAM_COUNTS = [48, 64]
+// The 32-team format's last slot (31 direct quota places + 1) comes from a
+// single intercontinental path: Oceania v Asia in the first round, the winner
+// then meets CONMEBOL in the second.
+const PLAYOFF_PATHS_32 = [{ id: 'path1', legs: ['OFC', 'AFC', 'CONMEBOL'] }]
+
+const PLAYOFF_PATHS_BY_TEAM_COUNT = { 32: PLAYOFF_PATHS_32, 48: PLAYOFF_PATHS, 64: PLAYOFF_PATHS }
+
+// Team counts whose last slot(s) are decided by a playoff rather than being
+// pure direct-quota picks.
+export const PLAYOFF_TEAM_COUNTS = [32, 48, 64]
+
+export function getPlayoffPaths(teamCount) {
+  return PLAYOFF_PATHS_BY_TEAM_COUNT[teamCount] || []
+}
 
 const QUOTAS_BY_TEAM_COUNT = { 32: QUOTAS_32, 48: QUOTAS_48, 64: QUOTAS_64 }
 
