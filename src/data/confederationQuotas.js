@@ -10,8 +10,8 @@ export const QUOTAS_48 = {
 
 export const QUOTAS_32 = {
   UEFA: 13,
-  CAF: 6,
-  AFC: 4,
+  CAF: 5,
+  AFC: 5,
   CONMEBOL: 5,
   CONCACAF: 4,
   OFC: 0,
